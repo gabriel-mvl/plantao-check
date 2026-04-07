@@ -115,9 +115,39 @@ function openOccurrence(id) {
 
   renderChecklist();
   updateProgress();
+  updatePdfMeta();
 
   // Close sidebar on mobile
   if (window.innerWidth <= 768) toggleSidebar();
+}
+
+// ── PDF META ──────────────────────────────────────────────────
+function updatePdfMeta() {
+  if (!currentOccurrence) return;
+  const bo = (document.getElementById('metaBO')?.value || '').trim();
+  const kw = (document.getElementById('metaKW')?.value || '').trim();
+
+  // occurrence name
+  const nameEl = document.getElementById('pdfOccName');
+  if (nameEl) nameEl.textContent = currentOccurrence.name.toUpperCase();
+
+  // BO line
+  const boEl = document.getElementById('pdfBoLine');
+  if (boEl) {
+    boEl.textContent = bo ? 'BO Nº ' + bo : '';
+    boEl.style.display = bo ? '' : 'none';
+  }
+
+  // keywords line
+  const kwEl = document.getElementById('pdfKwLine');
+  if (kwEl) {
+    kwEl.textContent = kw || '';
+    kwEl.style.display = kw ? '' : 'none';
+  }
+
+  // date on print footer
+  const dateEl = document.getElementById('pdfDate');
+  if (dateEl) dateEl.textContent = new Date().toLocaleString('pt-BR');
 }
 
 // ── RENDER CHECKLIST ──────────────────────────────────────────
