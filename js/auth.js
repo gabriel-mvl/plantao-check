@@ -24,9 +24,9 @@ const EMAILJS_PUBLIC_KEY  = '4ENO39pWC7a7b_oOB';
 
 // Detecta se o EmailJS foi configurado
 const EMAILJS_CONFIGURED = (
-  EMAILJS_SERVICE_ID  !== 'service_f8ahxdk' &&
-  EMAILJS_TEMPLATE_ID !== 'template_xqp8nw7' &&
-  EMAILJS_PUBLIC_KEY  !== '4ENO39pWC7a7b_oOB'
+  EMAILJS_SERVICE_ID  !== 'SEU_SERVICE_ID' &&
+  EMAILJS_TEMPLATE_ID !== 'SEU_TEMPLATE_ID' &&
+  EMAILJS_PUBLIC_KEY  !== 'SUA_PUBLIC_KEY'
 );
 
 // ── STORAGE HELPERS ──────────────────────────────────────────
