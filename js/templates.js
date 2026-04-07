@@ -14,7 +14,7 @@ const TEMPLATES = {
       { id: 'capturado', label: 'Nome do capturado', placeholder: 'Ex: JOÃO DA SILVA' },
       { id: 'numMandado', label: 'Número do mandado', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
       { id: 'numProcesso', label: 'Número do processo', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'vara', label: 'Vara / Juízo', placeholder: 'Ex: 1ª Vara Criminal de Sorocaba' },
+      { id: 'vara', label: 'Vara / Juízo', placeholder: 'Ex: 1ª Vara Criminal da Comarca' },
       { id: 'dataExpedicao', label: 'Data de expedição do mandado', placeholder: 'Ex: 10/01/2025' },
       { id: 'validade', label: 'Validade do mandado', placeholder: 'Ex: indeterminada / 10/01/2026' },
       { id: 'tipoPrisao', label: 'Tipo de prisão', placeholder: 'Ex: preventiva / temporária / definitiva' },
