@@ -73,7 +73,7 @@ const OCCURRENCES = [
         items: [
           { id: 'c22', label: 'Enviar e-mail de comunicação de captura para os destinatários obrigatórios', obs: 'Documentos: cópia do BO, mandado cumprido, ficha clínica, req. IML, DVC' },
           { id: 'c23', label: 'Enviar e-mail para o IML (ficha clínica + requisição de IML) para exame indireto', obs: 'Não esqueça de juntar laudo ao expediente quando receber' },
-          { id: 'c24', label: 'Verificar dia da audiência de custódia (semana = RAJ Sorocaba / FDS = Plantão de Itu via site TJSP)' },
+          { id: 'c24', label: 'Verificar dia da audiência de custódia (semana = RAJ local / FDS = plantão judicial local via site TJSP)' },
         ]
       },
     ]
@@ -211,7 +211,7 @@ const OCCURRENCES = [
         icon: '⚠',
         name: 'Antes de destinar o preso',
         items: [
-          { id: 'fg27', label: 'Verificar DVC: o preso possui crime sexual?', alert: 'Se sim → cela separada + destino: CDP 2 de Sorocaba (independente da ocorrência)' },
+          { id: 'fg27', label: 'Verificar DVC: o preso possui crime sexual?', alert: 'Se sim → cela separada + destino: CDP específico para crimes sexuais (independente da ocorrência)' },
           { id: 'fg28', label: 'Confirmar destino final conforme regime/perfil do preso' },
         ]
       },
@@ -240,7 +240,7 @@ const OCCURRENCES = [
         icon: '🏗',
         name: 'Guincho',
         items: [
-          { id: 'av4', label: 'Acionar o guincho via WhatsApp para encaminhar ao Pátio Carvalho em Sorocaba/SP' },
+          { id: 'av4', label: 'Acionar o guincho via WhatsApp para encaminhar ao pátio designado/SP' },
           { id: 'av5', label: 'Anotar: hora/data do acionamento, hora/data da chegada e protocolo do guincho' },
           { id: 'av6', label: 'Juntar papeleta do guincho ao BO (anexo)' },
           {
@@ -254,7 +254,7 @@ const OCCURRENCES = [
         icon: '🔬',
         name: 'Perícia',
         items: [
-          { id: 'av8', label: 'Requisitar perícia do veículo no SPJ: IC-SOROCABA', obs: 'Natureza: metalográfico (adulteração de chassi/placa/motor) e/ou vistoria veicular para constatação de danos. Se veículo foi ao pátio, alterar o campo "local" para Pátio Carvalho.' },
+          { id: 'av8', label: 'Requisitar perícia do veículo no SPJ: IC local', obs: 'Natureza: metalográfico (adulteração de chassi/placa/motor) e/ou vistoria veicular para constatação de danos. Se veículo foi ao pátio, alterar o campo "local" para Pátio Carvalho.' },
         ]
       },
       {
@@ -297,7 +297,7 @@ const OCCURRENCES = [
         name: 'Boletim de Ocorrência',
         items: [
           { id: 'h1', label: 'Abrir BO' },
-          { id: 'h2', label: 'Acionar perícia de LOCAL no SPJ: IC-SOROCABA', obs: 'Colocar breve histórico, natureza do exame e objetivo. Constar guarnição PM/GCM presente no local e telefone de contato. Enviar WhatsApp confirmando recebimento do pedido.' },
+          { id: 'h2', label: 'Acionar perícia de LOCAL no SPJ: IC local', obs: 'Colocar breve histórico, natureza do exame e objetivo. Constar guarnição PM/GCM presente no local e telefone de contato. Enviar WhatsApp confirmando recebimento do pedido.' },
         ]
       },
       {
@@ -335,7 +335,7 @@ const OCCURRENCES = [
         items: [
           { id: 'h17', label: 'Enviar e-mail para o IML (ficha clínica + requisição para exame indireto)', alert: 'SEMPRE enviar e-mail para IML. Não esquecer de anexar a ficha clínica.' },
           { id: 'h18', label: 'Verificar necessidade de comunicar ocorrência de relevância', obs: 'Homicídios geralmente geram repercussão — avaliar com delegado' },
-          { id: 'h19', label: 'Se vítima fatal: ligar para funerária municipal após pedido de perícia IC', obs: 'Funerárias: Itu ou Salto/SP conforme localidade' },
+          { id: 'h19', label: 'Se vítima fatal: ligar para funerária municipal após pedido de perícia IC', obs: 'funerária municipal da localidade' },
         ]
       },
     ]
@@ -592,7 +592,7 @@ const OCCURRENCES = [
         name: 'Procedimentos',
         items: [
           { id: 'cad1', label: 'Abrir BO' },
-          { id: 'cad2', label: 'Acionar perícia de LOCAL (IC-SOROCABA) no SPJ', obs: 'Colocar histórico, natureza e objetivo. Informar guarnição presente e contato. Confirmar recebimento via WhatsApp.' },
+          { id: 'cad2', label: 'Acionar perícia de LOCAL (IC local) no SPJ', obs: 'Colocar histórico, natureza e objetivo. Informar guarnição presente e contato. Confirmar recebimento via WhatsApp.' },
           { id: 'cad3', label: 'Ligar para a funerária municipal para retirar o corpo (após pedido de perícia)', alert: 'Só acionar a funerária APÓS requisitar a perícia.' },
           { id: 'cad4', label: 'Termo de depoimento — condutor e testemunha' },
           { id: 'cad5', label: 'Requisição de IML', obs: 'Objetivo: exame necroscópico e toxicológico. Natureza: necroscópico e toxicológico.' },
@@ -715,24 +715,24 @@ const REFERENCIAS = {
         <p><strong>Tipo de BO para flagrantes:</strong> Selecionar "BO para flagrante" — uma vez finalizado, não é possível reverter. O IPE é gerado automaticamente.</p>
         <p><strong>Acidentes de trânsito:</strong> A PM perguntará sobre possibilidade de aplicar resolução. Sempre passar a informação ao delegado para análise.</p>
         <p><strong>BO com situação "BO para registro":</strong> Não registrar nenhum BO nesta situação. Em caso de dúvida, consultar o delegado ou usar "apreciação do delegado titular".</p>
-        <p><strong>Perícia de local no SPJ:</strong> Selecionar IC-SOROCABA. Preencher histórico, natureza do exame e guarnição presente com contato.</p>
+        <p><strong>Perícia de local no SPJ:</strong> Selecionar IC local. Preencher histórico, natureza do exame e guarnição presente com contato.</p>
         <p><strong>Destinação dos presos:</strong></p>
         <ul>
-          <li>Pensão → Capela do Alto</li>
-          <li>Regime fechado → CDP Sorocaba</li>
-          <li>Preventiva → CDP Sorocaba</li>
-          <li>Temporário → Capão Bonito</li>
-          <li>Feminino → Votorantim</li>
-          <li>Crimes sexuais → CDP 2 de Sorocaba</li>
-          <li>Semi-aberto → CPP em Porto Feliz</li>
+          <li>Pensão → unidade de pensão</li>
+          <li>Regime fechado → unidade prisional competente</li>
+          <li>Preventiva → unidade prisional competente</li>
+          <li>Temporário → unidade para presos temporários</li>
+          <li>Feminino → unidade feminina</li>
+          <li>Crimes sexuais → CDP específico para crimes sexuais</li>
+          <li>Semi-aberto → CPP da região (semi-aberto)</li>
           <li>Adolescente → Fundação Casa</li>
-          <li>Preso evadido → CDP Sorocaba</li>
+          <li>Preso evadido → unidade prisional competente</li>
         </ul>
-        <p><strong>Antes de destinar o preso:</strong> Verificar no DVC se há crime sexual. Se sim → cela separada + CDP 2 de Sorocaba.</p>
+        <p><strong>Antes de destinar o preso:</strong> Verificar no DVC se há crime sexual. Se sim → cela separada + CDP específico para crimes sexuais.</p>
         <p><strong>Acidente com vítima fatal / Encontro de cadáver:</strong> Ligar para a funerária municipal após realizar o pedido de perícia.</p>
-        <p><strong>Ocorrências de relevância na mídia:</strong> Comunicar como Ocorrência de Relevância via Intranet ou e-mail institucional para Delpol Itu, Cepol Sorocaba e Cartório Central da Seccional de Sorocaba. Copiar e colar o BO completo no corpo da mensagem — não anexar.</p>
-        <p><strong>Desaparecimento de pessoa:</strong> Incluir o máximo de dados: cor da pele, adornos, vestimenta, placa do veículo (se houver), fotos. Enviar para Cepol, DPM Itu e Delegacia de Homicídios de Sorocaba.</p>
-        <p><strong>Audiência de custódia — captura:</strong> Segunda a sexta → comunicar RAJ Sorocaba. Finais de semana e feriados → verificar escrevente plantonista no site do TJSP e comunicar Mandados IIRGD e Capturas.</p>
+        <p><strong>Ocorrências de relevância na mídia:</strong> Comunicar como Ocorrência de Relevância via Intranet ou e-mail institucional para DPM local, CEPOL local e Cartório Central da Seccional. Copiar e colar o BO completo no corpo da mensagem — não anexar.</p>
+        <p><strong>Desaparecimento de pessoa:</strong> Incluir o máximo de dados: cor da pele, adornos, vestimenta, placa do veículo (se houver), fotos. Enviar para Cepol, DPM local e Delegacia de Homicídios da região.</p>
+        <p><strong>Audiência de custódia — captura:</strong> Segunda a sexta → comunicar RAJ local. Finais de semana e feriados → verificar escrevente plantonista no site do TJSP e comunicar Mandados IIRGD e Capturas.</p>
       </div>
     `
   }
