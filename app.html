@@ -6,8 +6,6 @@
   <title>Plantão Check — Ocorrências</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/print.css" media="print" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
 <body class="app-page" data-theme="dark">
 
@@ -15,54 +13,45 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-brand">
-        <span class="sb-icon">⚖</span>
-        <span class="sb-title">Plantão<span class="sb-accent">Check</span></span>
+        <span class="sb-icon">&#9878;</span>
+        <span class="sb-title">Plant&#227;o<span class="sb-accent">Check</span></span>
       </div>
-      <button class="sidebar-close" onclick="toggleSidebar()" title="Fechar menu">×</button>
+      <button class="sidebar-close" onclick="toggleSidebar()">&#215;</button>
     </div>
-
     <div class="sidebar-user" id="sidebarUser"></div>
-
     <nav class="sidebar-nav">
-      <p class="nav-label">Ocorrências</p>
+      <p class="nav-label">Ocorr&#234;ncias</p>
       <ul id="navList"></ul>
-
-      <p class="nav-label" style="margin-top:1.5rem">Referências</p>
+      <p class="nav-label" style="margin-top:1.4rem">Refer&#234;ncias</p>
       <ul>
-        <li><a href="#" class="nav-link" onclick="openRef('requisicoes')">📋 Requisições IML/IC</a></li>
-        <li><a href="#" class="nav-link" onclick="openRef('orientacoes')">📌 Orientações Gerais</a></li>
+        <li><a href="#" class="nav-link" onclick="openRef('requisicoes')"><span class="nav-icon">&#128203;</span> Requisi&#231;&#245;es IML/IC</a></li>
+        <li><a href="#" class="nav-link" onclick="openRef('orientacoes')"><span class="nav-icon">&#128204;</span> Orienta&#231;&#245;es Gerais</a></li>
       </ul>
     </nav>
-
     <div class="sidebar-footer">
-      <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">☀ Modo Claro</button>
+      <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">&#9728; Modo Claro</button>
       <button class="btn-logout" onclick="handleLogout()">Sair</button>
     </div>
   </aside>
-
-  <!-- OVERLAY -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
   <!-- MAIN -->
   <main class="main-content" id="mainContent">
 
-    <!-- TOPBAR -->
     <header class="topbar">
-      <button class="hamburger" onclick="toggleSidebar()">
-        <span></span><span></span><span></span>
-      </button>
-      <div class="topbar-title" id="topbarTitle">Selecione uma ocorrência</div>
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <div class="topbar-title" id="topbarTitle">Selecione uma ocorr&#234;ncia</div>
       <div class="topbar-actions">
-        <button class="btn-icon" onclick="window.print()" title="Imprimir">🖨</button>
-        <button class="btn-icon" onclick="generatePDF()" title="Gerar PDF">📄</button>
+        <button class="btn-icon" onclick="window.print()" title="Imprimir">&#128424;</button>
+        <button class="btn-icon" onclick="generatePDF()" title="Gerar PDF">&#128196;</button>
       </div>
     </header>
 
     <!-- HOME -->
     <div class="home-view" id="homeView">
       <div class="home-hero">
-        <h2 class="home-title">Qual ocorrência deseja registrar?</h2>
-        <p class="home-sub">Selecione o tipo para abrir o checklist correspondente</p>
+        <h2 class="home-title">Qual ocorr&#234;ncia?</h2>
+        <p class="home-sub">Selecione o tipo para abrir o checklist</p>
       </div>
       <div class="occurrence-grid" id="occurrenceGrid"></div>
     </div>
@@ -70,10 +59,31 @@
     <!-- CHECKLIST VIEW -->
     <div class="checklist-view hidden" id="checklistView">
 
+      <!-- PDF HEADER (s&#243; aparece na impress&#227;o) -->
+      <div class="pdf-header" id="pdfHeader">
+        <div class="pdf-header-top">
+          <div class="pdf-logo-mark"><span>&#9878;</span></div>
+          <div class="pdf-logo-text">
+            <div class="pdf-logo-name">Plant&#227;o<span>Check</span></div>
+            <div class="pdf-logo-sub">Sistema de Checklist do Plant&#227;o Policial</div>
+          </div>
+        </div>
+        <div class="pdf-occurrence-block">
+          <div class="pdf-occurrence-name" id="pdfOccName"></div>
+          <div class="pdf-triage-line" id="pdfTriage"></div>
+          <div class="pdf-bo-line" id="pdfBoLine"></div>
+          <div class="pdf-kw-line" id="pdfKwLine"></div>
+        </div>
+      </div>
+
       <div class="cl-header">
-        <div>
+        <div style="flex:1">
           <h2 class="cl-title" id="clTitle"></h2>
           <p class="cl-desc" id="clDesc"></p>
+          <div class="cl-meta">
+            <input class="cl-meta-input bo" id="metaBO" type="text" placeholder="N&#186; do BO (opcional)" oninput="updatePdfMeta()" />
+            <input class="cl-meta-input kw" id="metaKW" type="text" placeholder="Palavras-chave (opcional)" oninput="updatePdfMeta()" />
+          </div>
         </div>
         <div class="cl-progress-wrap">
           <div class="cl-progress-bar"><div class="cl-progress-fill" id="clProgressFill"></div></div>
@@ -83,10 +93,31 @@
 
       <div class="cl-body" id="clBody"></div>
 
+      <!-- OBSERVAÇÕES LIVRES -->
+      <div class="obs-section">
+        <div class="obs-header">
+          <span class="obs-icon">&#128221;</span>
+          <span class="obs-label">Observações da ocorrência</span>
+          <span class="obs-hint">Opcional — aparece no PDF</span>
+        </div>
+        <textarea id="obsText" class="obs-textarea" placeholder="Registre aqui informações complementares, particularidades da ocorrência, decisões do delegado, etc." oninput="updateObsForPdf()" rows="4"></textarea>
+      </div>
+
       <div class="cl-actions">
-        <button class="btn-secondary" onclick="resetChecklist()">↺ Reiniciar</button>
-        <button class="btn-secondary" onclick="backToHome()">← Voltar</button>
-        <button class="btn-primary" onclick="generatePDF()">📄 Gerar PDF</button>
+        <button class="btn-secondary" onclick="resetChecklist()">&#8635; Reiniciar</button>
+        <button class="btn-secondary" onclick="backToHome()">&#8592; Voltar</button>
+        <button class="btn-primary" onclick="generatePDF()">&#128196; Gerar PDF</button>
+      </div>
+
+      <!-- PDF OBS (s&#243; na impress&#227;o) -->
+      <div class="pdf-obs-block" id="pdfObsBlock" style="display:none">
+        <div class="pdf-obs-title">Observações</div>
+        <div class="pdf-obs-text" id="pdfObs"></div>
+      </div>
+
+      <!-- PDF FOOTER -->
+      <div class="pdf-print-footer" id="pdfFooter">
+        Plant&#227;oCheck &mdash; Ferramenta independente, sem v&#237;nculo institucional &mdash; <span id="pdfDate"></span>
       </div>
 
     </div>
@@ -98,17 +129,72 @@
 
   </main>
 
+  <!-- GLOBAL FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-legal">
+      Este aplicativo é uma ferramenta de apoio operacional desenvolvida de forma independente.
+      <strong>Não possui qualquer vínculo institucional</strong> com a Polícia Civil do Estado de
+      São Paulo ou com qualquer órgão público. O uso é de responsabilidade exclusiva do usuário.
+    </div>
+    <div class="footer-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
+  </footer>
+
+  <!-- TRIAGE MODAL -->
+  <div class="modal-backdrop hidden" id="triageBackdrop" onclick="closeTriageModal()"></div>
+  <div class="modal triage-modal hidden" id="triageModal">
+    <div class="modal-header">
+      <div>
+        <h3 id="triageOccName"></h3>
+        <p class="modal-subtitle">Responda antes de iniciar o checklist</p>
+      </div>
+      <button onclick="closeTriageModal()">&#215;</button>
+    </div>
+    <input type="hidden" id="triageOccId" />
+    <div class="modal-body triage-body">
+
+      <div class="triage-question">
+        <p class="triage-q-label">Quem está conduzindo?</p>
+        <div class="triage-opts">
+          <button class="triage-opt" data-group="condutor" data-value="pm"  onclick="selectTriageOpt('condutor','pm',this)">&#128110; Policial Militar</button>
+          <button class="triage-opt" data-group="condutor" data-value="gcm" onclick="selectTriageOpt('condutor','gcm',this)">&#128106; Guarda Municipal</button>
+        </div>
+      </div>
+
+      <div class="triage-question">
+        <p class="triage-q-label">É flagrante?</p>
+        <div class="triage-opts">
+          <button class="triage-opt" data-group="flagrante" data-value="sim" onclick="selectTriageOpt('flagrante','sim',this)">&#9989; Sim</button>
+          <button class="triage-opt" data-group="flagrante" data-value="nao" onclick="selectTriageOpt('flagrante','nao',this)">&#10060; Não</button>
+        </div>
+      </div>
+
+      <div class="triage-question">
+        <p class="triage-q-label">Há autor preso?</p>
+        <div class="triage-opts">
+          <button class="triage-opt" data-group="preso" data-value="sim" onclick="selectTriageOpt('preso','sim',this)">&#9989; Sim</button>
+          <button class="triage-opt" data-group="preso" data-value="nao" onclick="selectTriageOpt('preso','nao',this)">&#10060; Não</button>
+        </div>
+      </div>
+
+      <div id="triageMsg" class="auth-msg error hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeTriageModal()">Cancelar</button>
+      <button class="btn-primary" onclick="confirmTriage()" style="width:auto;margin-top:0">Abrir checklist &#8594;</button>
+    </div>
+  </div>
+
   <!-- TEMPLATE MODAL -->
   <div class="modal-backdrop hidden" id="modalBackdrop" onclick="closeModal()"></div>
   <div class="modal hidden" id="templateModal">
     <div class="modal-header">
       <h3 id="modalTitle">Gerar texto</h3>
-      <button onclick="closeModal()">×</button>
+      <button onclick="closeModal()">&#215;</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal()">Fechar</button>
-      <button class="btn-primary" onclick="generateTemplate()">Gerar texto</button>
+      <button class="btn-primary" onclick="generateTemplate()" style="width:auto;margin-top:0">Gerar texto</button>
     </div>
   </div>
 
