@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderUser();
   renderNavList();
   renderOccurrenceGrid();
+  renderRecentOccurrence();
 });
 
 // ── USER ─────────────────────────────────────────────────────
@@ -224,6 +225,8 @@ function openOccurrence(id) {
   renderChecklist();
   updateProgress();
   updatePdfMeta();
+  celebrationShown = false;
+  startOccurrenceTimer();
 }
 
 // ── BUILD SECTIONS (triage merge) ────────────────────────────
@@ -421,12 +424,8 @@ function updateProgress() {
   document.getElementById('clProgressFill').style.width  = pct + '%';
   document.getElementById('clProgressLabel').textContent = `${checked} / ${total}`;
 
-  // Celebration on 100%
-  if (pct === 100) {
-    document.getElementById('clProgressFill').style.background = 'var(--success)';
-  } else {
-    document.getElementById('clProgressFill').style.background = '';
-  }
+  document.getElementById('clProgressFill').style.background = pct === 100 ? 'var(--success)' : '';
+  checkCelebration(pct);
 }
 
 // ── PERSIST ─────────────────────────────────────────────────
@@ -454,11 +453,16 @@ function showView(viewId) {
 }
 
 function backToHome() {
+  stopOccurrenceTimer();
   currentOccurrence = null;
   showView('homeView');
   document.getElementById('topbarTitle').textContent = 'Selecione uma ocorrência';
   document.querySelectorAll('.nav-link[data-id]').forEach(el => el.classList.remove('active'));
   renderOccurrenceGrid();
+  renderRecentOccurrence();
+  // Clear search
+  const search = document.getElementById('homeSearch');
+  if (search) { search.value = ''; filterOccurrences(); }
 }
 
 // ── REFERENCE ────────────────────────────────────────────────
@@ -562,7 +566,193 @@ function handleLogout() {
   window.location.href = 'index.html';
 }
 
+
+// ── SEARCH / FILTER ──────────────────────────────────────────
+function filterOccurrences() {
+  const q = (document.getElementById('homeSearch')?.value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('.occ-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.querySelector('.occ-name')?.textContent.toLowerCase() || '';
+    const show = !q || name.includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const noRes = document.getElementById('noResults');
+  if (noRes) noRes.classList.toggle('hidden', visible > 0);
+}
+
+// ── RECENT OCCURRENCE ─────────────────────────────────────────
+function renderRecentOccurrence() {
+  const el = document.getElementById('recentOccurrence');
+  if (!el) return;
+  let best = null, bestTime = 0;
+  OCCURRENCES.forEach(occ => {
+    const saved = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
+    const ts    = parseInt(localStorage.getItem(`pc_ts_${occ.id}`) || '0');
+    if (saved && Object.values(saved).some(Boolean) && ts > bestTime) {
+      bestTime = ts;
+      const total   = occ.sections.reduce((a,s) => a + s.items.length, 0);
+      const checked = Object.values(saved).filter(Boolean).length;
+      best = { occ, checked, total, pct: Math.round((checked/total)*100) };
+    }
+  });
+  if (!best) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="recent-occ" onclick="startTriage('${best.occ.id}')">
+      <span class="recent-icon">${best.occ.icon}</span>
+      <div class="recent-info">
+        <span class="recent-label">Continuar onde parou</span>
+        <span class="recent-name">${best.occ.name}</span>
+      </div>
+      <div class="recent-pct">${best.pct}%</div>
+      <span class="recent-arrow">→</span>
+    </div>`;
+}
+
+// ── OCCURRENCE TIMER ──────────────────────────────────────────
+let timerInterval = null;
+
+function startOccurrenceTimer() {
+  stopOccurrenceTimer();
+  if (!currentOccurrence) return;
+  const key = `pc_ts_${currentOccurrence.id}`;
+  if (!localStorage.getItem(key)) localStorage.setItem(key, Date.now().toString());
+  const startTime = parseInt(localStorage.getItem(key));
+  timerInterval = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const h = Math.floor(elapsed / 3600000);
+    const m = Math.floor((elapsed % 3600000) / 60000);
+    const s = Math.floor((elapsed % 60000) / 1000);
+    const display = h > 0
+      ? `${h}h ${String(m).padStart(2,'0')}m`
+      : `${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    const el = document.getElementById('occTimer');
+    if (el) el.textContent = display;
+  }, 1000);
+}
+
+function stopOccurrenceTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// ── CELEBRATION (100%) ────────────────────────────────────────
+let celebrationShown = false;
+
+function checkCelebration(pct) {
+  if (pct === 100 && !celebrationShown) {
+    celebrationShown = true;
+    showCelebration();
+  }
+  if (pct < 100) celebrationShown = false;
+}
+
+function showCelebration() {
+  const banner = document.getElementById('celebrationBanner');
+  if (!banner) return;
+  banner.classList.remove('hidden');
+  banner.classList.add('celebrate-in');
+  setTimeout(() => {
+    banner.classList.add('celebrate-out');
+    setTimeout(() => {
+      banner.classList.add('hidden');
+      banner.classList.remove('celebrate-in','celebrate-out');
+    }, 500);
+  }, 3500);
+}
+
+// ── PLANTÃO DIÁRIO ────────────────────────────────────────────
+const PLANTAO_DIARIO = [
+  {
+    id: 'pd_livros', icon: '📚', name: 'Livros obrigatórios',
+    items: [
+      { id: 'pd1', label: 'Preenchimento do livro de BO' },
+      { id: 'pd2', label: 'Preenchimento do livro de objetos apreendidos' },
+      { id: 'pd3', label: 'Preenchimento do livro de fiança' },
+    ]
+  },
+  {
+    id: 'pd_iml', icon: '🏥', name: 'Comunicações ao IML',
+    items: [
+      { id: 'pd4', label: 'Envio de e-mail ao IML — exames indiretos de presos', obs: 'Anexar ficha clínica e requisição de cada preso custodiado' },
+      { id: 'pd5', label: 'Envio de e-mail ao IML — exames indiretos de vítimas', obs: 'Anexar ficha clínica e requisição de cada vítima atendida' },
+    ]
+  },
+  {
+    id: 'pd_comunicacoes', icon: '📧', name: 'Comunicações de praxe',
+    items: [
+      { id: 'pd6', label: 'Comunicações de captura de procurado', obs: 'Para cada captura: e-mail aos destinatários obrigatórios + confirmar audiência de custódia' },
+      { id: 'pd7', label: 'Comunicações de pessoa desaparecida', obs: 'Para cada BO de desaparecimento: e-mail ao CEPOL, DPM local e Delegacia de Homicídios da região' },
+    ]
+  },
+];
+
+let plantaoState = {};
+
+function openPlantaoDiario() {
+  const saved = JSON.parse(localStorage.getItem('pc_plantao_diario') || 'null');
+  plantaoState = saved || {};
+  const body = document.getElementById('plantaoBody');
+  if (!body) return;
+  body.innerHTML = PLANTAO_DIARIO.map(section => {
+    const total   = section.items.length;
+    const checked = section.items.filter(i => plantaoState[i.id]).length;
+    const done    = checked === total;
+    const items   = section.items.map(item => {
+      const isChecked = !!plantaoState[item.id];
+      const extra = item.obs ? `<div class="item-obs">ℹ ${item.obs}</div>` : '';
+      return `
+        <div class="cl-item ${isChecked ? 'checked' : ''}" id="pd_item_${item.id}" onclick="togglePlantaoItem('${item.id}')">
+          <div class="item-checkbox"></div>
+          <div class="item-content"><div class="item-label">${item.label}</div>${extra}</div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="cl-section ${done ? 'section-done' : ''}" style="margin-bottom:.75rem">
+        <div class="cl-section-header" style="cursor:default">
+          <span class="section-icon">${section.icon}</span>
+          <span class="section-name">${section.name}</span>
+          <span class="section-badge ${done ? 'badge-done' : ''}">${checked}/${total}</span>
+        </div>
+        <div class="cl-items">${items}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('plantaoBackdrop').classList.remove('hidden');
+  document.getElementById('plantaoModal').classList.remove('hidden');
+}
+
+function togglePlantaoItem(id) {
+  plantaoState[id] = !plantaoState[id];
+  localStorage.setItem('pc_plantao_diario', JSON.stringify(plantaoState));
+  const el = document.getElementById(`pd_item_${id}`);
+  if (el) el.classList.toggle('checked', plantaoState[id]);
+  for (const section of PLANTAO_DIARIO) {
+    if (!section.items.find(i => i.id === id)) continue;
+    const total   = section.items.length;
+    const checked = section.items.filter(i => plantaoState[i.id]).length;
+    const secEl   = document.getElementById(`pd_item_${section.items[0].id}`)?.closest('.cl-section');
+    if (secEl) {
+      const badge = secEl.querySelector('.section-badge');
+      if (badge) { badge.textContent = `${checked}/${total}`; badge.classList.toggle('badge-done', checked===total); }
+      secEl.classList.toggle('section-done', checked===total);
+    }
+    break;
+  }
+}
+
+function resetPlantao() {
+  if (!confirm('Reiniciar a rotina do plantão?')) return;
+  plantaoState = {};
+  localStorage.removeItem('pc_plantao_diario');
+  openPlantaoDiario();
+}
+
+function closePlantaoDiario() {
+  document.getElementById('plantaoBackdrop').classList.add('hidden');
+  document.getElementById('plantaoModal').classList.add('hidden');
+}
+
 // ── KEYBOARD ────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeTriageModal(); }
+  if (e.key === 'Escape') { closeModal(); closeTriageModal(); closePlantaoDiario(); }
 });
