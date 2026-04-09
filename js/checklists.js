@@ -672,7 +672,7 @@ const REFERENCIAS = {
           <li>Preso evadido → CDP de Sorocaba</li>
           <li>Estrangeiro masculino → CDP de Sorocaba</li>
         </ul>
-        <p><strong>Antes de destinar o preso:</strong> Verificar no DVC se há crime sexual. Se sim → cela separada + CDP específico.</p>
+        <p><strong>Antes de destinar o preso:</strong> Verificar no DVC se há crime sexual. Se sim → cela separada + CDP II de Sorocaba.</p>
         <p><strong>Ocorrências de relevância:</strong> Comunicar via e-mail institucional para DPM local, CEPOL local e Cartório da Seccional. Copiar o BO completo no corpo da mensagem — não anexar.</p>
         <p><strong>Desaparecimento de pessoa:</strong> Incluir cor da pele, adornos, vestimenta, placa (se houver) e fotos. Comunicar CEPOL, DPM local e Delegacia de Homicídios da região.</p>
         <p><strong>Audiência de custódia:</strong> Seg–Sex → RAJ local. FDS/feriados → plantonista do fórum via site TJSP + Mandados IIRGD e Capturas.</p>
