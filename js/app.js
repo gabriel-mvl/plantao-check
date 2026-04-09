@@ -119,18 +119,32 @@ function startTriage(id) {
 
   // Warn if another checklist has progress
   if (currentOccurrence && currentOccurrence.id !== id) {
-    const allItems  = currentSections.flatMap(s => s.items);
+    const allItems   = currentSections.flatMap(s => s.items);
     const anyChecked = allItems.some(i => checkState[i.id]);
     if (anyChecked && !confirm(`Você tem itens marcados em "${currentOccurrence.name}". Deseja abrir outra ocorrência? O progresso atual está salvo e pode ser retomado.`)) return;
   }
 
-  // Show triage modal
+  const modo = occ.triagem || 'completa';
+
+  // Abre direto sem modal
+  if (modo === 'nenhuma') {
+    triageAnswers = { flagrante: false, preso: false, condutor: 'pm' };
+    if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
+    openOccurrence(id);
+    return;
+  }
+
+  // Configura o modal conforme modo
   document.getElementById('triageOccName').textContent = occ.name;
   document.getElementById('triageOccId').value = id;
-
-  // Reset selections
   document.querySelectorAll('.triage-opt').forEach(el => el.classList.remove('selected'));
   document.getElementById('triageMsg').classList.add('hidden');
+
+  // Mostrar/ocultar linhas conforme modo
+  const rowFlagrante = document.getElementById('triageRowFlagrante');
+  const rowPreso     = document.getElementById('triageRowPreso');
+  if (rowFlagrante) rowFlagrante.style.display = modo === 'completa' ? '' : 'none';
+  if (rowPreso)     rowPreso.style.display     = modo === 'completa' ? '' : 'none';
 
   openTriageModal();
   if (window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('open')) toggleSidebar();
@@ -153,19 +167,35 @@ function selectTriageOpt(group, value, el) {
 }
 
 function confirmTriage() {
-  const id        = document.getElementById('triageOccId').value;
-  const flagrante = document.querySelector('.triage-opt[data-group="flagrante"].selected')?.dataset.value;
-  const preso     = document.querySelector('.triage-opt[data-group="preso"].selected')?.dataset.value;
-  const condutor  = document.querySelector('.triage-opt[data-group="condutor"].selected')?.dataset.value;
+  const id       = document.getElementById('triageOccId').value;
+  const occ      = OCCURRENCES.find(o => o.id === id);
+  const modo     = occ?.triagem || 'completa';
+  const condutor = document.querySelector('.triage-opt[data-group="condutor"].selected')?.dataset.value;
 
-  if (!flagrante || !preso || !condutor) {
+  if (!condutor) {
     const msg = document.getElementById('triageMsg');
-    msg.textContent = 'Responda todas as perguntas para continuar.';
+    msg.textContent = 'Selecione quem está conduzindo a ocorrência.';
     msg.classList.remove('hidden');
     return;
   }
 
-  triageAnswers = { flagrante: flagrante === 'sim', preso: preso === 'sim', condutor };
+  let flagrante = false;
+  let preso     = false;
+
+  if (modo === 'completa') {
+    const fVal = document.querySelector('.triage-opt[data-group="flagrante"].selected')?.dataset.value;
+    const pVal = document.querySelector('.triage-opt[data-group="preso"].selected')?.dataset.value;
+    if (!fVal || !pVal) {
+      const msg = document.getElementById('triageMsg');
+      msg.textContent = 'Responda todas as perguntas para continuar.';
+      msg.classList.remove('hidden');
+      return;
+    }
+    flagrante = fVal === 'sim';
+    preso     = pVal === 'sim';
+  }
+
+  triageAnswers = { flagrante, preso, condutor };
   closeTriageModal();
   openOccurrence(id);
 }
