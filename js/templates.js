@@ -46,11 +46,11 @@ const TEMPLATES = {
     ],
     generate: (f) => {
       const condutor = f.tipoCondutor || 'policial militar';
-      return `Comparece o condutor, ${condutor} acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem do apresentado. Em consulta aos sistemas policiais, verificou-se que o indivíduo constava como procurado pela Justiça. Nada relacionado foi exibido para apreensão. O apresentado foi conduzido a esta unidade policial.
+      return `Comparece o condutor, ${condutor} acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem do apresentado e, em consulta aos sistemas policiais, verificou-se que o indivíduo constava como procurado pela Justiça. Em revista pessoal, nada de ilícito foi encontrado. Diante dos fatos, o indivíduo foi encaminhado à unidade de saúde local para realização de exame cautelar de praxe e, na sequência, conduzido a esta unidade policial.
 
-Já nesta delegacia, em consulta aos sistemas, confirmou-se mandado de prisão em desfavor do conduzido, com os seguintes dados: mandado nº ${f.numMandado}, processo nº ${f.numProcesso}, ${f.vara}, expedido em ${f.dataExpedicao}, validade: ${f.validade}, modalidade: prisão ${f.tipoPrisao}.
+Já nesta delegacia, em consulta aos sistemas Analítico, Banco Nacional de Mandados de Prisão (BNMP) e Prodesp, confirmou-se mandado de prisão em desfavor do conduzido, conforme número ${f.numMandado}, processo nº ${f.numProcesso}, expedido em ${f.dataExpedicao} pela ${f.vara}, com validade até ${f.validade}, na modalidade: prisão ${f.tipoPrisao}.
 
-Face ao exposto, lavrou-se o presente boletim de ocorrência.`;
+Face ao exposto, foi dado cumprimento ao referido mandado e lavrou-se o presente boletim de ocorrência. Acrescenta-se ainda que [NOME DA PESSOA + TELEFONE] foi comunicado(a) de sua prisão. Por fim, foram feitas as comunicações de praxe.`;
     }
   },
 
