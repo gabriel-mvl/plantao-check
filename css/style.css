@@ -533,3 +533,6 @@ input,textarea{font-family:var(--font-body)}
   .triage-opts{flex-direction:column}
   .triage-opt{min-width:unset}
 }
+
+/* Hide print-only elements on screen */
+.pdf-header, .pdf-print-footer, .pdf-obs-block, .pdf-triage-line { display: none; }
