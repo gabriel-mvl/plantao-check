@@ -73,9 +73,11 @@ Pelo presente, informo que foi solicitado guincho no boletim de ocorrência nº 
 
 Acionamento: ${f.dataAcionamento}
 Chegada: ${f.dataChegada}
-Protocolo: ${f.protocolo}
-
-Veículo recolhido ao pátio: SIM.
+Protocolo do guincho: ${f.protocolo}
+Veículo: ${f.veiculo}
+Placa: ${f.placa}
+Lacre: ${f.lacre}
+Recolhido ao pátio: SIM.
 
 Atenciosamente,
 Escrivão de Polícia
