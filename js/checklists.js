@@ -659,16 +659,18 @@ const REFERENCIAS = {
         <p><strong>Finalização do BO:</strong> Sempre confirmar com o delegado antes de finalizar.</p>
         <p><strong>Flagrante:</strong> Selecionar "BO para flagrante" — não é reversível após finalizado. O IPE é gerado automaticamente.</p>
         <p><strong>Acidentes de trânsito:</strong> A PM perguntará sobre a possibilidade de aplicar resolução. Sempre repassar ao delegado para análise.</p>
-        <p><strong>Destinação dos presos:</strong></p>
+        <p><strong>Destinação dos presos (Seccional de Sorocaba):</strong></p>
         <ul>
-          <li>Pensão → unidade de pensão</li>
-          <li>Regime fechado / Preventiva → unidade prisional competente</li>
-          <li>Temporário → unidade para presos temporários</li>
-          <li>Feminino → unidade feminina</li>
-          <li>Crimes sexuais → CDP específico para crimes sexuais</li>
-          <li>Semi-aberto → CPP da região</li>
+          <li>Pensão → Penitenciária de Capela do Alto</li>
+          <li>Regime fechado → CDP de Sorocaba</li>
+          <li>Preventiva → CDP de Sorocaba</li>
+          <li>Temporário → CDP de Capão Bonito</li>
+          <li>Feminino → Penitenciária Feminina de Votorantim</li>
+          <li>Crimes sexuais → CDP II de Sorocaba</li>
+          <li>Semi-aberto → CPP de Porto Feliz</li>
           <li>Adolescente → Fundação Casa</li>
-          <li>Preso evadido → unidade prisional competente</li>
+          <li>Preso evadido → CDP de Sorocaba</li>
+          <li>Estrangeiro masculino → CDP de Sorocaba</li>
         </ul>
         <p><strong>Antes de destinar o preso:</strong> Verificar no DVC se há crime sexual. Se sim → cela separada + CDP específico.</p>
         <p><strong>Ocorrências de relevância:</strong> Comunicar via e-mail institucional para DPM local, CEPOL local e Cartório da Seccional. Copiar o BO completo no corpo da mensagem — não anexar.</p>
