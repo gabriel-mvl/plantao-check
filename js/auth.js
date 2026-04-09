@@ -1,20 +1,15 @@
 /* ============================================================
-   PLANTÃO CHECK — Auth Module
-   EmailJS Integration for verification codes
+   PLANTÃO CHECK — Auth Module v2
+   Acesso por e-mail + código de verificação (sem cadastro)
    ============================================================
 
-   SETUP INSTRUCTIONS (configure once):
-   1. Acesse https://www.emailjs.com e crie uma conta gratuita
-   2. Crie um "Email Service" conectando seu Gmail ou Outlook institucional
-   3. Crie um "Email Template" com as variáveis: {{to_email}}, {{code}}, {{name}}
-      Sugestão de template:
-        Assunto: [Plantão Check] Seu código de verificação
-        Corpo: Olá {{name}}, seu código de verificação é: {{code}}
-              Este código expira em 15 minutos.
-   4. Substitua os valores abaixo:
-      - EMAILJS_SERVICE_ID: ID do serviço criado (ex: "service_abc123")
-      - EMAILJS_TEMPLATE_ID: ID do template criado (ex: "template_xyz789")
-      - EMAILJS_PUBLIC_KEY: Sua chave pública (em Account > API Keys)
+   CONFIGURAÇÃO (fazer uma única vez):
+   1. Acesse https://www.emailjs.com
+   2. Crie ou reutilize seu Email Service — anote o Service ID
+   3. Edite seu Email Template — variáveis: {{to_email}}, {{code}}
+      Sugestão de assunto: [Plantão Check] Código: {{code}}
+      Corpo: Seu código de acesso é {{code}}. Expira em 15 minutos.
+   4. Substitua os três valores abaixo com suas credenciais
 
    ============================================================ */
 
@@ -29,21 +24,26 @@ const EMAILJS_CONFIGURED = (
   EMAILJS_PUBLIC_KEY  !== 'SUA_PUBLIC_KEY'
 );
 
-// ── STORAGE HELPERS ──────────────────────────────────────────
+// Sessão expira em 8 horas
+const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
+
+// ── STORAGE ──────────────────────────────────────────────────
 const DB = {
-  getUsers: () => JSON.parse(localStorage.getItem('pc_users') || '{}'),
-  saveUsers: (u) => localStorage.setItem('pc_users', JSON.stringify(u)),
-  getPending: () => JSON.parse(localStorage.getItem('pc_pending') || '{}'),
+  getPending : ()  => JSON.parse(localStorage.getItem('pc_pending')  || '{}'),
   savePending: (p) => localStorage.setItem('pc_pending', JSON.stringify(p)),
-  setSession: (u) => localStorage.setItem('pc_session', JSON.stringify(u)),
-  getSession: () => JSON.parse(localStorage.getItem('pc_session') || 'null'),
+  setSession : (u) => localStorage.setItem('pc_session', JSON.stringify({ ...u, expiresAt: Date.now() + SESSION_DURATION_MS })),
+  getSession : ()  => {
+    const s = JSON.parse(localStorage.getItem('pc_session') || 'null');
+    if (!s) return null;
+    if (Date.now() > s.expiresAt) { localStorage.removeItem('pc_session'); return null; }
+    return s;
+  },
   clearSession: () => localStorage.removeItem('pc_session'),
 };
 
-// ── GUARD: redirect to app if already logged in ──────────────
+// ── GUARD ────────────────────────────────────────────────────
 (function () {
-  const session = DB.getSession();
-  if (session && window.location.pathname.includes('index')) {
+  if (DB.getSession() && window.location.pathname.includes('index')) {
     window.location.href = 'app.html';
   }
 })();
@@ -59,214 +59,177 @@ function generateCode() {
 
 function showMsg(id, text, type = 'error') {
   const el = document.getElementById(id);
+  if (!el) return;
   el.textContent = text;
   el.className = `auth-msg ${type}`;
   el.classList.remove('hidden');
 }
 
 function hideMsg(id) {
-  document.getElementById(id).classList.add('hidden');
+  const el = document.getElementById(id);
+  if (el) el.classList.add('hidden');
 }
 
 function togglePw(inputId, btn) {
   const input = document.getElementById(inputId);
-  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
-  else { input.type = 'password'; btn.textContent = '👁'; }
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+  btn.textContent = input.type === 'password' ? '👁' : '🙈';
 }
 
 function switchPanel(panelId) {
-  ['loginPanel', 'registerPanel', 'verifyPanel'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
+  ['emailPanel', 'verifyPanel'].forEach(id => {
+    document.getElementById(id)?.classList.add('hidden');
   });
-  document.getElementById(panelId).classList.remove('hidden');
+  document.getElementById(panelId)?.classList.remove('hidden');
 }
 
 // ── DIGIT INPUT ──────────────────────────────────────────────
 function digitNext(input, nextId) {
   input.value = input.value.replace(/[^0-9]/g, '').slice(-1);
-  if (input.value && nextId) document.getElementById(nextId).focus();
+  if (input.value && nextId) document.getElementById(nextId)?.focus();
 }
 
 function digitBack(event, input, prevId) {
   if (event.key === 'Backspace' && !input.value && prevId) {
-    document.getElementById(prevId).focus();
+    document.getElementById(prevId)?.focus();
   }
 }
 
 function getCodeFromInputs() {
-  return ['d1','d2','d3','d4','d5','d6'].map(id => document.getElementById(id).value).join('');
+  return ['d1','d2','d3','d4','d5','d6'].map(id => document.getElementById(id)?.value || '').join('');
 }
 
 function clearCodeInputs() {
-  ['d1','d2','d3','d4','d5','d6'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('d1').focus();
+  ['d1','d2','d3','d4','d5','d6'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('d1')?.focus();
 }
 
-// ── EMAIL SENDING ────────────────────────────────────────────
-async function sendCodeEmail(toEmail, name, code) {
+// ── EMAIL SEND ───────────────────────────────────────────────
+async function sendCodeEmail(toEmail, code) {
   if (!EMAILJS_CONFIGURED) {
-    // EmailJS não configurado — retorna erro silencioso
     return { ok: false, error: 'EmailJS não configurado' };
   }
-
-  // Carrega EmailJS SDK se não estiver carregado
-  if (!window.emailjs) {
-    await loadEmailJS();
-  }
-
   try {
-    await emailjs.send(
+    if (!window.emailjs) await loadEmailJS();
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
-      { to_email: toEmail, name: name, code: code },
-      EMAILJS_PUBLIC_KEY
+      { to_email: toEmail, code }
     );
-    return { ok: true };
+    return response.status === 200 ? { ok: true } : { ok: false, error: response.text };
   } catch (err) {
-    console.error('EmailJS error:', err);
     return { ok: false, error: err };
   }
 }
 
 function loadEmailJS() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (window.emailjs) { resolve(); return; }
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
     script.onload = resolve;
+    script.onerror = reject;
     document.head.appendChild(script);
   });
 }
 
-// ── REGISTER ─────────────────────────────────────────────────
-async function handleRegister() {
-  hideMsg('registerMsg');
+// ── REQUEST CODE (step 1) ─────────────────────────────────────
+async function handleRequestCode() {
+  hideMsg('emailMsg');
+  const email = (document.getElementById('loginEmail')?.value || '').trim().toLowerCase();
 
-  const name     = document.getElementById('regName').value.trim();
-  const email    = document.getElementById('regEmail').value.trim().toLowerCase();
-  const password = document.getElementById('regPassword').value;
-  const confirm  = document.getElementById('regPasswordConfirm').value;
+  if (!validateEmail(email)) {
+    return showMsg('emailMsg', 'Informe um e-mail institucional válido (.gov.br).');
+  }
 
-  if (!name) return showMsg('registerMsg', 'Informe seu nome completo.');
-  if (!validateEmail(email)) return showMsg('registerMsg', 'Use um e-mail institucional .gov.br válido.');
-  if (password.length < 6) return showMsg('registerMsg', 'A senha deve ter pelo menos 6 caracteres.');
-  if (password !== confirm) return showMsg('registerMsg', 'As senhas não coincidem.');
-
-  const users = DB.getUsers();
-  if (users[email]) return showMsg('registerMsg', 'Este e-mail já está cadastrado. Faça login.');
-
-  const code    = generateCode();
-  const expires = Date.now() + 15 * 60 * 1000; // 15 min
-
-  const pending = DB.getPending();
-  pending[email] = { name, password: btoa(password), code, expires };
-  DB.savePending(pending);
-
-  const btn = document.querySelector('#registerPanel .btn-primary');
+  const btn = document.getElementById('btnRequestCode');
   btn.textContent = 'Enviando...';
   btn.disabled = true;
 
-  const result = await sendCodeEmail(email, name, code);
+  const code    = generateCode();
+  const expires = Date.now() + 15 * 60 * 1000;
 
-  btn.textContent = 'Criar conta e enviar código';
+  const pending = DB.getPending();
+  pending[email] = { code, expires };
+  DB.savePending(pending);
+
+  const result = await sendCodeEmail(email, code);
+
+  btn.textContent = 'Receber código por e-mail';
   btn.disabled = false;
 
   if (!result.ok) {
-    return showMsg('registerMsg', 'Não foi possível enviar o código de verificação. O serviço de e-mail pode não estar configurado. Entre em contato com o administrador do sistema.', 'error');
+    return showMsg('emailMsg', 'Não foi possível enviar o código. Verifique o e-mail ou contate o administrador.');
   }
 
   document.getElementById('verifyEmailDisplay').textContent = email;
   switchPanel('verifyPanel');
   showMsg('verifyMsg', `Código enviado para ${email}. Verifique sua caixa de entrada.`, 'info');
+  document.getElementById('d1')?.focus();
 }
 
-// ── VERIFY ───────────────────────────────────────────────────
+// ── VERIFY CODE (step 2) ──────────────────────────────────────
 function handleVerify() {
   hideMsg('verifyMsg');
+  const code  = getCodeFromInputs();
+  if (code.length < 6) return showMsg('verifyMsg', 'Digite os 6 dígitos do código.');
 
-  const code    = getCodeFromInputs();
-  if (code.length < 6) return showMsg('verifyMsg', 'Insira todos os 6 dígitos.');
-
-  const emailDisplay = document.getElementById('verifyEmailDisplay').textContent;
+  const email   = document.getElementById('verifyEmailDisplay')?.textContent || '';
   const pending = DB.getPending();
-  const entry   = pending[emailDisplay];
+  const entry   = pending[email];
 
-  if (!entry) return showMsg('verifyMsg', 'Nenhum cadastro pendente encontrado. Faça o cadastro novamente.');
+  if (!entry) return showMsg('verifyMsg', 'Código não encontrado. Solicite um novo.');
   if (Date.now() > entry.expires) {
-    delete pending[emailDisplay];
+    delete pending[email];
     DB.savePending(pending);
-    return showMsg('verifyMsg', 'Código expirado. Faça o cadastro novamente.', 'error');
+    return showMsg('verifyMsg', 'Código expirado. Solicite um novo.');
   }
-  if (entry.code !== code) return showMsg('verifyMsg', 'Código incorreto. Tente novamente.', 'error');
+  if (entry.code !== code) return showMsg('verifyMsg', 'Código incorreto. Tente novamente.');
 
-  // Confirma cadastro
-  const users = DB.getUsers();
-  users[emailDisplay] = { name: entry.name, password: entry.password, createdAt: Date.now() };
-  DB.saveUsers(users);
-
-  delete pending[emailDisplay];
+  delete pending[email];
   DB.savePending(pending);
 
-  // Loga automaticamente
-  DB.setSession({ email: emailDisplay, name: entry.name });
+  // Derive display name from email (part before @)
+  const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  DB.setSession({ email, name });
   window.location.href = 'app.html';
 }
 
-// ── RESEND CODE ──────────────────────────────────────────────
+// ── RESEND ────────────────────────────────────────────────────
 async function resendCode() {
-  const email   = document.getElementById('verifyEmailDisplay').textContent;
-  const pending = DB.getPending();
-  const entry   = pending[email];
-  if (!entry) return showMsg('verifyMsg', 'Faça o cadastro novamente.', 'error');
+  const email = document.getElementById('verifyEmailDisplay')?.textContent || '';
+  if (!email) return switchPanel('emailPanel');
+
+  clearCodeInputs();
+  hideMsg('verifyMsg');
 
   const code    = generateCode();
   const expires = Date.now() + 15 * 60 * 1000;
-  pending[email] = { ...entry, code, expires };
+  const pending = DB.getPending();
+  pending[email] = { code, expires };
   DB.savePending(pending);
 
-  clearCodeInputs();
-  const result = await sendCodeEmail(email, entry.name, code);
-
-  if (!result.ok) return showMsg('verifyMsg', 'Erro ao reenviar. Tente novamente.', 'error');
-
+  const result = await sendCodeEmail(email, code);
+  if (!result.ok) return showMsg('verifyMsg', 'Erro ao reenviar. Tente novamente.');
   showMsg('verifyMsg', 'Novo código enviado!', 'success');
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────
-function handleLogin() {
-  hideMsg('loginMsg');
-
-  const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password = document.getElementById('loginPassword').value;
-
-  if (!validateEmail(email)) return showMsg('loginMsg', 'Use um e-mail institucional .gov.br válido.');
-  if (!password) return showMsg('loginMsg', 'Informe sua senha.');
-
-  const users = DB.getUsers();
-  const user  = users[email];
-
-  if (!user) return showMsg('loginMsg', 'E-mail não cadastrado. Faça o cadastro.');
-  if (atob(user.password) !== password) return showMsg('loginMsg', 'Senha incorreta.');
-
-  DB.setSession({ email, name: user.name });
-  window.location.href = 'app.html';
-}
-
-// ── LOGOUT (chamado do app) ───────────────────────────────────
+// ── LOGOUT (called from app) ──────────────────────────────────
 function handleLogout() {
   DB.clearSession();
   window.location.href = 'index.html';
 }
 
-// ── ENTER KEY SUPPORT ─────────────────────────────────────────
+// ── ENTER KEY ────────────────────────────────────────────────
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
-  const loginPanel   = document.getElementById('loginPanel');
-  const registerPanel = document.getElementById('registerPanel');
-  const verifyPanel  = document.getElementById('verifyPanel');
-  if (!loginPanel.classList.contains('hidden'))    handleLogin();
-  else if (!registerPanel.classList.contains('hidden')) handleRegister();
-  else if (!verifyPanel.classList.contains('hidden'))   handleVerify();
+  const emailPanel  = document.getElementById('emailPanel');
+  const verifyPanel = document.getElementById('verifyPanel');
+  if (emailPanel  && !emailPanel.classList.contains('hidden'))  handleRequestCode();
+  else if (verifyPanel && !verifyPanel.classList.contains('hidden')) handleVerify();
 });
-
-
