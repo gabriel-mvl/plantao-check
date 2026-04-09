@@ -300,13 +300,13 @@ input,textarea{font-family:var(--font-body)}
 .occ-card:hover::after{opacity:1}
 .occ-card.occ-started{border-color:rgba(59,125,255,.25)}
 
-.occ-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.6rem}
-.occ-icon{font-size:1.65rem}
+.occ-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;min-height:2rem}
+.occ-icon{font-size:1.6rem;line-height:1}
 
 /* Progress ring */
-.occ-ring{position:relative;width:36px;height:36px;flex-shrink:0}
-.occ-ring svg{width:36px;height:36px;transform:rotate(-90deg)}
-.occ-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--accent);font-family:var(--font-mono)}
+.occ-ring{position:relative;width:38px;height:38px;flex-shrink:0}
+.occ-ring svg{width:38px;height:38px;transform:rotate(-90deg);display:block}
+.occ-ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:var(--accent);font-family:var(--font-mono);line-height:1}
 
 .occ-name{font-family:var(--font-display);font-weight:700;font-size:.9rem;line-height:1.3;color:var(--text-primary);margin-bottom:.25rem}
 .occ-count{font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono)}
@@ -469,19 +469,29 @@ input,textarea{font-family:var(--font-body)}
 
 /* ── TRIAGE ── */
 .triage-modal .modal-header h3{font-size:1.05rem}
-.triage-body{gap:1.2rem}
-.triage-question{}
-.triage-q-label{font-family:var(--font-display);font-size:.82rem;font-weight:600;color:var(--text-secondary);margin-bottom:.55rem;text-transform:uppercase;letter-spacing:.05em}
+.triage-body{gap:1.3rem}
+.triage-question{display:flex;flex-direction:column;gap:.55rem}
+.triage-q-label{font-family:var(--font-display);font-size:.88rem;font-weight:700;color:var(--text-primary)}
 .triage-opts{display:flex;gap:.5rem;flex-wrap:wrap}
 .triage-opt{
-  flex:1;min-width:120px;
-  padding:.65rem .9rem;
-  background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);
-  color:var(--text-secondary);font-size:.86rem;font-weight:500;
-  transition:all .18s;text-align:center;
+  flex:1;min-width:140px;
+  padding:.8rem 1rem;
+  background:var(--bg-card);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  color:var(--text-primary);
+  font-size:.88rem;font-weight:500;
+  transition:all .18s;
+  cursor:pointer;
+  font-family:var(--font-body);
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  line-height:1.3;
 }
-.triage-opt:hover{background:var(--bg-hover);border-color:var(--border-light);color:var(--text-primary)}
-.triage-opt.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600}
+.triage-opt:hover{background:var(--bg-hover);border-color:rgba(59,125,255,.35);color:var(--text-primary)}
+.triage-opt.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);font-weight:600;box-shadow:0 0 0 3px var(--accent-glow)}
+.triage-opt-icon{font-size:1rem;flex-shrink:0;line-height:1}
+.triage-opt-text{font-size:.86rem;font-weight:500;white-space:nowrap}
+.triage-opt.selected .triage-opt-text{font-weight:700}
 
 /* ── GLOBAL FOOTER ── */
 .app-footer{
