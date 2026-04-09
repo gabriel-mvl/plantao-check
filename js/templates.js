@@ -1,102 +1,131 @@
 /* ============================================================
-   PLANTÃO CHECK — Templates de Texto
-   Geradores de histórico, modelos de documentos etc.
+   PLANTÃO CHECK — Templates de Texto v2
    ============================================================ */
 
 const TEMPLATES = {
 
-  // ── HISTÓRICO DE BO — CAPTURA ─────────────────────────────
+  // ── HISTÓRICO DE BO — CAPTURA DE PROCURADO ───────────────
   historicoCaptura: {
     title: 'Histórico do BO — Captura de Procurado',
     fields: [
-      { id: 'condutor', label: 'Nome do condutor (policial militar)', placeholder: 'Ex: Sd PM FULANO DE TAL' },
-      { id: 'testemunha', label: 'Nome da testemunha (PM)', placeholder: 'Ex: Sd PM BELTRANO' },
-      { id: 'capturado', label: 'Nome do capturado', placeholder: 'Ex: JOÃO DA SILVA' },
-      { id: 'numMandado', label: 'Número do mandado', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'numProcesso', label: 'Número do processo', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'vara', label: 'Vara / Juízo', placeholder: 'Ex: 1ª Vara Criminal da Comarca' },
-      { id: 'dataExpedicao', label: 'Data de expedição do mandado', placeholder: 'Ex: 10/01/2025' },
-      { id: 'validade', label: 'Validade do mandado', placeholder: 'Ex: indeterminada / 10/01/2026' },
-      { id: 'tipoPrisao', label: 'Tipo de prisão', placeholder: 'Ex: preventiva / temporária / definitiva' },
+      {
+        id: 'tipoCondutor',
+        label: 'Tipo de condutor',
+        placeholder: 'policial militar / guarda municipal'
+      },
+      {
+        id: 'numMandado',
+        label: 'Número do mandado',
+        placeholder: 'Ex: 0000001-00.2024.8.26.0000'
+      },
+      {
+        id: 'numProcesso',
+        label: 'Número do processo',
+        placeholder: 'Ex: 0000001-00.2024.8.26.0000'
+      },
+      {
+        id: 'vara',
+        label: 'Vara / Juízo',
+        placeholder: 'Ex: 1ª Vara Criminal da Comarca'
+      },
+      {
+        id: 'dataExpedicao',
+        label: 'Data de expedição do mandado',
+        placeholder: 'Ex: 10/01/2025'
+      },
+      {
+        id: 'validade',
+        label: 'Validade do mandado',
+        placeholder: 'Ex: indeterminada'
+      },
+      {
+        id: 'tipoPrisao',
+        label: 'Tipo de prisão',
+        placeholder: 'Ex: preventiva / temporária / definitiva'
+      },
     ],
-    generate: (f) => `Comparecem nesta unidade policial o condutor ${f.condutor} e a testemunha ${f.testemunha}, ambos policiais militares, apresentando o capturado ${f.capturado}, bem como informando que em patrulhamento realizaram a abordagem do apresentado e, em consulta aos sistemas, verificaram que o mesmo encontrava-se constando como procurado pela Justiça. Nada relacionado foi exibido para apreensão.
+    generate: (f) => {
+      const condutor = f.tipoCondutor || 'policial militar';
+      return `Comparece o condutor, ${condutor} acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem do apresentado. Em consulta aos sistemas policiais, verificou-se que o indivíduo constava como procurado pela Justiça. Nada relacionado foi exibido para apreensão. O apresentado foi conduzido a esta unidade policial.
 
-Já nesta delegacia, em consulta aos sistemas policiais, foi verificado mandado de prisão em desfavor de ${f.capturado}, cujos dados são: mandado nº ${f.numMandado}, processo nº ${f.numProcesso}, ${f.vara}, data de expedição: ${f.dataExpedicao}, validade: ${f.validade}, tipo de prisão: ${f.tipoPrisao}.
+Já nesta delegacia, em consulta aos sistemas, confirmou-se mandado de prisão em desfavor do conduzido, com os seguintes dados: mandado nº ${f.numMandado}, processo nº ${f.numProcesso}, ${f.vara}, expedido em ${f.dataExpedicao}, validade: ${f.validade}, modalidade: prisão ${f.tipoPrisao}.
 
-Diante do exposto, lavrou-se o presente boletim de ocorrência.`
+Face ao exposto, lavrou-se o presente boletim de ocorrência.`;
+    }
   },
 
-  // ── E-MAIL DE GUINCHO / VEÍCULO APREENDIDO ───────────────
+  // ── E-MAIL — VEÍCULO APREENDIDO / GUINCHO ────────────────
   emailGuincho: {
-    title: 'Modelo de E-mail — Veículo Apreendido / Guincho',
+    title: 'Modelo de E-mail — Veículo Apreendido',
     fields: [
-      { id: 'numBO', label: 'Número do BO', placeholder: 'Ex: AV0438-2026' },
-      { id: 'veiculo', label: 'Veículo (marca/modelo)', placeholder: 'Ex: HONDA/CG 125 FAN' },
-      { id: 'placa', label: 'Placa do veículo', placeholder: 'Ex: DPT3930' },
-      { id: 'lacre', label: 'Número do lacre', placeholder: 'Ex: 0122261' },
-      { id: 'dataAcionamento', label: 'Data e hora do acionamento do guincho', placeholder: 'Ex: 16/01/2026 às 17:50' },
-      { id: 'dataChegada', label: 'Data e hora da chegada do guincho', placeholder: 'Ex: 16/01/2026 às 19:45' },
-      { id: 'protocolo', label: 'Protocolo do guincho', placeholder: 'Ex: delitu1601261758' },
+      { id: 'numBO',          label: 'Número do BO',                    placeholder: 'Ex: AV0438-2026' },
+      { id: 'veiculo',        label: 'Veículo (marca/modelo)',           placeholder: 'Ex: HONDA/CG 125 FAN' },
+      { id: 'placa',          label: 'Placa',                           placeholder: 'Ex: DPT3930' },
+      { id: 'lacre',          label: 'Número do lacre',                 placeholder: 'Ex: 0122261' },
+      { id: 'dataAcionamento',label: 'Data e hora — acionamento',       placeholder: 'Ex: 16/01/2026 às 17:50' },
+      { id: 'dataChegada',    label: 'Data e hora — chegada do guincho', placeholder: 'Ex: 16/01/2026 às 19:45' },
+      { id: 'protocolo',      label: 'Protocolo do guincho',            placeholder: 'Ex: delitu1601261758' },
     ],
-    generate: (f) => `Prezados,
+    generate: (f) =>
+`Prezados,
 
-Pelo presente informo que foi feita a solicitação de guincho no boletim de ocorrência nº ${f.numBO} para o veículo ${f.veiculo}, PLACA ${f.placa} — Lacre: ${f.lacre}.
+Pelo presente, informo que foi solicitado guincho no boletim de ocorrência nº ${f.numBO} para o veículo ${f.veiculo}, placa ${f.placa}, lacre nº ${f.lacre}.
 
-Hora e data de acionamento do guincho: ${f.dataAcionamento}
-Hora e data da chegada do guincho: ${f.dataChegada}
-Protocolo do guincho: ${f.protocolo}
-Veículo: ${f.veiculo} (PLACA ${f.placa})
-Lacre: ${f.lacre}
+Acionamento: ${f.dataAcionamento}
+Chegada: ${f.dataChegada}
+Protocolo: ${f.protocolo}
 
-Foi recolhido ao Pátio: SIM.
+Veículo recolhido ao pátio: SIM.
 
 Atenciosamente,
 Escrivão de Polícia
 
-OBS.: Anexar cópia do boletim de ocorrência, exibição e apreensão e papeleta do guincho.`
+OBS.: Anexar cópia do BO, auto de exibição e apreensão e papeleta do guincho.`
   },
 
   // ── E-MAIL — OCORRÊNCIA DE RELEVÂNCIA ───────────────────
   emailRelevancia: {
     title: 'Modelo de E-mail — Ocorrência de Relevância',
     fields: [
-      { id: 'local', label: 'Local da delegacia (ex: DELPOL ITU)', placeholder: 'DELPOL ITU' },
-      { id: 'data', label: 'Data', placeholder: 'Ex: 30 DE JANEIRO DE 2026' },
-      { id: 'crime', label: 'Tipo de crime', placeholder: 'Ex: HOMICÍDIO DOLOSO' },
-      { id: 'numBO', label: 'Número do BO', placeholder: 'Ex: AV0100-2026' },
+      { id: 'local',  label: 'Local da delegacia', placeholder: 'Ex: DELPOL DA COMARCA' },
+      { id: 'data',   label: 'Data por extenso',   placeholder: 'Ex: 30 DE JANEIRO DE 2026' },
+      { id: 'crime',  label: 'Natureza do crime',  placeholder: 'Ex: HOMICÍDIO DOLOSO' },
+      { id: 'numBO',  label: 'Número do BO',        placeholder: 'Ex: AV0100-2026' },
     ],
-    generate: (f) => `${f.local}, ${f.data}
+    generate: (f) =>
+`${f.local}, ${f.data}
 
 Excelentíssimo Delegado de Polícia,
 
-Pelo presente, comunico ocorrência de relevância versando sobre crime de ${f.crime}, acerca do boletim de ocorrência ${f.numBO}.
+Pelo presente, comunico ocorrência de relevância versando sobre ${f.crime}, registrada no boletim de ocorrência nº ${f.numBO}.
 
-[COLE AQUI O HISTÓRICO COMPLETO DO BOLETIM DE OCORRÊNCIA]
+[COLE AQUI O HISTÓRICO COMPLETO DO BO]
 
 Delegado de Polícia
 
-OBS.: Copiar e colar o BO inteiro no corpo da mensagem — NÃO anexar.`
+OBS.: Copiar e colar o BO inteiro no corpo da mensagem — NÃO colocar em anexo.`
   },
 
   // ── E-MAIL — DESAPARECIMENTO DE PESSOA ──────────────────
   emailDesaparecimento: {
     title: 'Modelo de E-mail — Desaparecimento de Pessoa',
     fields: [
-      { id: 'local', label: 'Local da delegacia', placeholder: 'DELPOL ITU' },
-      { id: 'data', label: 'Data', placeholder: 'Ex: 30 DE JANEIRO DE 2026' },
-      { id: 'nome', label: 'Nome do desaparecido', placeholder: 'Ex: FULANO DE TAL' },
-      { id: 'numBO', label: 'Número do BO', placeholder: 'Ex: AV0100-2026' },
+      { id: 'local',  label: 'Local da delegacia', placeholder: 'Ex: DELPOL DA COMARCA' },
+      { id: 'data',   label: 'Data por extenso',   placeholder: 'Ex: 30 DE JANEIRO DE 2026' },
+      { id: 'nome',   label: 'Nome do desaparecido', placeholder: 'Ex: FULANO DE TAL' },
+      { id: 'numBO',  label: 'Número do BO',          placeholder: 'Ex: AV0100-2026' },
     ],
-    generate: (f) => `${f.local}, ${f.data}
+    generate: (f) =>
+`${f.local}, ${f.data}
 
 Excelentíssimo Delegado de Polícia,
 
-Pelo presente, comunico o desaparecimento de ${f.nome}, referente ao boletim de ocorrência ${f.numBO}.
+Pelo presente, comunico o desaparecimento de ${f.nome}, conforme boletim de ocorrência nº ${f.numBO}.
 
-[COLE AQUI O HISTÓRICO COMPLETO DO BOLETIM DE OCORRÊNCIA]
+[COLE AQUI O HISTÓRICO COMPLETO DO BO]
 
 Delegado de Polícia
 
-OBS.: Copiar e colar o BO inteiro no corpo da mensagem — NÃO anexar. Incluir o máximo de dados da pessoa desaparecida: cor da pele, adornos, vestimenta, placa do veículo (se houver) e fotos.`
+OBS.: Copiar e colar o BO inteiro no corpo da mensagem — NÃO colocar em anexo. Incluir o máximo de dados sobre a pessoa desaparecida: cor da pele, adornos, vestimenta, placa do veículo (se houver) e fotos.`
   },
 };
