@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plantão Check — Acesso</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
 <body class="auth-page">
 
@@ -25,87 +23,65 @@
       <p class="brand-sub">Sistema de Checklist do Plant&#227;o Policial</p>
     </div>
 
-    <!-- LOGIN -->
-    <div class="auth-card" id="loginPanel">
+    <!-- STEP 1: E-MAIL -->
+    <div class="auth-card" id="emailPanel">
       <div class="card-header">
         <h2>Acesso</h2>
-        <p>Entre com sua conta institucional</p>
+        <p>Informe seu e-mail institucional para receber o c&#243;digo de acesso</p>
       </div>
+
       <div class="form-group">
         <label>E-mail institucional</label>
-        <input type="email" id="loginEmail" placeholder="nome@orgao.gov.br" autocomplete="email" />
+        <input type="email" id="loginEmail" placeholder="nome@orgao.gov.br" autocomplete="email" autofocus />
       </div>
-      <div class="form-group">
-        <label>Senha</label>
-        <div class="input-wrap">
-          <input type="password" id="loginPassword" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password" />
-          <button class="toggle-pw" onclick="togglePw('loginPassword', this)" tabindex="-1">&#128065;</button>
-        </div>
-      </div>
-      <div id="loginMsg" class="auth-msg hidden"></div>
-      <button class="btn-primary" onclick="handleLogin()">Entrar</button>
-      <p class="auth-switch">N&#227;o tem conta? <a href="#" onclick="switchPanel('registerPanel')">Cadastre-se</a></p>
+
+      <div id="emailMsg" class="auth-msg hidden"></div>
+
+      <button class="btn-primary" id="btnRequestCode" onclick="handleRequestCode()">
+        Receber c&#243;digo por e-mail
+      </button>
+
+      <p class="auth-hint">Apenas e-mails <strong>.gov.br</strong> s&#227;o aceitos</p>
     </div>
 
-    <!-- CADASTRO -->
-    <div class="auth-card hidden" id="registerPanel">
-      <div class="card-header">
-        <h2>Cadastro</h2>
-        <p>Apenas e-mails institucionais <strong>.gov.br</strong></p>
-      </div>
-      <div class="form-group">
-        <label>Nome completo</label>
-        <input type="text" id="regName" placeholder="Seu nome" />
-      </div>
-      <div class="form-group">
-        <label>E-mail institucional</label>
-        <input type="email" id="regEmail" placeholder="nome@orgao.gov.br" />
-      </div>
-      <div class="form-group">
-        <label>Senha</label>
-        <div class="input-wrap">
-          <input type="password" id="regPassword" placeholder="M&#237;nimo 6 caracteres" />
-          <button class="toggle-pw" onclick="togglePw('regPassword', this)" tabindex="-1">&#128065;</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Confirmar senha</label>
-        <div class="input-wrap">
-          <input type="password" id="regPasswordConfirm" placeholder="Repita a senha" />
-          <button class="toggle-pw" onclick="togglePw('regPasswordConfirm', this)" tabindex="-1">&#128065;</button>
-        </div>
-      </div>
-      <div id="registerMsg" class="auth-msg hidden"></div>
-      <button class="btn-primary" onclick="handleRegister()">Criar conta e enviar c&#243;digo</button>
-      <p class="auth-switch">J&#225; tem conta? <a href="#" onclick="switchPanel('loginPanel')">Entrar</a></p>
-    </div>
-
-    <!-- VERIFICACAO -->
+    <!-- STEP 2: VERIFICATION CODE -->
     <div class="auth-card hidden" id="verifyPanel">
       <div class="card-header">
-        <h2>Verifica&#231;&#227;o</h2>
-        <p>Insira o c&#243;digo de 6 d&#237;gitos enviado para <strong id="verifyEmailDisplay"></strong></p>
+        <h2>Verificar c&#243;digo</h2>
+        <p>C&#243;digo enviado para <strong id="verifyEmailDisplay"></strong></p>
       </div>
+
       <div class="form-group code-group">
-        <input type="text" maxlength="1" class="code-digit" id="d1" oninput="digitNext(this, 'd2')" />
-        <input type="text" maxlength="1" class="code-digit" id="d2" oninput="digitNext(this, 'd3')" onkeydown="digitBack(event, this, 'd1')" />
-        <input type="text" maxlength="1" class="code-digit" id="d3" oninput="digitNext(this, 'd4')" onkeydown="digitBack(event, this, 'd2')" />
-        <input type="text" maxlength="1" class="code-digit" id="d4" oninput="digitNext(this, 'd5')" onkeydown="digitBack(event, this, 'd3')" />
-        <input type="text" maxlength="1" class="code-digit" id="d5" oninput="digitNext(this, 'd6')" onkeydown="digitBack(event, this, 'd4')" />
-        <input type="text" maxlength="1" class="code-digit" id="d6" oninput="digitNext(this, null)" onkeydown="digitBack(event, this, 'd5')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d1" oninput="digitNext(this, 'd2')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d2" oninput="digitNext(this, 'd3')" onkeydown="digitBack(event, this, 'd1')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d3" oninput="digitNext(this, 'd4')" onkeydown="digitBack(event, this, 'd2')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d4" oninput="digitNext(this, 'd5')" onkeydown="digitBack(event, this, 'd3')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d5" oninput="digitNext(this, 'd6')" onkeydown="digitBack(event, this, 'd4')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d6" oninput="digitNext(this, null)" onkeydown="digitBack(event, this, 'd5')" />
       </div>
+
       <div id="verifyMsg" class="auth-msg hidden"></div>
-      <button class="btn-primary" onclick="handleVerify()">Verificar c&#243;digo</button>
-      <p class="auth-switch"><a href="#" onclick="resendCode()">Reenviar c&#243;digo</a> &nbsp;|&nbsp; <a href="#" onclick="switchPanel('loginPanel')">Voltar ao login</a></p>
+
+      <button class="btn-primary" onclick="handleVerify()">Entrar</button>
+
+      <p class="auth-switch">
+        <a href="#" onclick="resendCode()">Reenviar c&#243;digo</a>
+        &nbsp;&middot;&nbsp;
+        <a href="#" onclick="switchPanel('emailPanel')">Usar outro e-mail</a>
+      </p>
     </div>
 
     <!-- AVISO LEGAL -->
     <div class="legal-notice">
       <span class="legal-icon">&#9888;</span>
-      <span>Este aplicativo &#233; uma ferramenta de apoio operacional desenvolvida de forma independente. <strong>N&#227;o possui qualquer v&#237;nculo institucional</strong> com a Pol&#237;cia Civil do Estado de S&#227;o Paulo ou com qualquer &#243;rg&#227;o p&#250;blico. O uso &#233; de responsabilidade exclusiva do usu&#225;rio.</span>
+      <span>
+        Este aplicativo &#233; uma ferramenta de apoio operacional desenvolvida de forma independente.
+        <strong>N&#227;o possui qualquer v&#237;nculo institucional</strong> com a Pol&#237;cia Civil do
+        Estado de S&#227;o Paulo ou com qualquer &#243;rg&#227;o p&#250;blico.
+        O uso &#233; de responsabilidade exclusiva do usu&#225;rio.
+      </span>
     </div>
 
-    <!-- CREDITO -->
     <div class="app-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
 
   </div>
