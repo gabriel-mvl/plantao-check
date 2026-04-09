@@ -153,26 +153,44 @@
     <div class="modal-body triage-body">
 
       <div class="triage-question">
-        <p class="triage-q-label">Quem está conduzindo?</p>
+        <p class="triage-q-label">Quem está conduzindo a ocorrência?</p>
         <div class="triage-opts">
-          <button class="triage-opt" data-group="condutor" data-value="pm"  onclick="selectTriageOpt('condutor','pm',this)">&#128110; Policial Militar</button>
-          <button class="triage-opt" data-group="condutor" data-value="gcm" onclick="selectTriageOpt('condutor','gcm',this)">&#128106; Guarda Municipal</button>
+          <button class="triage-opt" data-group="condutor" data-value="pm" onclick="selectTriageOpt('condutor','pm',this)">
+            <span class="triage-opt-icon">&#128110;</span>
+            <span class="triage-opt-text">Policial Militar</span>
+          </button>
+          <button class="triage-opt" data-group="condutor" data-value="gcm" onclick="selectTriageOpt('condutor','gcm',this)">
+            <span class="triage-opt-icon">&#128106;</span>
+            <span class="triage-opt-text">Guarda Municipal</span>
+          </button>
         </div>
       </div>
 
-      <div class="triage-question">
-        <p class="triage-q-label">É flagrante?</p>
+      <div class="triage-question" id="triageRowFlagrante">
+        <p class="triage-q-label">A ocorrência é um flagrante?</p>
         <div class="triage-opts">
-          <button class="triage-opt" data-group="flagrante" data-value="sim" onclick="selectTriageOpt('flagrante','sim',this)">&#9989; Sim</button>
-          <button class="triage-opt" data-group="flagrante" data-value="nao" onclick="selectTriageOpt('flagrante','nao',this)">&#10060; Não</button>
+          <button class="triage-opt" data-group="flagrante" data-value="sim" onclick="selectTriageOpt('flagrante','sim',this)">
+            <span class="triage-opt-icon">&#10003;</span>
+            <span class="triage-opt-text">Sim, é flagrante</span>
+          </button>
+          <button class="triage-opt" data-group="flagrante" data-value="nao" onclick="selectTriageOpt('flagrante','nao',this)">
+            <span class="triage-opt-icon">&#8722;</span>
+            <span class="triage-opt-text">Não é flagrante</span>
+          </button>
         </div>
       </div>
 
-      <div class="triage-question">
-        <p class="triage-q-label">Há autor preso?</p>
+      <div class="triage-question" id="triageRowPreso">
+        <p class="triage-q-label">Há autor preso a encaminhar?</p>
         <div class="triage-opts">
-          <button class="triage-opt" data-group="preso" data-value="sim" onclick="selectTriageOpt('preso','sim',this)">&#9989; Sim</button>
-          <button class="triage-opt" data-group="preso" data-value="nao" onclick="selectTriageOpt('preso','nao',this)">&#10060; Não</button>
+          <button class="triage-opt" data-group="preso" data-value="sim" onclick="selectTriageOpt('preso','sim',this)">
+            <span class="triage-opt-icon">&#10003;</span>
+            <span class="triage-opt-text">Sim, há preso</span>
+          </button>
+          <button class="triage-opt" data-group="preso" data-value="nao" onclick="selectTriageOpt('preso','nao',this)">
+            <span class="triage-opt-icon">&#8722;</span>
+            <span class="triage-opt-text">Não há preso</span>
+          </button>
         </div>
       </div>
 
