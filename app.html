@@ -50,10 +50,22 @@
     <!-- HOME -->
     <div class="home-view" id="homeView">
       <div class="home-hero">
-        <h2 class="home-title">Qual ocorr&#234;ncia?</h2>
-        <p class="home-sub">Selecione o tipo para abrir o checklist</p>
+        <div class="home-hero-top">
+          <div>
+            <h2 class="home-title">Qual ocorr&#234;ncia?</h2>
+            <p class="home-sub">Selecione o tipo para abrir o checklist</p>
+          </div>
+          <button class="btn-plantao-diario" onclick="openPlantaoDiario()">
+            <span>&#9200;</span> Rotina do Plant&#227;o
+          </button>
+        </div>
+        <div id="recentOccurrence"></div>
+        <div class="home-search-wrap">
+          <input class="home-search" id="homeSearch" type="text" placeholder="&#128269; Buscar ocorr&#234;ncia..." oninput="filterOccurrences()" autocomplete="off" />
+        </div>
       </div>
       <div class="occurrence-grid" id="occurrenceGrid"></div>
+      <p class="no-results hidden" id="noResults">Nenhuma ocorr&#234;ncia encontrada.</p>
     </div>
 
     <!-- CHECKLIST VIEW -->
@@ -76,6 +88,12 @@
         </div>
       </div>
 
+      <!-- CELEBRATION BANNER -->
+      <div class="celebration-banner hidden" id="celebrationBanner">
+        <span class="cel-icon">&#10003;</span>
+        <span class="cel-text">Checklist conclu&#237;do!</span>
+      </div>
+
       <div class="cl-header">
         <div style="flex:1">
           <h2 class="cl-title" id="clTitle"></h2>
@@ -88,6 +106,7 @@
         <div class="cl-progress-wrap">
           <div class="cl-progress-bar"><div class="cl-progress-fill" id="clProgressFill"></div></div>
           <span class="cl-progress-label" id="clProgressLabel">0 / 0</span>
+          <span class="occ-timer" id="occTimer">00m 00s</span>
         </div>
       </div>
 
@@ -138,6 +157,23 @@
     </div>
     <div class="footer-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
   </footer>
+
+  <!-- PLANTÃO DIÁRIO MODAL -->
+  <div class="modal-backdrop hidden" id="plantaoBackdrop" onclick="closePlantaoDiario()"></div>
+  <div class="modal hidden" id="plantaoModal">
+    <div class="modal-header">
+      <div>
+        <h3>Rotina do Plant&#227;o</h3>
+        <p class="modal-subtitle">Procedimentos obrigat&#243;rios — independente de ocorr&#234;ncia</p>
+      </div>
+      <button onclick="closePlantaoDiario()">&#215;</button>
+    </div>
+    <div class="modal-body" id="plantaoBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="resetPlantao()">&#8635; Reiniciar</button>
+      <button class="btn-primary" onclick="closePlantaoDiario()" style="width:auto;margin-top:0">Fechar</button>
+    </div>
+  </div>
 
   <!-- TRIAGE MODAL -->
   <div class="modal-backdrop hidden" id="triageBackdrop" onclick="closeTriageModal()"></div>
