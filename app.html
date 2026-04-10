@@ -22,10 +22,16 @@
     <nav class="sidebar-nav">
       <p class="nav-label">Ocorr&#234;ncias</p>
       <ul id="navList"></ul>
+      <p class="nav-label" style="margin-top:1.4rem">Ferramentas</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="openHistorico()"><span class="nav-icon">&#128337;</span> Hist&#243;rico</a></li>
+        <li><a href="#" class="nav-link" onclick="openBNMP()"><span class="nav-icon">&#128269;</span> Busca BNMP</a></li>
+      </ul>
       <p class="nav-label" style="margin-top:1.4rem">Refer&#234;ncias</p>
       <ul>
         <li><a href="#" class="nav-link" onclick="openRef('requisicoes')"><span class="nav-icon">&#128203;</span> Requisi&#231;&#245;es IML/IC</a></li>
         <li><a href="#" class="nav-link" onclick="openRef('orientacoes')"><span class="nav-icon">&#128204;</span> Orienta&#231;&#245;es Gerais</a></li>
+        <li><a href="#" class="nav-link" onclick="openArtigosMenu()"><span class="nav-icon">&#9878;</span> Legisla&#231;&#227;o</a></li>
       </ul>
     </nav>
     <div class="sidebar-footer">
@@ -46,6 +52,9 @@
         <button class="btn-icon" onclick="generatePDF()" title="Gerar PDF">&#128196;</button>
       </div>
     </header>
+
+    <!-- PLANTÃO BAR -->
+    <div class="plantao-bar hidden" id="plantaoBar"></div>
 
     <!-- HOME -->
     <div class="home-view" id="homeView">
@@ -144,6 +153,16 @@
     <!-- REFERENCE VIEW -->
     <div class="ref-view hidden" id="refView">
       <div class="ref-body" id="refBody"></div>
+    </div>
+
+    <!-- HISTÓRICO VIEW -->
+    <div class="ref-view hidden" id="historicoView">
+      <div class="ref-body">
+        <div class="ref-section">
+          <div class="ref-section-title">&#128203; Hist&#243;rico de Ocorr&#234;ncias</div>
+          <div id="historicoList" style="padding:.5rem 0"></div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -252,6 +271,118 @@
     </div>
   </div>
 
+  <!-- MODAL ABERTURA DE PLANTÃO -->
+  <div class="modal-backdrop" id="plantaoInicioBackdrop"></div>
+  <div class="modal" id="plantaoInicioModal" style="max-width:460px">
+    <div class="modal-header">
+      <div>
+        <h3>Abrir Plant&#227;o</h3>
+        <p class="modal-subtitle">Preencha os dados antes de iniciar o registro</p>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-form-group">
+        <label>Data do plant&#227;o</label>
+        <input type="date" id="plantaoData" />
+      </div>
+      <div class="modal-form-group">
+        <label>Turno</label>
+        <div class="triage-opts">
+          <button class="turno-opt triage-opt" data-value="diurno" onclick="selectTurno('diurno',this)"><span class="triage-opt-icon">&#9728;</span><span class="triage-opt-text">Diurno</span></button>
+          <button class="turno-opt triage-opt" data-value="noturno" onclick="selectTurno('noturno',this)"><span class="triage-opt-icon">&#127769;</span><span class="triage-opt-text">Noturno</span></button>
+          <button class="turno-opt triage-opt" data-value="extraordinario" onclick="selectTurno('extraordinario',this)"><span class="triage-opt-icon">&#11088;</span><span class="triage-opt-text">Extraordin&#225;rio</span></button>
+        </div>
+      </div>
+      <div class="modal-form-group">
+        <label>Delegacia</label>
+        <input type="text" id="plantaoDelegacia" placeholder="Ex: 1ª DP de Sorocaba" />
+      </div>
+      <div class="modal-form-group">
+        <label>Delegado plantonista</label>
+        <input type="text" id="plantaoDelegado" placeholder="Nome do delegado" />
+      </div>
+      <div id="plantaoInicioMsg" class="auth-msg error hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="btnAbrirPlantao" onclick="confirmarAberturaPlan()" style="width:auto;margin-top:0">Abrir plant&#227;o &#8594;</button>
+    </div>
+  </div>
+
+  <!-- MODAL BNMP -->
+  <div class="modal-backdrop hidden" id="bnmpBackdrop" onclick="closeBNMP()"></div>
+  <div class="modal hidden" id="bnmpModal" style="max-width:440px">
+    <div class="modal-header">
+      <div><h3>&#128269; Busca BNMP</h3><p class="modal-subtitle">Banco Nacional de Mandados de Pris&#227;o — CNJ</p></div>
+      <button onclick="closeBNMP()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-form-group">
+        <label>Nome completo</label>
+        <input type="text" id="bnmpNome" placeholder="Nome do indiv&#237;duo" />
+      </div>
+      <div class="modal-form-group">
+        <label>CPF (opcional)</label>
+        <input type="text" id="bnmpCPF" placeholder="000.000.000-00" maxlength="14" />
+      </div>
+      <div class="modal-form-group">
+        <label>RG (opcional)</label>
+        <input type="text" id="bnmpRG" placeholder="N&#250;mero do RG" />
+      </div>
+      <div id="bnmpMsg" class="auth-msg error hidden">Informe pelo menos um campo para buscar.</div>
+      <p style="font-size:.76rem;color:var(--text-muted);margin-top:.5rem">O BNMP ser&#225; aberto em nova aba com os dados pr&#233;-preenchidos. Caso a busca n&#227;o funcione automaticamente, consulte diretamente em portalbnmp.cnj.jus.br</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeBNMP()">Cancelar</button>
+      <button class="btn-primary" onclick="buscarBNMP()" style="width:auto;margin-top:0">Abrir no BNMP &#8594;</button>
+    </div>
+  </div>
+
+  <!-- MODAL CHECKLIST PERSONALIZADO -->
+  <div class="modal-backdrop hidden" id="customBackdrop" onclick="closeCustomBuilder()"></div>
+  <div class="modal hidden" id="customBuilderModal" style="max-width:580px;max-height:90vh">
+    <div class="modal-header">
+      <div><h3 id="customBuilderTitle">Novo checklist personalizado</h3><p class="modal-subtitle">Crie seu pr&#243;prio modelo de ocorr&#234;ncia</p></div>
+      <button onclick="closeCustomBuilder()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <input type="hidden" id="customEditId" />
+      <div style="display:flex;gap:.6rem">
+        <div class="modal-form-group" style="flex:1">
+          <label>Nome do checklist</label>
+          <input type="text" id="customNome" placeholder="Ex: Suicídio, Furto a veículo..." />
+        </div>
+        <div class="modal-form-group" style="width:80px">
+          <label>&#205;cone</label>
+          <input type="text" id="customIcone" placeholder="&#128203;" maxlength="2" style="text-align:center;font-size:1.3rem" />
+        </div>
+      </div>
+      <div style="margin-top:.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+          <span style="font-size:.8rem;font-weight:600;color:var(--text-secondary);font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em">Se&#231;&#245;es e itens</span>
+          <button class="btn-template" onclick="addCustomSection()">+ Nova se&#231;&#227;o</button>
+        </div>
+        <div id="customSections"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCustomBuilder()">Cancelar</button>
+      <button class="btn-primary" id="btnSalvarCustom" onclick="salvarCustomChecklist()" style="width:auto;margin-top:0">Salvar checklist</button>
+    </div>
+  </div>
+
+  <!-- MODAL MENU LEGISLAÇÃO -->
+  <div class="modal-backdrop hidden" id="artigosMenuBackdrop" onclick="closeArtigosMenu()"></div>
+  <div class="modal hidden" id="artigosMenuModal" style="max-width:440px">
+    <div class="modal-header">
+      <div><h3>&#9878; Legisla&#231;&#227;o</h3><p class="modal-subtitle">Artigos mais usados no plant&#227;o</p></div>
+      <button onclick="closeArtigosMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" id="artigosMenuBody"></div>
+  </div>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/artigos.js"></script>
   <script src="js/checklists.js"></script>
   <script src="js/templates.js"></script>
   <script src="js/app.js"></script>
