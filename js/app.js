@@ -11,6 +11,9 @@ const session = (() => {
 })();
 if (!session) window.location.href = 'index.html';
 
+// Plantão ativo
+let plantaoAtivo = null;
+
 // ── STATE ────────────────────────────────────────────────────
 let currentOccurrence  = null;
 let currentSections    = [];   // sections after triage merge
@@ -20,12 +23,12 @@ let sectionCollapsed   = {};
 let triageAnswers      = {};   // { flagrante, preso, condutor }
 
 // ── INIT ─────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   applyStoredTheme();
   renderUser();
   renderNavList();
-  renderOccurrenceGrid();
-  renderRecentOccurrence();
+  await loadCustomOccurrences();
+  await checkPlantaoAtivo();
 });
 
 // ── USER ─────────────────────────────────────────────────────
@@ -70,10 +73,12 @@ function toggleSidebar() {
 function renderNavList() {
   const ul = document.getElementById('navList');
   if (!ul) return;
-  ul.innerHTML = OCCURRENCES.map(occ => `
+  const all = [...OCCURRENCES, ...(window._customOccurrences || [])];
+  ul.innerHTML = all.map(occ => `
     <li>
       <a href="#" class="nav-link" data-id="${occ.id}" onclick="startTriage('${occ.id}'); return false;">
         <span class="nav-icon">${occ.icon}</span>${occ.name}
+        ${occ._custom ? '<span class="nav-custom-badge">custom</span>' : ''}
       </a>
     </li>`).join('');
 }
@@ -88,7 +93,8 @@ function setActiveNav(id) {
 function renderOccurrenceGrid() {
   const grid = document.getElementById('occurrenceGrid');
   if (!grid) return;
-  grid.innerHTML = OCCURRENCES.map(occ => {
+  const all = [...OCCURRENCES, ...(window._customOccurrences || [])];
+  grid.innerHTML = all.map(occ => {
     const saved   = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
     const total   = occ.sections.reduce((a, s) => a + s.items.length, 0);
     const checked = saved ? Object.values(saved).filter(Boolean).length : 0;
@@ -111,11 +117,21 @@ function renderOccurrenceGrid() {
       <div class="occ-count">${occ.sections.length} seções · ${total} itens${started ? ` · <strong>${checked} feitos</strong>` : ''}</div>
     </div>`;
   }).join('');
+
+  // Add "create custom" card at the end
+  grid.innerHTML += `
+    <div class="occ-card occ-card-new" onclick="openCustomBuilder()">
+      <div class="occ-card-top">
+        <div class="occ-icon">➕</div>
+      </div>
+      <div class="occ-name">Novo checklist</div>
+      <div class="occ-count">Criar modelo personalizado</div>
+    </div>`;
 }
 
 // ── TRIAGE MODAL ─────────────────────────────────────────────
 function startTriage(id) {
-  const occ = OCCURRENCES.find(o => o.id === id);
+  const occ = [...OCCURRENCES, ...(window._customOccurrences || [])].find(o => o.id === id);
   if (!occ) return;
 
   // Warn if another checklist has progress
@@ -169,7 +185,7 @@ function selectTriageOpt(group, value, el) {
 
 function confirmTriage() {
   const id       = document.getElementById('triageOccId').value;
-  const occ      = OCCURRENCES.find(o => o.id === id);
+  const occ      = [...OCCURRENCES, ...(window._customOccurrences || [])].find(o => o.id === id);
   const modo     = occ?.triagem || 'completa';
   const condutor = document.querySelector('.triage-opt[data-group="condutor"].selected')?.dataset.value;
 
@@ -203,7 +219,7 @@ function confirmTriage() {
 
 // ── OPEN OCCURRENCE ──────────────────────────────────────────
 function openOccurrence(id) {
-  currentOccurrence = OCCURRENCES.find(o => o.id === id);
+  currentOccurrence = [...OCCURRENCES, ...(window._customOccurrences || [])].find(o => o.id === id);
   if (!currentOccurrence) return;
 
   const saved = JSON.parse(localStorage.getItem(`pc_check_${id}`) || 'null');
@@ -432,6 +448,11 @@ function updateProgress() {
 function persistState() {
   if (!currentOccurrence) return;
   localStorage.setItem(`pc_check_${currentOccurrence.id}`, JSON.stringify(checkState));
+  // Async sync to Supabase (fire and forget)
+  const bo  = document.getElementById('metaBO')?.value || '';
+  const kw  = document.getElementById('metaKW')?.value || '';
+  const obs = document.getElementById('obsText')?.value || '';
+  syncCheckState(currentOccurrence.id, checkState, obs, bo, kw, triageAnswers);
 }
 
 // ── RESET ────────────────────────────────────────────────────
@@ -756,3 +777,469 @@ function closePlantaoDiario() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeTriageModal(); closePlantaoDiario(); }
 });
+
+// ── PLANTÃO OBRIGATÓRIO ───────────────────────────────────────
+async function checkPlantaoAtivo() {
+  // Check localStorage first (fast)
+  const localId = localStorage.getItem('pc_plantao_id');
+  if (localId) {
+    try {
+      const rows = await DB_Plantoes.listar(session.email);
+      plantaoAtivo = rows?.find(p => p.id === localId && p.status === 'aberto') || null;
+    } catch(e) { /* offline - use local */ }
+  }
+
+  if (!plantaoAtivo) {
+    // Try to find open plantao in Supabase
+    try {
+      plantaoAtivo = await DB_Plantoes.buscarAberto(session.email);
+      if (plantaoAtivo) localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
+    } catch(e) { /* offline */ }
+  }
+
+  if (plantaoAtivo) {
+    renderAppWithPlantao();
+  } else {
+    openPlantaoModal();
+  }
+}
+
+function openPlantaoModal() {
+  document.getElementById('plantaoInicioBackdrop')?.classList.remove('hidden');
+  document.getElementById('plantaoInicioModal')?.classList.remove('hidden');
+  // Set today's date
+  const today = new Date().toISOString().split('T')[0];
+  const dateEl = document.getElementById('plantaoData');
+  if (dateEl) dateEl.value = today;
+}
+
+async function confirmarAberturaPlan() {
+  const data      = document.getElementById('plantaoData')?.value;
+  const turno     = document.querySelector('.turno-opt.selected')?.dataset.value;
+  const delegacia = document.getElementById('plantaoDelegacia')?.value?.trim();
+  const delegado  = document.getElementById('plantaoDelegado')?.value?.trim();
+
+  const msg = document.getElementById('plantaoInicioMsg');
+
+  if (!data || !turno || !delegacia || !delegado) {
+    msg.textContent = 'Preencha todos os campos para continuar.';
+    msg.classList.remove('hidden');
+    return;
+  }
+  msg.classList.add('hidden');
+
+  const btn = document.getElementById('btnAbrirPlantao');
+  btn.textContent = 'Abrindo...';
+  btn.disabled = true;
+
+  try {
+    const rows = await DB_Plantoes.criar(session.email, {
+      data, turno, delegacia, delegado, status: 'aberto'
+    });
+    plantaoAtivo = Array.isArray(rows) ? rows[0] : rows;
+    localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
+  } catch(e) {
+    // Offline fallback
+    plantaoAtivo = { id: `local_${Date.now()}`, data, turno, delegacia, delegado, status: 'aberto' };
+    localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
+    localStorage.setItem(`pc_plantao_data_${plantaoAtivo.id}`, JSON.stringify(plantaoAtivo));
+  }
+
+  document.getElementById('plantaoInicioBackdrop')?.classList.add('hidden');
+  document.getElementById('plantaoInicioModal')?.classList.add('hidden');
+  renderAppWithPlantao();
+}
+
+function selectTurno(value, el) {
+  document.querySelectorAll('.turno-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  el.dataset.value = value;
+}
+
+function renderAppWithPlantao() {
+  // Update plantao info bar
+  const bar = document.getElementById('plantaoBar');
+  if (bar && plantaoAtivo) {
+    const data = new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR');
+    const turnoLabel = { diurno: '☀ Diurno', noturno: '🌙 Noturno', extraordinario: '⭐ Extraordinário' };
+    bar.innerHTML = `
+      <span class="plantao-bar-info">
+        <span class="plantao-bar-icon">📋</span>
+        <span><strong>${plantaoAtivo.delegacia}</strong> — ${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno} — ${data} — Del. ${plantaoAtivo.delegado}</span>
+      </span>
+      <button class="plantao-bar-btn" onclick="encerrarPlantao()">Encerrar plantão</button>`;
+    bar.style.display = 'flex';
+  }
+
+  renderNavList();
+  renderOccurrenceGrid();
+  renderRecentOccurrence();
+}
+
+async function encerrarPlantao() {
+  if (!confirm('Encerrar o plantão atual? Você precisará abrir um novo plantão para registrar ocorrências.')) return;
+  try {
+    if (plantaoAtivo?.id && !plantaoAtivo.id.startsWith('local_')) {
+      await DB_Plantoes.encerrar(plantaoAtivo.id);
+    }
+  } catch(e) { /* offline */ }
+  localStorage.removeItem('pc_plantao_id');
+  plantaoAtivo = null;
+  openPlantaoModal();
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────────────
+async function openHistorico() {
+  showView('historicoView');
+  document.getElementById('topbarTitle').textContent = 'Histórico de Ocorrências';
+  document.querySelectorAll('.nav-link[data-id]').forEach(el => el.classList.remove('active'));
+
+  const container = document.getElementById('historicoList');
+  container.innerHTML = '<div class="hist-loading">Carregando...</div>';
+
+  try {
+    const rows = await DB_Ocorrencias.listarHistorico(session.email, 50);
+    if (!rows?.length) {
+      container.innerHTML = '<div class="hist-empty">Nenhuma ocorrência registrada ainda.</div>';
+      return;
+    }
+    container.innerHTML = rows.map(row => {
+      const dt = new Date(row.created_at).toLocaleString('pt-BR');
+      const statusLabel = row.status === 'concluido'
+        ? '<span class="hist-status done">Concluído</span>'
+        : '<span class="hist-status wip">Em andamento</span>';
+      const bo = row.num_bo ? `<span class="hist-bo">BO ${row.num_bo}</span>` : '';
+      const kw = row.palavras_chave ? `<span class="hist-kw">${row.palavras_chave}</span>` : '';
+      return `
+        <div class="hist-item" onclick="reabrirOcorrencia('${row.id}', '${row.tipo_id}', ${JSON.stringify(JSON.stringify(row.check_state))}, ${JSON.stringify(JSON.stringify(row.triage))}, ${JSON.stringify(row.num_bo||'')}, ${JSON.stringify(row.palavras_chave||'')}, ${JSON.stringify(row.observacoes||'')})">
+          <div class="hist-main">
+            <span class="hist-nome">${row.tipo_nome}</span>
+            ${statusLabel}
+          </div>
+          <div class="hist-meta">${bo}${kw}<span class="hist-dt">${dt}</span></div>
+          <button class="hist-del" onclick="event.stopPropagation();deletarOcorrencia('${row.id}')" title="Remover">🗑</button>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="hist-empty">Erro ao carregar histórico. Verifique sua conexão.</div>';
+  }
+}
+
+function reabrirOcorrencia(rowId, tipoId, checkStateStr, triageStr, bo, kw, obs) {
+  const occ = [...OCCURRENCES, ...(window._customOccurrences || [])].find(o => o.id === tipoId);
+  if (!occ) { alert('Tipo de ocorrência não encontrado.'); return; }
+  try {
+    checkState   = JSON.parse(checkStateStr);
+    triageAnswers = JSON.parse(triageStr) || {};
+  } catch(e) {
+    checkState = {}; triageAnswers = {};
+  }
+  localStorage.setItem(`pc_check_${tipoId}`, JSON.stringify(checkState));
+  currentOccurrence = occ;
+  currentSections   = buildSections(occ, triageAnswers);
+  sectionCollapsed  = {};
+  showView('checklistView');
+  setActiveNav(tipoId);
+  document.getElementById('topbarTitle').textContent = occ.name;
+  document.getElementById('clTitle').textContent     = occ.name;
+  document.getElementById('clDesc').textContent      = occ.desc || '';
+  document.getElementById('metaBO').value            = bo || '';
+  document.getElementById('metaKW').value            = kw || '';
+  document.getElementById('obsText').value           = obs || '';
+  renderChecklist();
+  updateProgress();
+  updatePdfMeta();
+  celebrationShown = false;
+  startOccurrenceTimer();
+}
+
+async function deletarOcorrencia(id) {
+  if (!confirm('Remover esta ocorrência do histórico?')) return;
+  try {
+    await DB_Ocorrencias.deletar(id);
+    openHistorico();
+  } catch(e) {
+    alert('Erro ao remover. Tente novamente.');
+  }
+}
+
+// ── BNMP — BUSCA DE PROCURADOS ────────────────────────────────
+function openBNMP() {
+  document.getElementById('bnmpBackdrop').classList.remove('hidden');
+  document.getElementById('bnmpModal').classList.remove('hidden');
+  document.getElementById('bnmpNome').focus();
+}
+
+function closeBNMP() {
+  document.getElementById('bnmpBackdrop').classList.add('hidden');
+  document.getElementById('bnmpModal').classList.add('hidden');
+}
+
+function buscarBNMP() {
+  const nome = document.getElementById('bnmpNome')?.value?.trim();
+  const cpf  = document.getElementById('bnmpCPF')?.value?.trim().replace(/\D/g,'');
+  const rg   = document.getElementById('bnmpRG')?.value?.trim();
+
+  if (!nome && !cpf && !rg) {
+    document.getElementById('bnmpMsg').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('bnmpMsg').classList.add('hidden');
+
+  // Monta URL do BNMP com parâmetros
+  const params = new URLSearchParams();
+  if (nome) params.set('nomePessoa', nome);
+  if (cpf)  params.set('cpf', cpf);
+  // BNMP não aceita RG diretamente, mas incluímos no nome se informado
+  const nomeCompleto = nome + (rg ? ` RG ${rg}` : '');
+  if (nome) params.set('nomePessoa', nomeCompleto);
+
+  const url = `https://portalbnmp.cnj.jus.br/#/pesquisa-peca?${params.toString()}`;
+  window.open(url, '_blank', 'noopener');
+  closeBNMP();
+}
+
+// ── CHECKLISTS PERSONALIZADOS ─────────────────────────────────
+window._customOccurrences = [];
+
+async function loadCustomOccurrences() {
+  try {
+    const rows = await DB_Custom.listar(session.email);
+    if (rows?.length) {
+      window._customOccurrences = rows.map(r => ({
+        id: `custom_${r.id}`,
+        _customDbId: r.id,
+        _custom: true,
+        icon: r.icone || '📋',
+        name: r.nome,
+        desc: 'Checklist personalizado',
+        triagem: 'condutor',
+        sections: r.sections || [],
+      }));
+    }
+  } catch(e) {
+    // Offline: load from localStorage
+    const local = JSON.parse(localStorage.getItem('pc_custom_checklists') || '[]');
+    window._customOccurrences = local;
+  }
+}
+
+function openCustomBuilder(editId = null) {
+  const existing = editId
+    ? window._customOccurrences.find(o => o.id === editId)
+    : null;
+
+  document.getElementById('customBuilderTitle').textContent = existing ? 'Editar checklist' : 'Novo checklist personalizado';
+  document.getElementById('customNome').value  = existing?.name || '';
+  document.getElementById('customIcone').value = existing?.icon || '📋';
+  document.getElementById('customEditId').value = editId || '';
+
+  // Render existing sections/items
+  renderCustomSections(existing?.sections || []);
+
+  document.getElementById('customBackdrop').classList.remove('hidden');
+  document.getElementById('customBuilderModal').classList.remove('hidden');
+}
+
+function closeCustomBuilder() {
+  document.getElementById('customBackdrop').classList.add('hidden');
+  document.getElementById('customBuilderModal').classList.add('hidden');
+}
+
+function renderCustomSections(sections) {
+  const container = document.getElementById('customSections');
+  container.innerHTML = sections.map((s, si) => `
+    <div class="custom-section" id="csec_${si}">
+      <div class="custom-section-header">
+        <input class="custom-input" value="${s.name}" placeholder="Nome da seção" id="csec_name_${si}" />
+        <button class="custom-del-btn" onclick="removeCustomSection(${si})">✕</button>
+      </div>
+      <div class="custom-items" id="citems_${si}">
+        ${s.items.map((item, ii) => `
+          <div class="custom-item-row">
+            <input class="custom-input custom-item-input" value="${item.label}" placeholder="Descrição do item" id="citem_${si}_${ii}" />
+            <button class="custom-del-btn" onclick="removeCustomItem(${si},${ii})">✕</button>
+          </div>`).join('')}
+      </div>
+      <button class="custom-add-item-btn" onclick="addCustomItem(${si})">+ Adicionar item</button>
+    </div>`).join('');
+}
+
+function addCustomSection() {
+  const sections = collectCustomSections();
+  sections.push({ name: '', items: [] });
+  renderCustomSections(sections);
+}
+
+function removeCustomSection(si) {
+  const sections = collectCustomSections();
+  sections.splice(si, 1);
+  renderCustomSections(sections);
+}
+
+function addCustomItem(si) {
+  const sections = collectCustomSections();
+  if (!sections[si]) return;
+  sections[si].items.push({ id: `ci_${Date.now()}`, label: '' });
+  renderCustomSections(sections);
+}
+
+function removeCustomItem(si, ii) {
+  const sections = collectCustomSections();
+  sections[si]?.items.splice(ii, 1);
+  renderCustomSections(sections);
+}
+
+function collectCustomSections() {
+  const container = document.getElementById('customSections');
+  const secEls = container.querySelectorAll('.custom-section');
+  return Array.from(secEls).map((secEl, si) => {
+    const name = document.getElementById(`csec_name_${si}`)?.value?.trim() || 'Seção';
+    const itemEls = secEl.querySelectorAll('.custom-item-input');
+    const items = Array.from(itemEls).map((el, ii) => ({
+      id: `ci_${si}_${ii}_${Date.now()}`,
+      label: el.value.trim() || 'Item',
+    })).filter(i => i.label && i.label !== 'Item' || true);
+    return { id: `csec_${si}`, icon: '📋', name, items };
+  });
+}
+
+async function salvarCustomChecklist() {
+  const nome  = document.getElementById('customNome')?.value?.trim();
+  const icone = document.getElementById('customIcone')?.value?.trim() || '📋';
+  const editId = document.getElementById('customEditId')?.value;
+
+  if (!nome) {
+    alert('Informe um nome para o checklist.');
+    return;
+  }
+
+  const sections = collectCustomSections().filter(s => s.items.length > 0);
+  if (!sections.length) {
+    alert('Adicione pelo menos uma seção com um item.');
+    return;
+  }
+
+  const btn = document.getElementById('btnSalvarCustom');
+  btn.textContent = 'Salvando...';
+  btn.disabled = true;
+
+  try {
+    if (editId) {
+      const dbId = editId.replace('custom_', '');
+      await DB_Custom.atualizar(dbId, { nome, icone, sections });
+    } else {
+      await DB_Custom.criar(session.email, { nome, icone, sections });
+    }
+  } catch(e) {
+    // Offline fallback
+    const local = JSON.parse(localStorage.getItem('pc_custom_checklists') || '[]');
+    const newOcc = {
+      id: `custom_local_${Date.now()}`, _custom: true,
+      icon: icone, name: nome, desc: 'Checklist personalizado',
+      triagem: 'condutor', sections,
+    };
+    if (editId) {
+      const idx = local.findIndex(o => o.id === editId);
+      if (idx >= 0) local[idx] = newOcc;
+    } else {
+      local.push(newOcc);
+    }
+    localStorage.setItem('pc_custom_checklists', JSON.stringify(local));
+  }
+
+  await loadCustomOccurrences();
+  renderNavList();
+  renderOccurrenceGrid();
+  closeCustomBuilder();
+
+  btn.textContent = 'Salvar checklist';
+  btn.disabled = false;
+}
+
+async function deletarCustomChecklist(occId) {
+  if (!confirm('Excluir este checklist personalizado?')) return;
+  try {
+    const dbId = occId.replace('custom_', '');
+    await DB_Custom.deletar(dbId);
+  } catch(e) {
+    const local = JSON.parse(localStorage.getItem('pc_custom_checklists') || '[]');
+    localStorage.setItem('pc_custom_checklists', JSON.stringify(local.filter(o => o.id !== occId)));
+  }
+  await loadCustomOccurrences();
+  renderNavList();
+  renderOccurrenceGrid();
+}
+
+// ── JURISPRUDÊNCIA ────────────────────────────────────────────
+function openArtigos(categoriaId) {
+  const cat = ARTIGOS.find(a => a.id === categoriaId);
+  if (!cat) return;
+
+  showView('refView');
+  document.getElementById('topbarTitle').textContent = cat.nome;
+  document.getElementById('refBody').innerHTML = `
+    <div class="ref-section">
+      <div class="ref-section-title ${cat.destaque_categoria ? 'ref-title-destaque' : ''}">${cat.icon} ${cat.nome} <span class="ref-subtitle">${cat.subtitulo}</span></div>
+      <div class="artigos-list">
+        ${cat.itens.map(item => `
+          <div class="artigo-item ${item.destaque ? 'artigo-destaque' : ''}">
+            <div class="artigo-header">
+              <span class="artigo-num">${item.artigo}</span>
+              <span class="artigo-titulo">${item.titulo}</span>
+            </div>
+            <p class="artigo-texto">${item.texto}</p>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  if (window.innerWidth <= 768) toggleSidebar();
+}
+
+// ── UPDATE showView to include historico ──────────────────────
+const _origShowView = showView;
+showView = function(viewId) {
+  ['homeView','checklistView','refView','historicoView'].forEach(id => {
+    document.getElementById(id)?.classList.toggle('hidden', id !== viewId);
+  });
+};
+
+
+// ── ARTIGOS MENU ──────────────────────────────────────────────
+function openArtigosMenu() {
+  const body = document.getElementById('artigosMenuBody');
+  if (body) {
+    body.innerHTML = ARTIGOS.map(cat => `
+      <div class="artigos-menu-item ${cat.destaque_categoria ? 'artigos-menu-destaque' : ''}"
+           onclick="closeArtigosMenu(); openArtigos('${cat.id}')">
+        <span class="artigos-menu-icon">${cat.icon}</span>
+        <div class="artigos-menu-info">
+          <span class="artigos-menu-nome">${cat.nome}</span>
+          <span class="artigos-menu-sub">${cat.subtitulo}</span>
+        </div>
+        <span style="color:var(--text-muted)">→</span>
+      </div>`).join('');
+  }
+  document.getElementById('artigosMenuBackdrop')?.classList.remove('hidden');
+  document.getElementById('artigosMenuModal')?.classList.remove('hidden');
+  if (window.innerWidth <= 768) toggleSidebar();
+}
+
+function closeArtigosMenu() {
+  document.getElementById('artigosMenuBackdrop')?.classList.add('hidden');
+  document.getElementById('artigosMenuModal')?.classList.add('hidden');
+}
+
+// Update keyboard handler to close new modals
+document.removeEventListener('keydown', window._keyHandler);
+window._keyHandler = e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeTriageModal();
+    closePlantaoDiario();
+    closeBNMP();
+    closeCustomBuilder();
+    closeArtigosMenu();
+  }
+};
+document.addEventListener('keydown', window._keyHandler);
