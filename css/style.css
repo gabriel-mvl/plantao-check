@@ -766,3 +766,34 @@ input,textarea{font-family:var(--font-body)}
 .quesitos-list { padding-left: 1.3rem; margin-top: .4rem; }
 .quesito-item { font-size: .84rem; color: var(--text-secondary); margin-bottom: .45rem; line-height: 1.55; }
 .quesito-item::marker { color: var(--accent); font-weight: 700; }
+
+/* ── MODELOS DE E-MAIL ── */
+.email-fields { display: flex; flex-direction: column; gap: .75rem; }
+.email-output-label {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--text-secondary);
+  font-family: var(--font-display); margin-bottom: .4rem; margin-top: .25rem;
+}
+.email-anexos {
+  margin-top: .75rem;
+  background: var(--accent-glow);
+  border: 1px solid rgba(59,125,255,.2);
+  border-radius: var(--radius);
+  padding: .75rem 1rem;
+}
+.email-anexos-title {
+  font-size: .76rem; font-weight: 700; color: var(--accent);
+  margin-bottom: .45rem; font-family: var(--font-display);
+}
+.email-anexo-item {
+  font-size: .82rem; color: var(--text-secondary);
+  padding: .2rem 0; display: flex; align-items: center; gap: .4rem;
+}
+.email-aviso {
+  margin-top: .65rem;
+  padding: .6rem .85rem;
+  background: rgba(251,191,36,.08);
+  border: 1px solid rgba(251,191,36,.25);
+  border-radius: var(--radius);
+  font-size: .8rem; color: var(--warning); line-height: 1.5;
+}
