@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pré-Atendimento — Plantão Check</title>
+  <style>
+    /* ── SCREEN ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f2f8;
+      color: #1a2035;
+      padding: 2rem 1rem;
+    }
+    .page-wrapper { max-width: 820px; margin: 0 auto; }
+    .screen-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .screen-title { font-size: 1.3rem; font-weight: 700; color: #1a2035; }
+    .screen-sub { font-size: .85rem; color: #546080; margin-top: .2rem; }
+    .btn-print {
+      padding: .65rem 1.3rem;
+      background: #2563eb; color: #fff;
+      border: none; border-radius: 8px;
+      font-size: .9rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: .4rem;
+    }
+    .btn-print:hover { background: #1d4ed8; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: #fff;
+      border: 1px solid #e2e7f2;
+      border-radius: 14px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    }
+
+    /* ── FORM HEADER ── */
+    .form-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 1.2rem;
+      border-bottom: 2px solid #1a2035;
+      margin-bottom: 1.5rem;
+    }
+    .form-brand { display: flex; align-items: center; gap: .6rem; }
+    .form-brand-icon {
+      width: 42px; height: 42px;
+      background: #1a2035; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; color: #fff;
+    }
+    .form-brand-name { font-size: 1.3rem; font-weight: 800; letter-spacing: -.03em; }
+    .form-brand-name span { color: #2563eb; }
+    .form-brand-sub { font-size: .7rem; color: #9aa5bf; font-family: monospace; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
+    .form-title-block { text-align: right; }
+    .form-title-main { font-size: 1rem; font-weight: 700; color: #1a2035; text-transform: uppercase; letter-spacing: .04em; }
+    .form-title-sub { font-size: .72rem; color: #9aa5bf; font-family: monospace; margin-top: .15rem; }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 1.5rem; }
+    .section-title {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: #546080;
+      border-bottom: 1px solid #e2e7f2;
+      padding-bottom: .4rem; margin-bottom: .9rem;
+    }
+    .fields-row { display: grid; gap: .75rem; }
+    .fields-row.col-2 { grid-template-columns: 1fr 1fr; }
+    .fields-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .fields-row.col-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .fields-row.col-1-2 { grid-template-columns: 1fr 2fr; }
+    .fields-row.col-2-1 { grid-template-columns: 2fr 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: .3rem; }
+    .field label {
+      font-size: .72rem; font-weight: 600; color: #546080;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    .field .line {
+      border: none; border-bottom: 1.5px solid #c8d0e0;
+      height: 28px; width: 100%;
+      background: transparent;
+    }
+    .field .line-tall {
+      border: 1.5px solid #c8d0e0;
+      border-radius: 4px;
+      height: 60px; width: 100%;
+      background: transparent;
+    }
+    .field .line-xl {
+      border: 1.5px solid #c8d0e0;
+      border-radius: 4px;
+      height: 80px; width: 100%;
+      background: transparent;
+    }
+
+    /* ── NATUREZA / CHECKBOXES ── */
+    .natureza-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .5rem;
+    }
+    .natureza-item {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .85rem; color: #1a2035;
+      padding: .4rem .5rem;
+      border: 1.5px solid #e2e7f2;
+      border-radius: 6px;
+    }
+    .natureza-item .box {
+      width: 16px; height: 16px; flex-shrink: 0;
+      border: 1.5px solid #546080;
+      border-radius: 3px;
+    }
+    .natureza-outros { display: flex; flex-direction: column; gap: .3rem; margin-top: .5rem; }
+    .natureza-outros label { font-size: .72rem; font-weight: 600; color: #546080; text-transform: uppercase; letter-spacing: .05em; }
+    .natureza-outros .line { border: none; border-bottom: 1.5px solid #c8d0e0; height: 28px; }
+
+    /* ── ASSINATURAS ── */
+    .assinaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .assinatura { display: flex; flex-direction: column; gap: .3rem; }
+    .assinatura .sig-line { border-bottom: 1.5px solid #1a2035; height: 36px; }
+    .assinatura label { font-size: .72rem; color: #546080; text-transform: uppercase; letter-spacing: .05em; text-align: center; }
+
+    /* ── AVISO ── */
+    .aviso-lgpd {
+      margin-top: 1.2rem;
+      padding: .65rem .9rem;
+      background: #f4f7fc;
+      border: 1px solid #e2e7f2;
+      border-radius: 6px;
+      font-size: .73rem;
+      color: #546080;
+      line-height: 1.5;
+    }
+
+    /* ── FOOTER ── */
+    .form-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1.2rem;
+      padding-top: .8rem;
+      border-top: 1px solid #e2e7f2;
+      font-size: .7rem; color: #9aa5bf; font-family: monospace;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page-wrapper { max-width: 100%; }
+      .screen-header { display: none; }
+      .form-card { border: none; box-shadow: none; padding: 1cm 1.2cm; border-radius: 0; }
+      .natureza-item { break-inside: avoid; }
+      .assinaturas { break-inside: avoid; }
+      @page { margin: 1cm 1.2cm; size: A4; }
+    }
+    @media (max-width: 600px) {
+      .fields-row.col-2, .fields-row.col-3, .fields-row.col-4,
+      .fields-row.col-1-2, .fields-row.col-2-1 { grid-template-columns: 1fr; }
+      .assinaturas { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- Screen header (hidden on print) -->
+    <div class="screen-header">
+      <div>
+        <div class="screen-title">Formulário de Pré-Atendimento</div>
+        <div class="screen-sub">Clique em imprimir para gerar cópias físicas</div>
+      </div>
+      <button class="btn-print" onclick="window.print()">🖨 Imprimir</button>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card">
+
+      <!-- Header -->
+      <div class="form-header">
+        <div class="form-brand">
+          <div class="form-brand-icon">⚖</div>
+          <div>
+            <div class="form-brand-name">Plantão<span>Check</span></div>
+            <div class="form-brand-sub">Sistema de Checklist do Plantão Policial</div>
+          </div>
+        </div>
+        <div class="form-title-block">
+          <div class="form-title-main">Ficha de Pré-Atendimento</div>
+          <div class="form-title-sub">Preenchimento pelo próprio declarante</div>
+        </div>
+      </div>
+
+      <!-- 1. DADOS DO ATENDIMENTO -->
+      <div class="section">
+        <div class="section-title">1. Dados do Atendimento</div>
+        <div class="fields-row col-3">
+          <div class="field">
+            <label>Data</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Horário de chegada</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Nº de protocolo / BO (se houver)</label>
+            <div class="line"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. IDENTIFICAÇÃO -->
+      <div class="section">
+        <div class="section-title">2. Identificação do Declarante</div>
+        <div class="fields-row col-1">
+          <div class="field">
+            <label>Nome completo</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="fields-row col-3" style="margin-top:.75rem">
+          <div class="field">
+            <label>RG</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>CPF</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Data de nascimento</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="fields-row col-3" style="margin-top:.75rem">
+          <div class="field">
+            <label>Estado civil</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Profissão / ocupação</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Nacionalidade</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="fields-row col-2" style="margin-top:.75rem">
+          <div class="field">
+            <label>Telefone / WhatsApp</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>E-mail</label>
+            <div class="line"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. ENDEREÇO -->
+      <div class="section">
+        <div class="section-title">3. Endereço Residencial</div>
+        <div class="fields-row col-1">
+          <div class="field">
+            <label>Logradouro (rua, avenida, etc.)</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="fields-row col-4" style="margin-top:.75rem">
+          <div class="field">
+            <label>Número</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Complemento</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Bairro</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>CEP</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="fields-row col-2" style="margin-top:.75rem">
+          <div class="field">
+            <label>Cidade</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Estado (UF)</label>
+            <div class="line"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. NATUREZA DA OCORRÊNCIA -->
+      <div class="section">
+        <div class="section-title">4. Natureza da Ocorrência — Marque o(s) que se aplica(m)</div>
+        <div class="natureza-grid">
+          <div class="natureza-item"><div class="box"></div> Perda de documentos</div>
+          <div class="natureza-item"><div class="box"></div> Furto (sem violência)</div>
+          <div class="natureza-item"><div class="box"></div> Roubo (com violência ou ameaça)</div>
+          <div class="natureza-item"><div class="box"></div> Agressão física</div>
+          <div class="natureza-item"><div class="box"></div> Ameaça / intimidação</div>
+          <div class="natureza-item"><div class="box"></div> Violência doméstica / familiar</div>
+          <div class="natureza-item"><div class="box"></div> Acidente de trânsito</div>
+          <div class="natureza-item"><div class="box"></div> Estelionato / golpe / fraude</div>
+          <div class="natureza-item"><div class="box"></div> Dano a bem próprio ou alheio</div>
+          <div class="natureza-item"><div class="box"></div> Desaparecimento de pessoa</div>
+          <div class="natureza-item"><div class="box"></div> Encontro de pessoa falecida</div>
+          <div class="natureza-item"><div class="box"></div> Crime sexual / assédio</div>
+          <div class="natureza-item"><div class="box"></div> Disparo de arma de fogo</div>
+          <div class="natureza-item"><div class="box"></div> Tráfico / porte de drogas</div>
+          <div class="natureza-item"><div class="box"></div> Perturbação do sossego</div>
+          <div class="natureza-item"><div class="box"></div> Acidente / intoxicação</div>
+        </div>
+        <div class="natureza-outros">
+          <label>Outros — descreva brevemente</label>
+          <div class="line"></div>
+        </div>
+      </div>
+
+      <!-- 5. RELATO DO FATO -->
+      <div class="section">
+        <div class="section-title">5. Relato Resumido do Fato</div>
+        <div class="fields-row col-2">
+          <div class="field">
+            <label>Data e hora aproximada do ocorrido</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Local onde ocorreu (endereço ou referência)</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.75rem">
+          <label>Descreva o que aconteceu (com suas próprias palavras)</label>
+          <div class="line-xl"></div>
+        </div>
+      </div>
+
+      <!-- 6. ENVOLVIDOS -->
+      <div class="section">
+        <div class="section-title">6. Dados dos Envolvidos (se conhecidos)</div>
+        <div class="field">
+          <label>Nome / apelido do(s) autor(es) ou suspeito(s) — se souber</label>
+          <div class="line"></div>
+        </div>
+        <div class="fields-row col-2" style="margin-top:.75rem">
+          <div class="field">
+            <label>Características físicas do suspeito (cor da pele, altura, etc.)</label>
+            <div class="line-tall"></div>
+          </div>
+          <div class="field">
+            <label>Veículo envolvido (placa, cor, modelo) — se houver</label>
+            <div class="line-tall"></div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.75rem">
+          <label>Nome e telefone de testemunhas — se houver</label>
+          <div class="line"></div>
+        </div>
+      </div>
+
+      <!-- 7. VÍTIMA (se diferente do declarante) -->
+      <div class="section">
+        <div class="section-title">7. Vítima (se diferente do declarante)</div>
+        <div class="fields-row col-2">
+          <div class="field">
+            <label>Nome completo da vítima</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>RG / CPF da vítima</label>
+            <div class="line"></div>
+          </div>
+        </div>
+        <div class="fields-row col-2" style="margin-top:.75rem">
+          <div class="field">
+            <label>Telefone da vítima</label>
+            <div class="line"></div>
+          </div>
+          <div class="field">
+            <label>Relação com o declarante</label>
+            <div class="line"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. DOCUMENTOS / OBJETOS -->
+      <div class="section">
+        <div class="section-title">8. Documentos e Objetos Envolvidos</div>
+        <div class="field">
+          <label>Documentos perdidos ou subtraídos (RG, CNH, passaporte, cartão, etc.)</label>
+          <div class="line"></div>
+        </div>
+        <div class="field" style="margin-top:.75rem">
+          <label>Objetos perdidos ou subtraídos (celular, bolsa, veículo, dinheiro, etc.) — com descrição e valor estimado</label>
+          <div class="line-tall"></div>
+        </div>
+      </div>
+
+      <!-- 9. INFORMAÇÕES COMPLEMENTARES -->
+      <div class="section">
+        <div class="section-title">9. Informações Complementares</div>
+        <div class="fields-row col-2">
+          <div class="field">
+            <label>Houve lesão corporal?</label>
+            <div style="display:flex;gap:1.5rem;align-items:center;height:28px">
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Sim</div>
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Não</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Recebeu atendimento médico?</label>
+            <div style="display:flex;gap:1.5rem;align-items:center;height:28px">
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Sim</div>
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Não</div>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.75rem">
+          <label>Local do atendimento médico (se houver)</label>
+          <div class="line"></div>
+        </div>
+        <div class="fields-row col-2" style="margin-top:.75rem">
+          <div class="field">
+            <label>Há câmeras ou imagens do ocorrido?</label>
+            <div style="display:flex;gap:1.5rem;align-items:center;height:28px">
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Sim</div>
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Não</div>
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Não sei</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Boletim de ocorrência anterior sobre o mesmo fato?</label>
+            <div style="display:flex;gap:1.5rem;align-items:center;height:28px">
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Sim</div>
+              <div class="natureza-item" style="border:none;padding:0;gap:.4rem"><div class="box"></div> Não</div>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:.75rem">
+          <label>Outras informações relevantes que queira acrescentar</label>
+          <div class="line-tall"></div>
+        </div>
+      </div>
+
+      <!-- ASSINATURAS -->
+      <div class="assinaturas">
+        <div class="assinatura">
+          <div class="sig-line"></div>
+          <label>Assinatura do declarante</label>
+        </div>
+        <div class="assinatura">
+          <div class="sig-line"></div>
+          <label>Escrivão responsável / servidor</label>
+        </div>
+      </div>
+
+      <!-- AVISO LGPD -->
+      <div class="aviso-lgpd">
+        <strong>Aviso de privacidade (LGPD):</strong> As informações prestadas neste formulário são utilizadas exclusivamente para fins de registro policial e instrução de procedimento investigatório, nos termos da Lei nº 13.709/2018 (LGPD) e legislação processual penal aplicável. O tratamento dos dados é realizado pela autoridade policial competente, com base em obrigação legal (art. 7º, II, LGPD).
+      </div>
+
+      <!-- FOOTER -->
+      <div class="form-footer">
+        <span>PlantãoCheck — Ferramenta de apoio operacional independente, sem vínculo institucional</span>
+        <span>Desenvolvido por Gabriel Vital</span>
+      </div>
+
+    </div><!-- /form-card -->
+  </div><!-- /page-wrapper -->
+</body>
+</html>
