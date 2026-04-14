@@ -1527,7 +1527,10 @@ function openEmailEditor(id) {
       ${tmpl.fields.map(f => `
         <div class="modal-form-group">
           <label>${f.label}</label>
-          <input type="text" id="email_${f.id}" placeholder="${f.placeholder || ''}" autocomplete="off" />
+          ${f.type === 'date'
+            ? `<input type="date" id="email_${f.id}" />`
+            : `<input type="text" id="email_${f.id}" placeholder="${f.placeholder || ''}" autocomplete="off" />`
+          }
         </div>`).join('')}
     </div>
     <div id="emailOutput" class="hidden">
@@ -1544,8 +1547,12 @@ function openEmailEditor(id) {
       </div>
     </div>`;
 
-  // Focus first field
-  setTimeout(() => body.querySelector('input')?.focus(), 100);
+  // Pre-fill date fields with today and focus first input
+  const today = new Date().toISOString().split('T')[0];
+  setTimeout(() => {
+    body.querySelectorAll('input[type="date"]').forEach(el => { if (!el.value) el.value = today; });
+    body.querySelector('input')?.focus();
+  }, 100);
 
   document.getElementById('emailEditorBackdrop')?.classList.remove('hidden');
   document.getElementById('emailEditorModal')?.classList.remove('hidden');
