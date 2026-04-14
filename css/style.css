@@ -797,3 +797,12 @@ input,textarea{font-family:var(--font-body)}
   border-radius: var(--radius);
   font-size: .8rem; color: var(--warning); line-height: 1.5;
 }
+
+/* ── DATE INPUT — ícone de calendário visível no modo escuro ── */
+input[type="date"] {
+  color-scheme: dark;
+  color: var(--text-primary);
+}
+body[data-theme="light"] input[type="date"] {
+  color-scheme: light;
+}
