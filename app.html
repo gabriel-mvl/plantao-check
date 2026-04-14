@@ -28,6 +28,7 @@
         <li><a href="#" class="nav-link" onclick="openRelatorio()"><span class="nav-icon">&#128196;</span> Relat&#243;rio do Plant&#227;o</a></li>
         <li><a href="#" class="nav-link" onclick="openBNMP()"><span class="nav-icon">&#128269;</span> Busca BNMP</a></li>
         <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
+        <li><a href="#" class="nav-link" onclick="openEmailMenu()"><span class="nav-icon">&#128231;</span> Modelos de E-mail</a></li>
         <li><a href="#" class="nav-link" onclick="window.open('pre-atendimento.html','_blank')"><span class="nav-icon">&#128221;</span> Pr&#233;-Atendimento</a></li>
       </ul>
       <p class="nav-label" style="margin-top:1.4rem">Refer&#234;ncias</p>
@@ -404,6 +405,33 @@
     </div>
   </div>
 
+  <!-- MODAL MENU E-MAILS -->
+  <div class="modal-backdrop hidden" id="emailMenuBackdrop" onclick="closeEmailMenu()"></div>
+  <div class="modal hidden" id="emailMenuModal" style="max-width:480px">
+    <div class="modal-header">
+      <div><h3>&#128231; Modelos de E-mail</h3><p class="modal-subtitle">Selecione o modelo para preencher e copiar</p></div>
+      <button onclick="closeEmailMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailMenuBody"></div>
+  </div>
+
+  <!-- MODAL EDITOR DE E-MAIL -->
+  <div class="modal-backdrop hidden" id="emailEditorBackdrop" onclick="closeEmailEditor()"></div>
+  <div class="modal hidden" id="emailEditorModal" style="max-width:600px">
+    <div class="modal-header">
+      <div>
+        <h3 id="emailEditorTitle">E-mail</h3>
+        <p class="modal-subtitle" id="emailEditorSubtitle"></p>
+      </div>
+      <button onclick="closeEmailEditor()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailEditorBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeEmailEditor()">Fechar</button>
+      <button class="btn-primary" id="btnGerarEmail" onclick="gerarEmail()" style="width:auto;margin-top:0">Gerar e-mail</button>
+    </div>
+  </div>
+
   <script src="js/supabase.js"></script>
   <!-- MODAL MENU QUESITOS -->
   <div class="modal-backdrop hidden" id="quesitosMenuBackdrop" onclick="closeQuesitosMenu()"></div>
@@ -417,6 +445,33 @@
         <input class="home-search" id="quesitosSearch" type="text" placeholder="&#128269; Buscar quesito ou crime..." oninput="filterQuesitos()" autocomplete="off" style="max-width:100%" />
       </div>
       <div id="quesitosMenuBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL MENU E-MAILS -->
+  <div class="modal-backdrop hidden" id="emailMenuBackdrop" onclick="closeEmailMenu()"></div>
+  <div class="modal hidden" id="emailMenuModal" style="max-width:480px">
+    <div class="modal-header">
+      <div><h3>&#128231; Modelos de E-mail</h3><p class="modal-subtitle">Selecione o modelo para preencher e copiar</p></div>
+      <button onclick="closeEmailMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailMenuBody"></div>
+  </div>
+
+  <!-- MODAL EDITOR DE E-MAIL -->
+  <div class="modal-backdrop hidden" id="emailEditorBackdrop" onclick="closeEmailEditor()"></div>
+  <div class="modal hidden" id="emailEditorModal" style="max-width:600px">
+    <div class="modal-header">
+      <div>
+        <h3 id="emailEditorTitle">E-mail</h3>
+        <p class="modal-subtitle" id="emailEditorSubtitle"></p>
+      </div>
+      <button onclick="closeEmailEditor()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailEditorBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeEmailEditor()">Fechar</button>
+      <button class="btn-primary" id="btnGerarEmail" onclick="gerarEmail()" style="width:auto;margin-top:0">Gerar e-mail</button>
     </div>
   </div>
 
