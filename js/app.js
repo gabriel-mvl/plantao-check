@@ -1522,16 +1522,16 @@ function openEmailEditor(id) {
   document.getElementById('emailEditorSubtitle').textContent = tmpl.icon + ' Preencha os campos para gerar o e-mail pronto';
 
   const body = document.getElementById('emailEditorBody');
+  const fieldsHtml = tmpl.fields.map(f => {
+    const inputHtml = f.type === 'date'
+      ? `<input type="date" id="email_${f.id}" />`
+      : `<input type="text" id="email_${f.id}" placeholder="${f.placeholder || ''}" autocomplete="off" />`;
+    return `<div class="modal-form-group"><label>${f.label}</label>${inputHtml}</div>`;
+  }).join('');
+
   body.innerHTML = `
     <div class="email-fields">
-      ${tmpl.fields.map(f => `
-        <div class="modal-form-group">
-          <label>${f.label}</label>
-          ${f.type === 'date'
-            ? `<input type="date" id="email_${f.id}" />`
-            : `<input type="text" id="email_${f.id}" placeholder="${f.placeholder || ''}" autocomplete="off" />`
-          }
-        </div>`).join('')}
+      ${fieldsHtml}
     </div>
     <div id="emailOutput" class="hidden">
       <div class="email-output-label">E-mail gerado — pronto para copiar e colar:</div>
