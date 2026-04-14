@@ -1485,3 +1485,118 @@ showView = function(viewId) {
     document.getElementById(id)?.classList.toggle('hidden', id !== viewId);
   });
 };
+
+
+// ── MODELOS DE E-MAIL ─────────────────────────────────────────
+let currentEmailTemplate = null;
+
+function openEmailMenu() {
+  const body = document.getElementById('emailMenuBody');
+  if (body) {
+    body.innerHTML = EMAIL_TEMPLATES.map(t => `
+      <div class="artigos-menu-item" onclick="closeEmailMenu(); openEmailEditor('${t.id}')">
+        <span class="artigos-menu-icon">${t.icon}</span>
+        <div class="artigos-menu-info">
+          <span class="artigos-menu-nome">${t.title}</span>
+          <span class="artigos-menu-sub">${t.anexos.length ? t.anexos.length + ' anexo(s) obrigatório(s)' : 'Sem anexos'}</span>
+        </div>
+        <span style="color:var(--text-muted)">&#8594;</span>
+      </div>`).join('');
+  }
+  document.getElementById('emailMenuBackdrop')?.classList.remove('hidden');
+  document.getElementById('emailMenuModal')?.classList.remove('hidden');
+  if (window.innerWidth <= 768) toggleSidebar();
+}
+
+function closeEmailMenu() {
+  document.getElementById('emailMenuBackdrop')?.classList.add('hidden');
+  document.getElementById('emailMenuModal')?.classList.add('hidden');
+}
+
+function openEmailEditor(id) {
+  const tmpl = EMAIL_TEMPLATES.find(t => t.id === id);
+  if (!tmpl) return;
+  currentEmailTemplate = id;
+
+  document.getElementById('emailEditorTitle').textContent = tmpl.title;
+  document.getElementById('emailEditorSubtitle').textContent = tmpl.icon + ' Preencha os campos para gerar o e-mail pronto';
+
+  const body = document.getElementById('emailEditorBody');
+  body.innerHTML = `
+    <div class="email-fields">
+      ${tmpl.fields.map(f => `
+        <div class="modal-form-group">
+          <label>${f.label}</label>
+          <input type="text" id="email_${f.id}" placeholder="${f.placeholder || ''}" autocomplete="off" />
+        </div>`).join('')}
+    </div>
+    <div id="emailOutput" class="hidden">
+      <div class="email-output-label">E-mail gerado — pronto para copiar e colar:</div>
+      <div class="generated-text-box" id="emailText"></div>
+      ${tmpl.anexos.length ? `
+        <div class="email-anexos">
+          <div class="email-anexos-title">&#128206; Documentos a anexar:</div>
+          ${tmpl.anexos.map(a => `<div class="email-anexo-item">&#9744; ${a}</div>`).join('')}
+        </div>` : ''}
+      ${tmpl.aviso ? `<div class="email-aviso">&#9888; ${tmpl.aviso}</div>` : ''}
+      <div class="copy-bar">
+        <button class="btn-copy" id="btnCopyEmail" onclick="copyEmail()">&#128203; Copiar e-mail</button>
+      </div>
+    </div>`;
+
+  // Focus first field
+  setTimeout(() => body.querySelector('input')?.focus(), 100);
+
+  document.getElementById('emailEditorBackdrop')?.classList.remove('hidden');
+  document.getElementById('emailEditorModal')?.classList.remove('hidden');
+}
+
+function closeEmailEditor() {
+  document.getElementById('emailEditorBackdrop')?.classList.add('hidden');
+  document.getElementById('emailEditorModal')?.classList.add('hidden');
+  currentEmailTemplate = null;
+}
+
+function gerarEmail() {
+  if (!currentEmailTemplate) return;
+  const tmpl = EMAIL_TEMPLATES.find(t => t.id === currentEmailTemplate);
+  if (!tmpl) return;
+
+  const values = {};
+  tmpl.fields.forEach(f => {
+    values[f.id] = (document.getElementById(`email_${f.id}`)?.value || '').trim() || `[${f.label.toUpperCase()}]`;
+  });
+
+  const text = tmpl.generate(values);
+  document.getElementById('emailOutput').classList.remove('hidden');
+  document.getElementById('emailText').textContent = text;
+
+  const btn = document.getElementById('btnCopyEmail');
+  if (btn) { btn.textContent = '📋 Copiar e-mail'; btn.className = 'btn-copy'; }
+
+  document.getElementById('emailText').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function copyEmail() {
+  const text = document.getElementById('emailText')?.textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('btnCopyEmail');
+    if (btn) {
+      btn.textContent = '✓ Copiado!';
+      btn.className = 'btn-copy copied';
+      setTimeout(() => { btn.textContent = '📋 Copiar e-mail'; btn.className = 'btn-copy'; }, 2500);
+    }
+  });
+}
+
+// Enter key no editor de e-mail
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const editorModal = document.getElementById('emailEditorModal');
+    if (editorModal && !editorModal.classList.contains('hidden') &&
+        document.activeElement?.tagName === 'INPUT') {
+      gerarEmail();
+    }
+  }
+});
