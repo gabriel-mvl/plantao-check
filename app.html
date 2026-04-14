@@ -25,7 +25,10 @@
       <p class="nav-label" style="margin-top:1.4rem">Ferramentas</p>
       <ul>
         <li><a href="#" class="nav-link" onclick="openHistorico()"><span class="nav-icon">&#128337;</span> Hist&#243;rico</a></li>
+        <li><a href="#" class="nav-link" onclick="openRelatorio()"><span class="nav-icon">&#128196;</span> Relat&#243;rio do Plant&#227;o</a></li>
         <li><a href="#" class="nav-link" onclick="openBNMP()"><span class="nav-icon">&#128269;</span> Busca BNMP</a></li>
+        <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
+        <li><a href="#" class="nav-link" onclick="window.open('pre-atendimento.html','_blank')"><span class="nav-icon">&#128221;</span> Pr&#233;-Atendimento</a></li>
       </ul>
       <p class="nav-label" style="margin-top:1.4rem">Refer&#234;ncias</p>
       <ul>
@@ -47,6 +50,7 @@
     <header class="topbar">
       <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
       <div class="topbar-title" id="topbarTitle">Selecione uma ocorr&#234;ncia</div>
+      <div class="sync-indicator hidden" id="syncIndicator" title="Sincronizando...">&#9729;</div>
       <div class="topbar-actions">
         <button class="btn-icon" onclick="window.print()" title="Imprimir">&#128424;</button>
         <button class="btn-icon" onclick="generatePDF()" title="Gerar PDF">&#128196;</button>
@@ -163,6 +167,11 @@
           <div id="historicoList" style="padding:.5rem 0"></div>
         </div>
       </div>
+    </div>
+
+    <!-- RELATÓRIO DO PLANTÃO (print only) -->
+    <div class="relatorio-view hidden" id="relatorioView">
+      <div id="relatorioContent"></div>
     </div>
 
   </main>
@@ -380,9 +389,40 @@
     <div class="modal-body" id="artigosMenuBody"></div>
   </div>
 
+  <!-- MODAL MENU QUESITOS -->
+  <div class="modal-backdrop hidden" id="quesitosMenuBackdrop" onclick="closeQuesitosMenu()"></div>
+  <div class="modal hidden" id="quesitosMenuModal" style="max-width:500px">
+    <div class="modal-header">
+      <div><h3>&#128203; Quesitos Periciais</h3><p class="modal-subtitle">Selecione o tipo de crime</p></div>
+      <button onclick="closeQuesitosMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <div class="home-search-wrap" style="margin-bottom:.75rem">
+        <input class="home-search" id="quesitosSearch" type="text" placeholder="&#128269; Buscar quesito ou crime..." oninput="filterQuesitos()" autocomplete="off" style="max-width:100%" />
+      </div>
+      <div id="quesitosMenuBody"></div>
+    </div>
+  </div>
+
   <script src="js/supabase.js"></script>
+  <!-- MODAL MENU QUESITOS -->
+  <div class="modal-backdrop hidden" id="quesitosMenuBackdrop" onclick="closeQuesitosMenu()"></div>
+  <div class="modal hidden" id="quesitosMenuModal" style="max-width:500px">
+    <div class="modal-header">
+      <div><h3>&#128203; Quesitos Periciais</h3><p class="modal-subtitle">Selecione o tipo de crime</p></div>
+      <button onclick="closeQuesitosMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <div class="home-search-wrap" style="margin-bottom:.75rem">
+        <input class="home-search" id="quesitosSearch" type="text" placeholder="&#128269; Buscar quesito ou crime..." oninput="filterQuesitos()" autocomplete="off" style="max-width:100%" />
+      </div>
+      <div id="quesitosMenuBody"></div>
+    </div>
+  </div>
+
   <script src="js/supabase.js"></script>
   <script src="js/artigos.js"></script>
+  <script src="js/quesitos.js"></script>
   <script src="js/checklists.js"></script>
   <script src="js/templates.js"></script>
   <script src="js/app.js"></script>
