@@ -456,10 +456,10 @@ PCSP_DOCS.autorizacaoSangue = {
       </p>
       <p style="text-align:justify;margin-bottom:2rem">
         Declaro que fui informado(a) de que a recusa em submeter-se ao exame acarreta a
-        penalidade prevista no art. 306, § 2º do CTB; os resultados poderão ser utilizados
+        penalidade prevista no art. 306, § 2º do CTB; que os resultados poderão ser utilizados
         como prova em processo administrativo e judicial; que a coleta será realizada por
         profissional habilitado em unidade de saúde; e que o exame será enviado ao Instituto
-        Médico Legal (IML).
+        Médico Legal (IML) para análise.
       </p>
       <p style="text-align:center;margin-bottom:3rem">
         ${u.mun}, ${data}
@@ -551,6 +551,81 @@ PCSP_DOCS.autorizacaoCelular = {
         <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
         <div>Assinatura do(a) declarante</div>
         <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
+      </div>`;
+  },
+};
+
+// ── 3. AUTORIZAÇÃO DE ENTRADA EM RESIDÊNCIA ───────────────────
+PCSP_DOCS.autorizacaoEntrada = {
+  id: 'autorizacaoEntrada',
+  icone: '🏠',
+  titulo: 'Autorização de Entrada em Residência',
+  subtitulo: 'Consentimento voluntário — art. 5º XI CF/88 + HC 598.051/STJ',
+  campos: [
+    { id: 'nome',       label: 'Nome completo do declarante',      placeholder: 'Ex: FULANO DE TAL' },
+    { id: 'rg',         label: 'RG',                               placeholder: 'Ex: 12.345.678-9' },
+    { id: 'qualidade',  label: 'Qualidade (morador / responsável)', placeholder: 'Ex: morador(a) / proprietário(a)' },
+    { id: 'endereco',   label: 'Endereço do imóvel',               type: 'address' },
+    { id: 'numBO',      label: 'Número do BO (se houver)',          placeholder: 'Ex: AV0100-1/2026', required: false },
+  ],
+  gerar(campos, u, ctx) {
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho',
+                   'julho','agosto','setembro','outubro','novembro','dezembro'];
+    const hoje  = new Date();
+    const data  = `${hoje.getDate()} de ${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
+    const boRef = campos.numBO
+      ? `, relacionado ao boletim de ocorrência nº <strong>${campos.numBO}</strong>,`
+      : '';
+
+    return `
+      <p style="text-align:justify;margin-bottom:1rem">
+        Eu, <strong>${campos.nome}</strong>, RG <strong>${campos.rg}</strong>,
+        na qualidade de <strong>${campos.qualidade}</strong> do imóvel situado à
+        <strong>${campos.endereco}</strong>${boRef}
+        DECLARO, de forma livre, expressa, voluntária e consciente, que:
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        Estou ciente do direito fundamental à inviolabilidade domiciliar, garantido pelo
+        art. 5º, inciso XI, da Constituição Federal de 1988, segundo o qual
+        <em>"a casa é asilo inviolável do indivíduo, ninguém nela podendo penetrar sem
+        consentimento do morador, salvo em caso de flagrante delito ou desastre, ou
+        para prestar socorro, ou, durante o dia, por determinação judicial"</em>.
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        <strong>AUTORIZO</strong>, livremente e sem qualquer coação, ameaça ou
+        promessa de vantagem, o ingresso de agentes da Polícia Civil do Estado de
+        São Paulo no referido imóvel, bem como a realização de diligências de
+        busca e apreensão necessárias à investigação policial em curso, nos termos
+        dos arts. 240 a 250 do Código de Processo Penal.
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        A presente declaração é firmada em conformidade com as diretrizes estabelecidas
+        pelo Superior Tribunal de Justiça no HC 598.051/SP (Sexta Turma, j. 02/03/2021),
+        que exige o registro documental do consentimento do morador para fins de
+        validade probatória do ingresso policial em domicílio sem mandado judicial.
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        Por ser a expressão da verdade, firmo o presente.
+      </p>
+
+      <p style="text-align:center;margin:2rem 0">
+        ${u.mun}, ${data}
+      </p>
+
+      <div style="text-align:center;margin-top:3rem">
+        <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
+        <div>Assinatura do(a) declarante</div>
+        <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
+      </div>
+
+      <div style="text-align:center;margin-top:2.5rem">
+        <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
+        <div>Assinatura do agente policial responsável pela diligência</div>
+        <div style="font-size:.9em;margin-top:.15rem">Nome / RG funcional / Matrícula</div>
       </div>`;
   },
 };
