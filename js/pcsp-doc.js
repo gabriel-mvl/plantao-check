@@ -302,67 +302,50 @@ const PCDoc = (() => {
     const u = _unitList[parseInt(unitIdx)];
     if (!u) return;
 
-    // Collect field values
+    // ── Collect field values ──────────────────────────────
     const campos = {};
-    (doc.campos || []).forEach(c => {
-      if (c.type === 'toggle') {
-        // Collect checkbox state + sub-field values
-        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
-        campos[c.id] = checked;
-        if (checked) {
-          (c.subfields || []).forEach(sf => {
-            campos[sf.id] = document.getElementById(`pcdoc_${sf.id}`)?.value?.trim() || '';
-          });
-        }
-        return; // continue forEach
+    (doc.campos || []).forEach(campo => {
+      if (campo.type === 'toggle') {
+        const checked = document.getElementById('pcdoc_' + campo.id)?.checked || false;
+        campos[campo.id] = checked;
+        (campo.subfields || []).forEach(sf => {
+          campos[sf.id] = checked
+            ? (document.getElementById('pcdoc_' + sf.id)?.value?.trim() || '')
+            : '';
+        });
+        return;
       }
-      if (c.type === 'address') {
-        // Build formatted address from sub-fields
-        const log  = document.getElementById(`pcdoc_logradouro_${c.id}`)?.value?.trim() || '';
-        const num  = document.getElementById(`pcdoc_numero_${c.id}`)?.value?.trim() || '';
-        const comp = document.getElementById(`pcdoc_complemento_${c.id}`)?.value?.trim() || '';
-        const bai  = document.getElementById(`pcdoc_bairro_${c.id}`)?.value?.trim() || '';
-        const cid  = document.getElementById(`pcdoc_cidade_${c.id}`)?.value?.trim() || '';
-        const cep  = document.getElementById(`pcdoc_cep_${c.id}`)?.value?.trim() || '';
-        const parts = [log, num, comp].filter(Boolean).join(', ');
-        const partsEnd = [bai, cid].filter(Boolean).join(', ');
-        const cepStr = cep ? `, CEP ${cep.replace(/\D/g,'').replace(/(\d{5})(\d{3})/,'$1-$2')}` : '';
-        campos[c.id] = [parts, partsEnd].filter(Boolean).join(', ') + cepStr;
-      } else {
-        campos[c.id] = document.getElementById(`pcdoc_${c.id}`)?.value?.trim() || '';
+      if (campo.type === 'address') {
+        const log  = document.getElementById('pcdoc_logradouro_' + campo.id)?.value?.trim() || '';
+        const num  = document.getElementById('pcdoc_numero_'    + campo.id)?.value?.trim() || '';
+        const comp = document.getElementById('pcdoc_complemento_'+ campo.id)?.value?.trim() || '';
+        const bai  = document.getElementById('pcdoc_bairro_'    + campo.id)?.value?.trim() || '';
+        const cid  = document.getElementById('pcdoc_cidade_'    + campo.id)?.value?.trim() || '';
+        const cep  = document.getElementById('pcdoc_cep_'       + campo.id)?.value?.trim() || '';
+        const street = [log, num, comp].filter(Boolean).join(', ');
+        const city   = [bai, cid].filter(Boolean).join(', ');
+        const cepStr = cep ? ', CEP ' + cep.replace(/\D/g,'').replace(/(\d{5})(\d{3})/,'$1-$2') : '';
+        campos[campo.id] = [street, city].filter(Boolean).join(', ') + cepStr;
+        return;
       }
+      campos[campo.id] = document.getElementById('pcdoc_' + campo.id)?.value?.trim() || '';
     });
 
-    // Validate required fields
-    const missing = (doc.campos || []).filter(c => {
-      if (c.required === false) return false;
-      if (c.type === 'toggle') {
-        // Collect checkbox state + sub-field values
-        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
-        campos[c.id] = checked;
-        if (checked) {
-          (c.subfields || []).forEach(sf => {
-            campos[sf.id] = document.getElementById(`pcdoc_${sf.id}`)?.value?.trim() || '';
-          });
-        }
-        return; // continue forEach
+    // ── Validate required fields ──────────────────────────
+    const missingLabels = [];
+    (doc.campos || []).forEach(campo => {
+      if (campo.required === false) return;
+      if (campo.type === 'toggle') return; // optional by nature
+      if (campo.type === 'address') {
+        const log = document.getElementById('pcdoc_logradouro_' + campo.id)?.value?.trim() || '';
+        const num = document.getElementById('pcdoc_numero_'     + campo.id)?.value?.trim() || '';
+        if (!log || !num) missingLabels.push(campo.label);
+        return;
       }
-      if (c.type === 'toggle') {
-        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
-        if (!checked) return false;
-        return (c.subfields || []).some(sf =>
-          sf.required !== false && !(document.getElementById(`pcdoc_${sf.id}`)?.value?.trim())
-        );
-      }
-      if (c.type === 'address') {
-        const log = document.getElementById(`pcdoc_logradouro_${c.id}`)?.value?.trim() || '';
-        const num = document.getElementById(`pcdoc_numero_${c.id}`)?.value?.trim() || '';
-        return !log || !num;
-      }
-      return !campos[c.id];
+      if (!campos[campo.id]) missingLabels.push(campo.label);
     });
-    if (missing.length) {
-      if (typeof showToast === 'function') showToast(`Preencha: ${missing.map(c => c.label).join(', ')}`);
+    if (missingLabels.length) {
+      if (typeof showToast === 'function') showToast('Preencha: ' + missingLabels.join(', '));
       return;
     }
 
