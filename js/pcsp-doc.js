@@ -363,10 +363,10 @@ PCSP_DOCS.autorizacaoSangue = {
       </p>
       <p style="text-align:justify;margin-bottom:2rem">
         Declaro que fui informado(a) de que a recusa em submeter-se ao exame acarreta a
-        penalidade prevista no art. 306, § 2º do CTB; os resultados poderão ser utilizados
+        penalidade prevista no art. 306, § 2º do CTB; que os resultados poderão ser utilizados
         como prova em processo administrativo e judicial; que a coleta será realizada por
-        profissional habilitado em unidade de saúde; e que o exame será enviado ao Instituto
-        Médico Legal (IML).
+        profissional habilitado em unidade de saúde; e que a amostra coletada será enviada ao Instituto
+        Médico Legal (IML) para análise.
       </p>
       <p style="text-align:center;margin-bottom:3rem">
         ${u.mun}, ${data}
