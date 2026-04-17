@@ -239,9 +239,14 @@ const PCDoc = (() => {
     PCDoc._lastCampos = campos;
     PCDoc._lastDoc    = doc;
 
-    // Show preview
+    // Show preview — force white background regardless of theme
     const preview = document.getElementById('pcdocPreview');
-    if (preview) preview.innerHTML = fullHtml;
+    if (preview) {
+      preview.innerHTML = fullHtml;
+      preview.style.background = '#fff';
+      preview.style.borderRadius = '6px';
+      preview.style.padding = '.75rem';
+    }
 
     const output = document.getElementById('pcdocOutput');
     if (output) {
