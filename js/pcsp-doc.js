@@ -725,11 +725,6 @@ PCSP_DOCS.autorizacaoEntrada = {
         <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
       </div>
 
-      ${campos.inclui_policial && campos.pol_nome ? `
-      <div style="text-align:center;margin-top:2.5rem">
-        <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
-        <div>${(campos.pol_nome || '').toUpperCase()}</div>
-        <div><strong>${campos.pol_carreira || ''}</strong></div>
-      </div>` : ''}`;
+      ${campos.inclui_policial && campos.pol_nome ? '<div style="text-align:center;margin-top:2.5rem"><div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div><div>' + String(campos.pol_nome).toUpperCase() + '</div><div><strong>' + String(campos.pol_carreira || '') + '</strong></div></div>' : ''}`;
   },
 };
