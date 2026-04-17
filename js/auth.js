@@ -109,40 +109,39 @@ function clearCodeInputs() {
 }
 
 // ── EMAIL SEND ───────────────────────────────────────────────
+let _emailjsReady = false;
+
+async function loadAndInitEmailJS() {
+  if (_emailjsReady) return;
+  await new Promise((resolve, reject) => {
+    if (window.emailjs) { resolve(); return; }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Falha ao carregar SDK EmailJS'));
+    document.head.appendChild(script);
+  });
+  // Init only once
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  _emailjsReady = true;
+}
+
 async function sendCodeEmail(toEmail, code) {
   if (!EMAILJS_CONFIGURED) {
-    console.error('[EmailJS] Credenciais não configuradas');
     return { ok: false, error: 'EmailJS não configurado' };
   }
   try {
-    await loadEmailJS();
-
-    // EmailJS v4: init recebe objeto de opções
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
+    await loadAndInitEmailJS();
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
       { to_email: toEmail, code }
     );
-
-    console.log('[EmailJS] Resposta:', response);
     return response.status === 200 ? { ok: true } : { ok: false, error: response.text };
   } catch (err) {
-    console.error('[EmailJS] Erro ao enviar:', err);
+    console.error('[EmailJS] Erro:', err);
     return { ok: false, error: String(err?.text || err?.message || err) };
   }
-}
-
-function loadEmailJS() {
-  return new Promise((resolve, reject) => {
-    if (window.emailjs) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-    script.onload = () => { console.log('[EmailJS] SDK carregado'); resolve(); };
-    script.onerror = () => { console.error('[EmailJS] Falha ao carregar SDK'); reject(new Error('SDK load failed')); };
-    document.head.appendChild(script);
-  });
 }
 
 // ── REQUEST CODE (step 1) ─────────────────────────────────────
