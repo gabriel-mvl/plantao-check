@@ -1280,30 +1280,63 @@ async function openRelatorio() {
   if (window.innerWidth <= 768) toggleSidebar();
 
   const container = document.getElementById('relatorioContent');
-  container.innerHTML = '<div class="hist-loading">Carregando ocorrências...</div>';
+  container.innerHTML = '<div class="hist-loading">Carregando...</div>';
 
   let ocorrencias = [];
   try {
     ocorrencias = await DB_Ocorrencias.listarPorPlantao(plantaoAtivo.id) || [];
   } catch(e) {
-    // Fallback: try localStorage
     const all = [...OCCURRENCES, ...(window._customOccurrences || [])];
     all.forEach(occ => {
-      const saved = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
+      const saved  = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
+      const status = localStorage.getItem(`pc_status_${occ.id}`) || 'andamento';
       if (saved && Object.values(saved).some(Boolean)) {
         ocorrencias.push({
           tipo_id: occ.id, tipo_nome: occ.name,
-          check_state: saved, status: 'andamento',
-          triage: {}, num_bo: '', palavras_chave: '', observacoes: '',
+          status, num_bo: '', palavras_chave: '', observacoes: '',
           created_at: new Date().toISOString(),
         });
       }
     });
   }
 
-  const data = new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR');
-  const turnoLabel = { diurno: 'Diurno', noturno: 'Noturno', extraordinario: 'Extraordinário' };
-  const concluidas = ocorrencias.filter(o => o.status === 'concluido').length;
+  const dataFmt     = new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR');
+  const turnoLabel  = { diurno: 'Diurno', noturno: 'Noturno', extraordinario: 'Extraordinário' };
+  const concluidas  = ocorrencias.filter(o => o.status === 'concluido');
+  const andamento   = ocorrencias.filter(o => o.status !== 'concluido');
+
+  const renderLinha = (oc, num) => {
+    const bo = oc.num_bo        ? `<span class="rel-linha-bo">BO ${oc.num_bo}</span>` : '<span class="rel-linha-sem">—</span>';
+    const kw = oc.palavras_chave? `<span class="rel-linha-kw">${oc.palavras_chave}</span>` : '';
+    return `<tr class="rel-linha">
+      <td class="rel-td-num">${num}</td>
+      <td class="rel-td-tipo">${oc.tipo_nome}</td>
+      <td class="rel-td-bo">${bo}</td>
+      <td class="rel-td-kw">${kw}</td>
+    </tr>`;
+  };
+
+  const tabelaConcluidas = concluidas.length ? `
+    <table class="rel-tabela">
+      <thead><tr>
+        <th class="rel-th-num">#</th>
+        <th>Ocorrência</th>
+        <th>Nº do BO</th>
+        <th>Palavras-chave</th>
+      </tr></thead>
+      <tbody>${concluidas.map((oc, i) => renderLinha(oc, i + 1)).join('')}</tbody>
+    </table>` : '<div class="rel-empty-sub">Nenhuma ocorrência finalizada.</div>';
+
+  const tabelaAndamento = andamento.length ? `
+    <table class="rel-tabela rel-tabela-wip">
+      <thead><tr>
+        <th class="rel-th-num">#</th>
+        <th>Ocorrência</th>
+        <th>Nº do BO</th>
+        <th>Palavras-chave</th>
+      </tr></thead>
+      <tbody>${andamento.map((oc, i) => renderLinha(oc, i + 1)).join('')}</tbody>
+    </table>` : '';
 
   container.innerHTML = `
     <div class="relatorio-actions">
@@ -1312,6 +1345,8 @@ async function openRelatorio() {
     </div>
 
     <div class="relatorio-doc" id="relatorioDoc">
+
+      <!-- CABEÇALHO -->
       <div class="rel-header">
         <div class="rel-brand-row">
           <div class="rel-brand-icon">&#9878;</div>
@@ -1320,18 +1355,29 @@ async function openRelatorio() {
             <div class="rel-brand-sub">Relat&#243;rio do Plant&#227;o</div>
           </div>
         </div>
-        <div class="rel-plantao-info">
-          <div class="rel-info-row"><span class="rel-info-label">Delegacia</span><span class="rel-info-val">${plantaoAtivo.delegacia}</span></div>
-          <div class="rel-info-row"><span class="rel-info-label">Delegado plantonista</span><span class="rel-info-val">${plantaoAtivo.delegado}</span></div>
-          <div class="rel-info-row"><span class="rel-info-label">Data</span><span class="rel-info-val">${data}</span></div>
-          <div class="rel-info-row"><span class="rel-info-label">Turno</span><span class="rel-info-val">${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno}</span></div>
-          <div class="rel-info-row"><span class="rel-info-label">Ocorrências registradas</span><span class="rel-info-val">${ocorrencias.length} (${concluidas} concluída${concluidas !== 1 ? 's' : ''})</span></div>
-          <div class="rel-info-row"><span class="rel-info-label">Gerado em</span><span class="rel-info-val">${new Date().toLocaleString('pt-BR')}</span></div>
+        <div class="rel-plantao-grid">
+          <div class="rel-info-cell"><span class="rel-info-label">Delegacia</span><span class="rel-info-val">${plantaoAtivo.delegacia}</span></div>
+          <div class="rel-info-cell"><span class="rel-info-label">Delegado plantonista</span><span class="rel-info-val">${plantaoAtivo.delegado}</span></div>
+          <div class="rel-info-cell"><span class="rel-info-label">Data</span><span class="rel-info-val">${dataFmt}</span></div>
+          <div class="rel-info-cell"><span class="rel-info-label">Turno</span><span class="rel-info-val">${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno}</span></div>
+          <div class="rel-info-cell"><span class="rel-info-label">Ocorrências finalizadas</span><span class="rel-info-val">${concluidas.length}</span></div>
+          <div class="rel-info-cell"><span class="rel-info-label">Em andamento</span><span class="rel-info-val">${andamento.length}</span></div>
+          <div class="rel-info-cell rel-info-cell-full"><span class="rel-info-label">Gerado em</span><span class="rel-info-val">${new Date().toLocaleString('pt-BR')}</span></div>
         </div>
       </div>
 
-      ${ocorrencias.length === 0 ? '<div class="rel-empty">Nenhuma ocorrência registrada neste plantão.</div>' :
-        ocorrencias.map((oc, idx) => renderRelatorioOcorrencia(oc, idx + 1)).join('')}
+      <!-- FINALIZADAS -->
+      <div class="rel-section-block">
+        <div class="rel-section-block-title rel-title-done">&#10003; Ocorr&#234;ncias Finalizadas (${concluidas.length})</div>
+        ${tabelaConcluidas}
+      </div>
+
+      ${andamento.length ? `
+      <!-- EM ANDAMENTO -->
+      <div class="rel-section-block">
+        <div class="rel-section-block-title rel-title-wip">&#9200; Em Andamento (${andamento.length})</div>
+        ${tabelaAndamento}
+      </div>` : ''}
 
       <div class="rel-footer">
         Plant&#227;oCheck &mdash; Ferramenta de apoio operacional independente, sem v&#237;nculo institucional &mdash; Desenvolvido por Gabriel Vital
@@ -1339,68 +1385,7 @@ async function openRelatorio() {
     </div>`;
 }
 
-function renderRelatorioOcorrencia(oc, num) {
-  const allOcc = [...OCCURRENCES, ...(window._customOccurrences || [])];
-  const occ = allOcc.find(o => o.id === oc.tipo_id);
-  const checkState = oc.check_state || {};
-  const triage = oc.triage || {};
-  const dt = new Date(oc.created_at).toLocaleString('pt-BR');
-
-  const statusBadge = oc.status === 'concluido'
-    ? '<span class="rel-badge-done">Conclu&#237;do</span>'
-    : '<span class="rel-badge-wip">Em andamento</span>';
-
-  const condutorMap = { pm:'PM', gcm:'GCM', pc:'PC', parte:'Parte interessada' };
-  const condutor = condutorMap[triage.condutor] || (triage.condutor ? triage.condutor : '—');
-  const flagrante = triage.flagrante ? 'Sim' : triage.flagrante === false ? 'Não' : '—';
-  const preso = triage.preso ? 'Sim' : triage.preso === false ? 'Não' : '—';
-
-  // Build sections with check state
-  let sectionsHtml = '';
-  if (occ) {
-    const sections = occ.sections || [];
-    sections.forEach(sec => {
-      const items = sec.items.map(item => {
-        const checked = !!checkState[item.id];
-        return `<div class="rel-item ${checked ? 'rel-item-done' : ''}">
-          <span class="rel-item-box">${checked ? '&#10003;' : ''}</span>
-          <span class="rel-item-label">${item.label}</span>
-        </div>`;
-      }).join('');
-      const total = sec.items.length;
-      const done = sec.items.filter(i => checkState[i.id]).length;
-      sectionsHtml += `
-        <div class="rel-section">
-          <div class="rel-section-header">
-            <span>${sec.icon} ${sec.name}</span>
-            <span class="rel-section-badge">${done}/${total}</span>
-          </div>
-          <div class="rel-section-items">${items}</div>
-        </div>`;
-    });
-  }
-
-  return `
-    <div class="rel-ocorrencia">
-      <div class="rel-oc-header">
-        <div class="rel-oc-num">${num}</div>
-        <div class="rel-oc-info">
-          <div class="rel-oc-nome">${oc.tipo_nome}</div>
-          <div class="rel-oc-meta">
-            ${oc.num_bo ? `<span>BO ${oc.num_bo}</span>` : ''}
-            ${oc.palavras_chave ? `<span>${oc.palavras_chave}</span>` : ''}
-            <span>${dt}</span>
-            <span>Condutor: ${condutor}</span>
-            <span>Flagrante: ${flagrante}</span>
-            <span>Preso: ${preso}</span>
-          </div>
-        </div>
-        ${statusBadge}
-      </div>
-      ${sectionsHtml}
-      ${oc.observacoes ? `<div class="rel-observacoes"><strong>Observa&#231;&#245;es:</strong> ${oc.observacoes}</div>` : ''}
-    </div>`;
-}
+function renderRelatorioOcorrencia(oc, num) { return ''; } // legacy — unused
 
 // ── QUESITOS ──────────────────────────────────────────────────
 function openQuesitosMenu() {
