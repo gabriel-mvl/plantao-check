@@ -1340,87 +1340,72 @@ async function openRelatorio() {
     });
   }
 
-  const dataFmt     = new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR');
-  const turnoLabel  = { diurno: 'Diurno', noturno: 'Noturno', extraordinario: 'Extraordinário' };
-  const concluidas  = ocorrencias.filter(o => o.status === 'concluido');
-  const andamento   = ocorrencias.filter(o => o.status !== 'concluido');
+  const dataFmt    = new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR');
+  const turnoLabel = { diurno: 'Diurno', noturno: 'Noturno', extraordinario: 'Extraordinário' };
+  const total      = ocorrencias.length;
+  const nFin       = ocorrencias.filter(o => o.status === 'concluido').length;
+  const nAnd       = total - nFin;
 
-  const renderLinha = (oc, num) => {
-    const bo = oc.num_bo        ? `<span class="rel-linha-bo">BO ${oc.num_bo}</span>` : '<span class="rel-linha-sem">—</span>';
-    const kw = oc.palavras_chave? `<span class="rel-linha-kw">${oc.palavras_chave}</span>` : '';
-    return `<tr class="rel-linha">
-      <td class="rel-td-num">${num}</td>
+  // Render one row per occurrence — all together, ordered
+  const linhas = ocorrencias.map((oc, i) => {
+    const isDone  = oc.status === 'concluido';
+    const boCell  = oc.num_bo ? oc.num_bo : '—';
+    const kwCell  = oc.palavras_chave || '';
+    const badge   = isDone
+      ? '<span class="rel-badge-done">&#10003;</span>'
+      : '<span class="rel-badge-wip">&#9201;</span>';
+    return `<tr>
+      <td class="rel-td-num">${i + 1}</td>
       <td class="rel-td-tipo">${oc.tipo_nome}</td>
-      <td class="rel-td-bo">${bo}</td>
-      <td class="rel-td-kw">${kw}</td>
+      <td class="rel-td-bo">${boCell}</td>
+      <td class="rel-td-kw">${kwCell}</td>
+      <td class="rel-td-status">${badge}</td>
     </tr>`;
-  };
+  }).join('');
 
-  const tabelaConcluidas = concluidas.length ? `
+  const tabela = total ? `
     <table class="rel-tabela">
-      <thead><tr>
-        <th class="rel-th-num">#</th>
-        <th>Ocorrência</th>
-        <th>Nº do BO</th>
-        <th>Palavras-chave</th>
-      </tr></thead>
-      <tbody>${concluidas.map((oc, i) => renderLinha(oc, i + 1)).join('')}</tbody>
-    </table>` : '<div class="rel-empty-sub">Nenhuma ocorrência finalizada.</div>';
-
-  const tabelaAndamento = andamento.length ? `
-    <table class="rel-tabela rel-tabela-wip">
-      <thead><tr>
-        <th class="rel-th-num">#</th>
-        <th>Ocorrência</th>
-        <th>Nº do BO</th>
-        <th>Palavras-chave</th>
-      </tr></thead>
-      <tbody>${andamento.map((oc, i) => renderLinha(oc, i + 1)).join('')}</tbody>
-    </table>` : '';
+      <thead>
+        <tr>
+          <th style="width:28px">#</th>
+          <th>Ocorrência</th>
+          <th style="width:120px">Nº do BO</th>
+          <th>Palavras-chave</th>
+          <th style="width:32px"></th>
+        </tr>
+      </thead>
+      <tbody>${linhas}</tbody>
+    </table>` : '<p class="rel-empty-sub">Nenhuma ocorrência registrada neste plantão.</p>';
 
   container.innerHTML = `
-    <div class="relatorio-actions">
+    <div class="relatorio-actions no-print">
       <button class="btn-primary" onclick="window.print()" style="width:auto;margin-top:0">&#128424; Imprimir / PDF</button>
       <button class="btn-secondary" onclick="backToHome()">&#8592; Voltar</button>
     </div>
 
     <div class="relatorio-doc" id="relatorioDoc">
 
-      <!-- CABEÇALHO -->
-      <div class="rel-header">
-        <div class="rel-brand-row">
-          <div class="rel-brand-icon">&#9878;</div>
-          <div>
-            <div class="rel-brand-name">Plant&#227;o<span>Check</span></div>
-            <div class="rel-brand-sub">Relat&#243;rio do Plant&#227;o</div>
-          </div>
+      <div class="rel-header-simple">
+        <div class="rel-header-left">
+          <div class="rel-doc-title">RELAT&#211;RIO DO PLANT&#195;O</div>
+          <div class="rel-doc-sub">Plant&#227;oCheck &mdash; Ferramenta de apoio operacional</div>
         </div>
-        <div class="rel-plantao-grid">
-          <div class="rel-info-cell"><span class="rel-info-label">Delegacia</span><span class="rel-info-val">${plantaoAtivo.delegacia}</span></div>
-          <div class="rel-info-cell"><span class="rel-info-label">Delegado plantonista</span><span class="rel-info-val">${plantaoAtivo.delegado}</span></div>
-          <div class="rel-info-cell"><span class="rel-info-label">Data</span><span class="rel-info-val">${dataFmt}</span></div>
-          <div class="rel-info-cell"><span class="rel-info-label">Turno</span><span class="rel-info-val">${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno}</span></div>
-          <div class="rel-info-cell"><span class="rel-info-label">Ocorrências finalizadas</span><span class="rel-info-val">${concluidas.length}</span></div>
-          <div class="rel-info-cell"><span class="rel-info-label">Em andamento</span><span class="rel-info-val">${andamento.length}</span></div>
-          <div class="rel-info-cell rel-info-cell-full"><span class="rel-info-label">Gerado em</span><span class="rel-info-val">${new Date().toLocaleString('pt-BR')}</span></div>
+        <div class="rel-header-right">
+          <div class="rel-header-line"><strong>Delegacia:</strong> ${plantaoAtivo.delegacia}</div>
+          <div class="rel-header-line"><strong>Delegado(a):</strong> ${plantaoAtivo.delegado}</div>
+          <div class="rel-header-line"><strong>Data:</strong> ${dataFmt} &nbsp;|&nbsp; <strong>Turno:</strong> ${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno}</div>
+          <div class="rel-header-line rel-header-muted">Gerado em ${new Date().toLocaleString('pt-BR')} &nbsp;|&nbsp; ${nFin} finalizada${nFin !== 1 ? 's' : ''}, ${nAnd} em andamento</div>
         </div>
       </div>
 
-      <!-- FINALIZADAS -->
-      <div class="rel-section-block">
-        <div class="rel-section-block-title rel-title-done">&#10003; Ocorr&#234;ncias Finalizadas (${concluidas.length})</div>
-        ${tabelaConcluidas}
+      <div class="rel-tabela-wrap">
+        ${tabela}
       </div>
 
-      ${andamento.length ? `
-      <!-- EM ANDAMENTO -->
-      <div class="rel-section-block">
-        <div class="rel-section-block-title rel-title-wip">&#9200; Em Andamento (${andamento.length})</div>
-        ${tabelaAndamento}
-      </div>` : ''}
-
-      <div class="rel-footer">
-        Plant&#227;oCheck &mdash; Ferramenta de apoio operacional independente, sem v&#237;nculo institucional &mdash; Desenvolvido por Gabriel Vital
+      <div class="rel-footer-simple">
+        Legenda: &#10003; Finalizado &nbsp;&nbsp; &#9201; Em andamento
+        &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+        Plant&#227;oCheck &mdash; sem v&#237;nculo institucional &mdash; Desenvolvido por Gabriel Vital
       </div>
     </div>`;
 }
