@@ -133,14 +133,45 @@ const PCDoc = (() => {
       `<option value="${_esc(d.raw)}">${_esc(d.label)}</option>`
     ).join('');
 
-    const camposHtml = (doc.campos || []).map(c => `
-      <div class="modal-form-group">
-        <label>${_esc(c.label)}</label>
-        ${c.type === 'date'
-          ? `<input type="date" id="pcdoc_${c.id}" />`
-          : `<input type="text" id="pcdoc_${c.id}" placeholder="${_esc(c.placeholder || '')}" autocomplete="off" />`
-        }
-      </div>`).join('');
+    const camposHtml = (doc.campos || []).map(c => {
+      if (c.type === 'date') {
+        return `
+          <div class="modal-form-group">
+            <label>${_esc(c.label)}</label>
+            <input type="date" id="pcdoc_${c.id}" />
+          </div>`;
+      }
+      if (c.type === 'address') {
+        return `
+          <div class="modal-form-group pcdoc-address-group">
+            <label>${_esc(c.label)}</label>
+            <div class="pcdoc-cep-row">
+              <input type="text" id="pcdoc_cep_${c.id}"
+                     placeholder="CEP (somente n\u00fameros)" maxlength="9"
+                     oninput="PCDoc._onCepInput(this,'${c.id}')"
+                     autocomplete="off" style="width:140px;flex-shrink:0" />
+              <span class="pcdoc-cep-status" id="pcdoc_cep_status_${c.id}"></span>
+            </div>
+            <div class="pcdoc-addr-fields">
+              <input type="text" id="pcdoc_logradouro_${c.id}" placeholder="Logradouro" autocomplete="off" />
+              <div class="pcdoc-addr-row2">
+                <input type="text" id="pcdoc_numero_${c.id}" placeholder="N\u00famero" autocomplete="off" style="width:90px;flex-shrink:0" />
+                <input type="text" id="pcdoc_complemento_${c.id}" placeholder="Complemento (opcional)" autocomplete="off" />
+              </div>
+              <div class="pcdoc-addr-row2">
+                <input type="text" id="pcdoc_bairro_${c.id}" placeholder="Bairro" autocomplete="off" />
+                <input type="text" id="pcdoc_cidade_${c.id}" placeholder="Cidade/UF" autocomplete="off" style="width:130px;flex-shrink:0" />
+              </div>
+              <input type="hidden" id="pcdoc_${c.id}" />
+            </div>
+          </div>`;
+      }
+      return `
+        <div class="modal-form-group">
+          <label>${_esc(c.label)}</label>
+          <input type="text" id="pcdoc_${c.id}" placeholder="${_esc(c.placeholder || '')}" autocomplete="off" />
+        </div>`;
+    }).join('');
 
     el.innerHTML = `
       <div class="modal-form-group">
@@ -217,11 +248,33 @@ const PCDoc = (() => {
     // Collect field values
     const campos = {};
     (doc.campos || []).forEach(c => {
-      campos[c.id] = document.getElementById(`pcdoc_${c.id}`)?.value?.trim() || '';
+      if (c.type === 'address') {
+        // Build formatted address from sub-fields
+        const log  = document.getElementById(`pcdoc_logradouro_${c.id}`)?.value?.trim() || '';
+        const num  = document.getElementById(`pcdoc_numero_${c.id}`)?.value?.trim() || '';
+        const comp = document.getElementById(`pcdoc_complemento_${c.id}`)?.value?.trim() || '';
+        const bai  = document.getElementById(`pcdoc_bairro_${c.id}`)?.value?.trim() || '';
+        const cid  = document.getElementById(`pcdoc_cidade_${c.id}`)?.value?.trim() || '';
+        const cep  = document.getElementById(`pcdoc_cep_${c.id}`)?.value?.trim() || '';
+        const parts = [log, num, comp].filter(Boolean).join(', ');
+        const partsEnd = [bai, cid].filter(Boolean).join(', ');
+        const cepStr = cep ? `, CEP ${cep.replace(/\D/g,'').replace(/(\d{5})(\d{3})/,'$1-$2')}` : '';
+        campos[c.id] = [parts, partsEnd].filter(Boolean).join(', ') + cepStr;
+      } else {
+        campos[c.id] = document.getElementById(`pcdoc_${c.id}`)?.value?.trim() || '';
+      }
     });
 
     // Validate required fields
-    const missing = (doc.campos || []).filter(c => c.required !== false && !campos[c.id]);
+    const missing = (doc.campos || []).filter(c => {
+      if (c.required === false) return false;
+      if (c.type === 'address') {
+        const log = document.getElementById(`pcdoc_logradouro_${c.id}`)?.value?.trim() || '';
+        const num = document.getElementById(`pcdoc_numero_${c.id}`)?.value?.trim() || '';
+        return !log || !num;
+      }
+      return !campos[c.id];
+    });
     if (missing.length) {
       if (typeof showToast === 'function') showToast(`Preencha: ${missing.map(c => c.label).join(', ')}`);
       return;
@@ -296,6 +349,45 @@ const PCDoc = (() => {
     });
   }
 
+  // ── CEP LOOKUP (ViaCEP) ──────────────────────────────────
+  function _onCepInput(input, fieldId) {
+    // Format as 00000-000 while typing
+    let v = input.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+    input.value = v;
+
+    const digits = v.replace(/\D/g,'');
+    if (digits.length < 8) return;
+
+    const status = document.getElementById(`pcdoc_cep_status_${fieldId}`);
+    if (status) { status.textContent = '⏳'; status.className = 'pcdoc-cep-status loading'; }
+
+    fetch(`https://viacep.com.br/ws/${digits}/json/`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.erro) {
+          if (status) { status.textContent = 'CEP não encontrado'; status.className = 'pcdoc-cep-status error'; }
+          return;
+        }
+        // Fill sub-fields — user can still edit
+        const set = (id, val) => {
+          const el = document.getElementById(`pcdoc_${id}_${fieldId}`);
+          if (el && val) el.value = val;
+        };
+        set('logradouro', data.logradouro);
+        set('bairro',     data.bairro);
+        set('cidade',     data.localidade ? `${data.localidade}/SP` : '');
+
+        if (status) { status.textContent = '✓'; status.className = 'pcdoc-cep-status ok'; }
+
+        // Auto-focus número after fill
+        document.getElementById(`pcdoc_numero_${fieldId}`)?.focus();
+      })
+      .catch(() => {
+        if (status) { status.textContent = 'Erro ao buscar CEP'; status.className = 'pcdoc-cep-status error'; }
+      });
+  }
+
   // ── API PÚBLICA ───────────────────────────────────────────
   return {
     // Abre o modal para um documento registrado
@@ -327,6 +419,7 @@ const PCDoc = (() => {
 
     // Internos (expostos para uso via onclick inline)
     _onDeptChange,
+    _onCepInput: _onCepInput,
     _copy,
     _print,
     _lastHtml: null,
@@ -388,7 +481,7 @@ PCSP_DOCS.autorizacaoCelular = {
   campos: [
     { id: 'nome',      label: 'Nome completo do declarante',    placeholder: 'Ex: FULANO DE TAL' },
     { id: 'rg',        label: 'RG',                             placeholder: 'Ex: 12.345.678-9' },
-    { id: 'endereco',  label: 'Endereço completo (com CEP)',    placeholder: 'Ex: Rua das Flores, 100, Centro, Itu/SP, CEP 13300-000' },
+    { id: 'endereco',  label: 'Endereço completo',             type: 'address' },
     { id: 'numBO',     label: 'Número do BO',                   placeholder: 'Ex: AV0100-1/2026' },
     { id: 'marca',     label: 'Marca e modelo do aparelho',     placeholder: 'Ex: Samsung Galaxy A54' },
     { id: 'imei',      label: 'IMEI',                           placeholder: 'Ex: 000000000000000' },
