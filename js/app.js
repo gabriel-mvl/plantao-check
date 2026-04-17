@@ -1286,6 +1286,7 @@ window._keyHandler = e => {
     closeBNMP();
     closeCustomBuilder();
     closeArtigosMenu();
+    PCDoc.close();
   }
 };
 document.addEventListener('keydown', window._keyHandler);
@@ -1766,87 +1767,4 @@ async function finalizarOcorrenciaHist(rowId) {
   } catch(e) {
     alert('Erro ao finalizar. Verifique sua conexão.');
   }
-}
-
-// ── AUTORIZAÇÃO COLETA DE SANGUE ──────────────────────────────
-function openAutorizacaoSangue() {
-  document.getElementById('autSangueBackdrop')?.classList.remove('hidden');
-  document.getElementById('autSangueModal')?.classList.remove('hidden');
-  document.getElementById('autSangueOutput')?.classList.add('hidden');
-  document.getElementById('autSangueNome')?.focus();
-  if (window.innerWidth <= 768) toggleSidebar();
-}
-
-function closeAutorizacaoSangue() {
-  document.getElementById('autSangueBackdrop')?.classList.add('hidden');
-  document.getElementById('autSangueModal')?.classList.add('hidden');
-}
-
-function gerarAutorizacaoSangue() {
-  const nome   = document.getElementById('autSangueNome')?.value?.trim();
-  const rg     = document.getElementById('autSangueRG')?.value?.trim();
-  const cidade = document.getElementById('autSangueCidade')?.value?.trim();
-
-  if (!nome || !rg || !cidade) {
-    showToast('Preencha todos os campos');
-    return;
-  }
-
-  const meses = ['janeiro','fevereiro','março','abril','maio','junho',
-                 'julho','agosto','setembro','outubro','novembro','dezembro'];
-  const hoje  = new Date();
-  const data  = `${hoje.getDate()} de ${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
-
-  const texto =
-`AUTORIZAÇÃO PARA COLETA DE SANGUE
-
-Eu, ${nome}, RG ${rg}, AUTORIZO, nos termos da Resolução Contran nº 432/2013, a coleta de amostra de sangue para fins de dosagem alcoólica e/ou identificação de substâncias psicoativas.
-
-Declaro que fui informado(a) de que a recusa em submeter-se ao exame acarreta a penalidade prevista no art. 306, § 2º do CTB; os resultados poderão ser utilizados como prova em processo administrativo e judicial; que a coleta será realizada por profissional habilitado em unidade de saúde; e que o exame será enviado ao Instituto Médico Legal (IML).
-
-${cidade}, ${data}
-
-
-_____________________________________________
-Assinatura do examinado(a)
-${nome} — RG ${rg}`;
-
-  const output = document.getElementById('autSangueOutput');
-  const textEl = document.getElementById('autSangueText');
-  const btn    = document.getElementById('btnCopyAutSangue');
-  if (output) output.classList.remove('hidden');
-  if (textEl) textEl.textContent = texto;
-  if (btn)    { btn.textContent = '📋 Copiar texto'; btn.className = 'btn-copy'; }
-  output?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function copyAutorizacao() {
-  const text = document.getElementById('autSangueText')?.textContent;
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('btnCopyAutSangue');
-    if (btn) {
-      btn.textContent = '✓ Copiado!';
-      btn.className = 'btn-copy copied';
-      setTimeout(() => { btn.textContent = '📋 Copiar texto'; btn.className = 'btn-copy'; }, 2500);
-    }
-  });
-}
-
-function imprimirAutorizacao() {
-  const texto = document.getElementById('autSangueText')?.textContent;
-  if (!texto) return;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head>
-    <meta charset="UTF-8"/>
-    <title>Autorização — Coleta de Sangue</title>
-    <style>
-      body{font-family:'Times New Roman',serif;font-size:12pt;margin:3cm 2.5cm;color:#000;line-height:1.8}
-      pre{white-space:pre-wrap;font-family:'Times New Roman',serif;font-size:12pt;line-height:1.8}
-      @page{margin:3cm 2.5cm;size:A4}
-    </style>
-  </head><body><pre>${texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
-  <script>window.onload=()=>{window.print();window.onafterprint=()=>window.close();}<\/script>
-  </body></html>`);
-  win.document.close();
 }
