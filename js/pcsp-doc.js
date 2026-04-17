@@ -141,6 +141,17 @@ const PCDoc = (() => {
             <input type="date" id="pcdoc_${c.id}" />
           </div>`;
       }
+      if (c.type === 'toggle') {
+        // Collect checkbox state + sub-field values
+        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
+        campos[c.id] = checked;
+        if (checked) {
+          (c.subfields || []).forEach(sf => {
+            campos[sf.id] = document.getElementById(`pcdoc_${sf.id}`)?.value?.trim() || '';
+          });
+        }
+        return; // continue forEach
+      }
       if (c.type === 'address') {
         return `
           <div class="modal-form-group pcdoc-address-group">
@@ -163,6 +174,39 @@ const PCDoc = (() => {
                 <input type="text" id="pcdoc_cidade_${c.id}" placeholder="Cidade/UF" autocomplete="off" style="width:130px;flex-shrink:0" />
               </div>
               <input type="hidden" id="pcdoc_${c.id}" />
+            </div>
+          </div>`;
+      }
+      if (c.type === 'toggle') {
+        // Checkbox that shows/hides a group of sub-fields
+        const subHtml = (c.subfields || []).map(sf => {
+          if (sf.type === 'select') {
+            const opts = (sf.options || []).map(o =>
+              `<option value="${_esc(o.value)}">${_esc(o.label)}</option>`
+            ).join('');
+            return `
+              <div class="modal-form-group" style="margin-top:.5rem">
+                <label>${_esc(sf.label)}</label>
+                <select id="pcdoc_${sf.id}"><option value="">Selecione...</option>${opts}</select>
+              </div>`;
+          }
+          return `
+            <div class="modal-form-group" style="margin-top:.5rem">
+              <label>${_esc(sf.label)}</label>
+              <input type="text" id="pcdoc_${sf.id}" placeholder="${_esc(sf.placeholder || '')}" autocomplete="off" />
+            </div>`;
+        }).join('');
+        return `
+          <div class="modal-form-group">
+            <label class="pcdoc-toggle-label">
+              <input type="checkbox" id="pcdoc_${c.id}"
+                     onchange="document.getElementById('pcdoc_sub_${c.id}').style.display=this.checked?'block':'none'" />
+              <span>${_esc(c.label)}</span>
+            </label>
+            <div id="pcdoc_sub_${c.id}" style="display:none;margin-top:.4rem;
+                 padding:.75rem;background:var(--bg-surface);border:1px solid var(--border);
+                 border-radius:var(--radius)">
+              ${subHtml}
             </div>
           </div>`;
       }
@@ -261,6 +305,17 @@ const PCDoc = (() => {
     // Collect field values
     const campos = {};
     (doc.campos || []).forEach(c => {
+      if (c.type === 'toggle') {
+        // Collect checkbox state + sub-field values
+        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
+        campos[c.id] = checked;
+        if (checked) {
+          (c.subfields || []).forEach(sf => {
+            campos[sf.id] = document.getElementById(`pcdoc_${sf.id}`)?.value?.trim() || '';
+          });
+        }
+        return; // continue forEach
+      }
       if (c.type === 'address') {
         // Build formatted address from sub-fields
         const log  = document.getElementById(`pcdoc_logradouro_${c.id}`)?.value?.trim() || '';
@@ -281,6 +336,24 @@ const PCDoc = (() => {
     // Validate required fields
     const missing = (doc.campos || []).filter(c => {
       if (c.required === false) return false;
+      if (c.type === 'toggle') {
+        // Collect checkbox state + sub-field values
+        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
+        campos[c.id] = checked;
+        if (checked) {
+          (c.subfields || []).forEach(sf => {
+            campos[sf.id] = document.getElementById(`pcdoc_${sf.id}`)?.value?.trim() || '';
+          });
+        }
+        return; // continue forEach
+      }
+      if (c.type === 'toggle') {
+        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
+        if (!checked) return false;
+        return (c.subfields || []).some(sf =>
+          sf.required !== false && !(document.getElementById(`pcdoc_${sf.id}`)?.value?.trim())
+        );
+      }
       if (c.type === 'address') {
         const log = document.getElementById(`pcdoc_logradouro_${c.id}`)?.value?.trim() || '';
         const num = document.getElementById(`pcdoc_numero_${c.id}`)?.value?.trim() || '';
@@ -580,11 +653,23 @@ PCSP_DOCS.autorizacaoEntrada = {
   titulo: 'Autorização de Entrada em Residência',
   subtitulo: 'Consentimento voluntário — art. 5º XI CF/88 + HC 598.051/STJ',
   campos: [
-    { id: 'nome',       label: 'Nome completo do declarante',      placeholder: 'Ex: FULANO DE TAL' },
-    { id: 'rg',         label: 'RG',                               placeholder: 'Ex: 12.345.678-9' },
-    { id: 'qualidade',  label: 'Qualidade (morador / responsável)', placeholder: 'Ex: morador(a) / proprietário(a)' },
-    { id: 'endereco',   label: 'Endereço do imóvel',               type: 'address' },
-    { id: 'numBO',      label: 'Número do BO (se houver)',          placeholder: 'Ex: AV0100-1/2026', required: false },
+    { id: 'nome',       label: 'Nome completo do declarante',       placeholder: 'Ex: FULANO DE TAL' },
+    { id: 'rg',         label: 'RG',                                placeholder: 'Ex: 12.345.678-9' },
+    { id: 'qualidade',  label: 'Qualidade (morador / responsável)',  placeholder: 'Ex: morador(a) / proprietário(a)' },
+    { id: 'endereco',   label: 'Endereço do imóvel',                type: 'address' },
+    { id: 'numBO',      label: 'Número do BO (se houver)',           placeholder: 'Ex: AV0100-1/2026', required: false },
+    { id: 'inclui_policial', label: 'Incluir qualificação do policial responsável', type: 'toggle',
+      subfields: [
+        { id: 'pol_nome',    label: 'Nome do policial',  placeholder: 'Ex: João da Silva' },
+        { id: 'pol_carreira', label: 'Carreira', type: 'select', options: [
+          { value: 'Agente de Telecomunicações Policial', label: 'Agente de Telecomunicações Policial' },
+          { value: 'Agente Policial',                     label: 'Agente Policial' },
+          { value: 'Delegado de Polícia',                 label: 'Delegado de Polícia' },
+          { value: 'Escrivão de Polícia',                 label: 'Escrivão de Polícia' },
+          { value: 'Investigador de Polícia',             label: 'Investigador de Polícia' },
+        ]},
+      ],
+    },
   ],
   gerar(campos, u, ctx) {
     const meses = ['janeiro','fevereiro','março','abril','maio','junho',
@@ -640,10 +725,11 @@ PCSP_DOCS.autorizacaoEntrada = {
         <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
       </div>
 
+      ${campos.inclui_policial ? `
       <div style="text-align:center;margin-top:2.5rem">
         <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
-        <div>Assinatura do agente policial responsável pela diligência</div>
-        <div style="font-size:.9em;margin-top:.15rem">Nome / RG funcional / Matrícula</div>
-      </div>`;
+        <div>${campos.pol_nome.toUpperCase()}</div>
+        <div><strong>${campos.pol_carreira}</strong></div>
+      </div>` : ''}`;
   },
 };
