@@ -1128,3 +1128,19 @@ body[data-theme="light"] input[type="date"] {
   transition: all .15s; cursor: pointer; margin-left: .45rem;
 }
 .btn-print-doc:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ── MODAL PCDOC — selects e preview ── */
+#pcdocModalBody select {
+  width: 100%;
+  padding: .55rem .75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-size: .85rem;
+  outline: none;
+  transition: border-color .18s;
+}
+#pcdocModalBody select:focus { border-color: var(--border-focus); box-shadow: var(--shadow-glow); }
+#pcdocModalBody select:disabled { opacity: .5; cursor: not-allowed; }
+#pcdocPreview img { max-width: 60px; }
