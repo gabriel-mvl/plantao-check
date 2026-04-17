@@ -694,14 +694,11 @@ PCSP_DOCS.autorizacaoEntrada = {
 
       <p style="text-align:justify;margin-bottom:1rem">
         Estou ciente do direito fundamental à inviolabilidade domiciliar, garantido pelo
-        art. 5º, inciso XI, da Constituição Federal de 1988, segundo o qual
-        <em>"a casa é asilo inviolável do indivíduo, ninguém nela podendo penetrar sem
-        consentimento do morador, salvo em caso de flagrante delito ou desastre, ou
-        para prestar socorro, ou, durante o dia, por determinação judicial"</em>.
+        art. 5º, inciso XI, da Constituição Federal de 1988.</em>
       </p>
 
       <p style="text-align:justify;margin-bottom:1rem">
-        <strong>AUTORIZO</strong>, livremente e sem qualquer coação, ameaça ou
+        Ciente disso, <strong>AUTORIZO</strong>, livremente e sem qualquer coação, ameaça ou
         promessa de vantagem, o ingresso de agentes da Polícia Civil do Estado de
         São Paulo no referido imóvel, bem como a realização de diligências de
         busca e apreensão necessárias à investigação policial em curso, nos termos
