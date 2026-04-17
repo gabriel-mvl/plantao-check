@@ -792,29 +792,67 @@ document.addEventListener('keydown', e => {
 
 // ── PLANTÃO OBRIGATÓRIO ───────────────────────────────────────
 async function checkPlantaoAtivo() {
-  // Check localStorage first (fast)
+  showSplash('Recuperando sessão...');
+
   const localId = localStorage.getItem('pc_plantao_id');
+
+  // 1. Try Supabase for the locally stored plantao ID
   if (localId) {
     try {
       const rows = await DB_Plantoes.listar(session.email);
       plantaoAtivo = rows?.find(p => p.id === localId && p.status === 'aberto') || null;
-    } catch(e) { /* offline - use local */ }
-  }
-
-  if (!plantaoAtivo) {
-    // Try to find open plantao in Supabase
-    try {
-      plantaoAtivo = await DB_Plantoes.buscarAberto(session.email);
-      if (plantaoAtivo) localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
     } catch(e) { /* offline */ }
   }
 
+  // 2. If nothing found locally, search Supabase for any open plantao today
+  if (!plantaoAtivo) {
+    try {
+      plantaoAtivo = await DB_Plantoes.buscarAberto(session.email);
+      if (plantaoAtivo) {
+        localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
+        showToast(`↩ Plantão de ${new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR')} recuperado`);
+      }
+    } catch(e) { /* offline */ }
+  }
+
+  // 3. Offline fallback: reconstruct from localStorage
+  if (!plantaoAtivo && localId) {
+    const localData = JSON.parse(localStorage.getItem(`pc_plantao_data_${localId}`) || 'null');
+    if (localData) {
+      plantaoAtivo = localData;
+      showToast('⚡ Modo offline — dados locais');
+    }
+  }
+
+  hideSplash();
+
   if (plantaoAtivo) {
     renderAppWithPlantao();
+    showToast(`📋 ${plantaoAtivo.delegacia} — ${plantaoAtivo.turno === 'diurno' ? 'Diurno' : plantaoAtivo.turno === 'noturno' ? 'Noturno' : 'Extraordinário'}`);
   } else {
     openPlantaoModal();
   }
   renderAndamentoSection();
+}
+
+function showSplash(msg) {
+  let el = document.getElementById('appSplash');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'appSplash';
+    el.className = 'app-splash';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `<div class="splash-inner"><div class="splash-spinner"></div><span>${msg}</span></div>`;
+  el.classList.remove('hidden');
+}
+
+function hideSplash() {
+  const el = document.getElementById('appSplash');
+  if (el) {
+    el.classList.add('splash-fade');
+    setTimeout(() => el.remove(), 400);
+  }
 }
 
 function openPlantaoModal() {
@@ -851,6 +889,8 @@ async function confirmarAberturaPlan() {
     });
     plantaoAtivo = Array.isArray(rows) ? rows[0] : rows;
     localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
+    // Always save locally for offline recovery
+    localStorage.setItem(`pc_plantao_data_${plantaoAtivo.id}`, JSON.stringify(plantaoAtivo));
   } catch(e) {
     // Offline fallback
     plantaoAtivo = { id: `local_${Date.now()}`, data, turno, delegacia, delegado, status: 'aberto' };
