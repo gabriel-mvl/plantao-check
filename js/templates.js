@@ -83,6 +83,44 @@ const EMAIL_TEMPLATES = [
     aviso:'Copiar e colar o boletim de ocorrência inteiro no corpo da mensagem. NÃO colocar em anexo.',
   },
 
+  { id:'autorizacaoSangue', icon:'🩸', title:'Autorização — Coleta de Sangue (CONTRAN 432)',
+    fields:[
+      {id:'nome',    label:'Nome completo do autor',   placeholder:'Ex: FULANO DE TAL'},
+      {id:'rg',      label:'RG',                       placeholder:'Ex: 00.000.000-0'},
+      {id:'cidade',  label:'Cidade',                   placeholder:'Ex: Itu'},
+    ],
+    generate:(f) => {
+      const hoje = new Date();
+      const meses = ['janeiro','fevereiro','março','abril','maio','junho',
+                     'julho','agosto','setembro','outubro','novembro','dezembro'];
+      const dataExtenso = `${hoje.getDate()} de ${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
+      return `AUTORIZAÇÃO PARA COLETA DE SANGUE
+Resolução CONTRAN nº 432, de 23 de janeiro de 2013
+
+Eu, ${f.nome}, RG ${f.rg}, estou sendo informado(a) de que fui flagrado(a) na condução de veículo automotor em via pública, sob suspeita de influência de álcool ou de outra substância psicoativa que cause dependência, conforme art. 306 do Código de Trânsito Brasileiro.
+
+Nos termos da Resolução CONTRAN nº 432/2013, AUTORIZO a realização de exame clínico, incluindo a coleta de amostra de sangue para fins de dosagem alcoólica e/ou identificação de substâncias psicoativas.
+
+Declaro que fui informado(a) de que:
+- A recusa em submeter-se ao exame acarreta a penalidade prevista no art. 306, § 2º do CTB;
+- Os resultados poderão ser utilizados como prova em processo administrativo e judicial;
+- O exame será realizado por profissional de saúde habilitado.
+
+${f.cidade}, ${dataExtenso}.
+
+
+_____________________________________________
+Assinatura do examinado(a)
+${f.nome} — RG ${f.rg}
+
+
+_____________________________________________
+Assinatura da autoridade policial / médico responsável`;
+    },
+    anexos:[],
+    aviso:'Data preenchida automaticamente com o dia de hoje. Imprimir em duas vias: uma para o examinado, uma para o processo.',
+  },
+
   { id:'emailIML', icon:'🏥', title:'Encaminhamento ao IML — Exame Indireto',
     fields:[
       {id:'delpol', label:'Delegacia',               placeholder:'Ex: DELPOL DA COMARCA'},
