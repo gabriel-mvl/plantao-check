@@ -32,7 +32,7 @@
         <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
         <li><a href="#" class="nav-link" onclick="openEmailMenu()"><span class="nav-icon">&#128231;</span> Modelos de E-mail</a></li>
         <li><a href="#" class="nav-link" onclick="window.open('pre-atendimento.html','_blank')"><span class="nav-icon">&#128221;</span> Pr&#233;-Atendimento</a></li>
-        <li><a href="#" class="nav-link" onclick="openAutorizacaoSangue()"><span class="nav-icon">&#129656;</span> Autoriza&#231;&#227;o Sangue</a></li>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoSangue')"><span class="nav-icon">&#129656;</span> Autoriza&#231;&#227;o Sangue</a></li>
       </ul>
       <p class="nav-label" style="margin-top:1.4rem">Refer&#234;ncias</p>
       <ul>
@@ -447,42 +447,6 @@
     </div>
   </div>
 
-  <!-- MODAL AUTORIZAÇÃO COLETA DE SANGUE -->
-  <div class="modal-backdrop hidden" id="autSangueBackdrop" onclick="closeAutorizacaoSangue()"></div>
-  <div class="modal hidden" id="autSangueModal" style="max-width:520px">
-    <div class="modal-header">
-      <div><h3>&#129656; Autoriza&#231;&#227;o — Coleta de Sangue</h3><p class="modal-subtitle">Resolu&#231;&#227;o CONTRAN n&#186; 432/2013</p></div>
-      <button onclick="closeAutorizacaoSangue()">&#215;</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-form-group">
-        <label>Nome completo do examinado</label>
-        <input type="text" id="autSangueNome" placeholder="Ex: FULANO DE TAL" autocomplete="off" />
-      </div>
-      <div class="modal-form-group">
-        <label>RG</label>
-        <input type="text" id="autSangueRG" placeholder="Ex: 00.000.000-0" autocomplete="off" />
-      </div>
-      <div class="modal-form-group">
-        <label>Cidade</label>
-        <input type="text" id="autSangueCidade" placeholder="Ex: Itu" autocomplete="off" />
-      </div>
-      <div id="autSangueOutput" class="hidden">
-        <div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>
-        <div class="generated-text-box" id="autSangueText" style="white-space:pre-wrap;line-height:1.8;font-size:.82rem"></div>
-        <div class="email-aviso" style="margin-top:.6rem">&#9888; Imprimir em duas vias: uma para o examinado, uma para o processo.</div>
-        <div class="copy-bar">
-          <button class="btn-copy" id="btnCopyAutSangue" onclick="copyAutorizacao()">&#128203; Copiar texto</button>
-          <button class="btn-print-doc" onclick="imprimirAutorizacao()">&#128424; Imprimir</button>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeAutorizacaoSangue()">Fechar</button>
-      <button class="btn-primary" onclick="gerarAutorizacaoSangue()" style="width:auto;margin-top:0">Gerar documento</button>
-    </div>
-  </div>
-
   <script src="js/supabase.js"></script>
   <!-- MODAL MENU QUESITOS -->
   <div class="modal-backdrop hidden" id="quesitosMenuBackdrop" onclick="closeQuesitosMenu()"></div>
@@ -526,47 +490,30 @@
     </div>
   </div>
 
-  <!-- MODAL AUTORIZAÇÃO COLETA DE SANGUE -->
-  <div class="modal-backdrop hidden" id="autSangueBackdrop" onclick="closeAutorizacaoSangue()"></div>
-  <div class="modal hidden" id="autSangueModal" style="max-width:520px">
-    <div class="modal-header">
-      <div><h3>&#129656; Autoriza&#231;&#227;o — Coleta de Sangue</h3><p class="modal-subtitle">Resolu&#231;&#227;o CONTRAN n&#186; 432/2013</p></div>
-      <button onclick="closeAutorizacaoSangue()">&#215;</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-form-group">
-        <label>Nome completo do examinado</label>
-        <input type="text" id="autSangueNome" placeholder="Ex: FULANO DE TAL" autocomplete="off" />
-      </div>
-      <div class="modal-form-group">
-        <label>RG</label>
-        <input type="text" id="autSangueRG" placeholder="Ex: 00.000.000-0" autocomplete="off" />
-      </div>
-      <div class="modal-form-group">
-        <label>Cidade</label>
-        <input type="text" id="autSangueCidade" placeholder="Ex: Itu" autocomplete="off" />
-      </div>
-      <div id="autSangueOutput" class="hidden">
-        <div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>
-        <div class="generated-text-box" id="autSangueText" style="white-space:pre-wrap;line-height:1.8;font-size:.82rem"></div>
-        <div class="email-aviso" style="margin-top:.6rem">&#9888; Imprimir em duas vias: uma para o examinado, uma para o processo.</div>
-        <div class="copy-bar">
-          <button class="btn-copy" id="btnCopyAutSangue" onclick="copyAutorizacao()">&#128203; Copiar texto</button>
-          <button class="btn-print-doc" onclick="imprimirAutorizacao()">&#128424; Imprimir</button>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeAutorizacaoSangue()">Fechar</button>
-      <button class="btn-primary" onclick="gerarAutorizacaoSangue()" style="width:auto;margin-top:0">Gerar documento</button>
-    </div>
-  </div>
-
   <script src="js/supabase.js"></script>
   <script src="js/artigos.js"></script>
   <script src="js/quesitos.js"></script>
   <script src="js/checklists.js"></script>
   <script src="js/templates.js"></script>
+  <!-- MODAL GENÉRICO DE DOCUMENTOS PCSP -->
+  <div class="modal-backdrop hidden" id="pcdocBackdrop" onclick="PCDoc.close()"></div>
+  <div class="modal hidden" id="pcdocModal" style="max-width:560px">
+    <div class="modal-header">
+      <div>
+        <h3 id="pcdocModalTitle">Documento</h3>
+        <p class="modal-subtitle" id="pcdocModalSub"></p>
+      </div>
+      <button onclick="PCDoc.close()">&#215;</button>
+    </div>
+    <div class="modal-body" id="pcdocModalBody" style="max-height:70vh;overflow-y:auto"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="PCDoc.close()">Fechar</button>
+      <button class="btn-primary" onclick="PCDoc.gerar()" style="width:auto;margin-top:0">Gerar documento</button>
+    </div>
+  </div>
+
+  <script src="js/pcsp-units.js"></script>
+  <script src="js/pcsp-doc.js"></script>
   <script src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
