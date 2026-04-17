@@ -1144,3 +1144,31 @@ body[data-theme="light"] input[type="date"] {
 #pcdocModalBody select:focus { border-color: var(--border-focus); box-shadow: var(--shadow-glow); }
 #pcdocModalBody select:disabled { opacity: .5; cursor: not-allowed; }
 #pcdocPreview img { max-width: 60px; }
+
+/* ── PCDOC ADDRESS FIELD ── */
+.pcdoc-cep-row {
+  display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem;
+}
+.pcdoc-cep-status {
+  font-size: .78rem; font-family: var(--font-mono);
+  min-width: 130px;
+}
+.pcdoc-cep-status.loading { color: var(--text-muted); }
+.pcdoc-cep-status.ok      { color: var(--success); font-weight: 700; }
+.pcdoc-cep-status.error   { color: var(--danger); }
+
+.pcdoc-addr-fields {
+  display: flex; flex-direction: column; gap: .4rem;
+}
+.pcdoc-addr-fields input {
+  width: 100%;
+  padding: .5rem .7rem;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-primary);
+  font-size: .84rem; outline: none; transition: border-color .18s;
+}
+.pcdoc-addr-fields input:focus {
+  border-color: var(--border-focus); box-shadow: var(--shadow-glow);
+}
+.pcdoc-addr-row2 { display: flex; gap: .4rem; }
+.pcdoc-addr-row2 input { flex: 1; }
