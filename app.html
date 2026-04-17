@@ -20,13 +20,15 @@
     </div>
     <div class="sidebar-user" id="sidebarUser"></div>
     <nav class="sidebar-nav">
+      <button class="btn-home-nav" onclick="backToHome(); if(window.innerWidth<=768) toggleSidebar();">
+        &#127968; P&#225;gina inicial
+      </button>
       <p class="nav-label">Ocorr&#234;ncias</p>
       <ul id="navList"></ul>
       <p class="nav-label" style="margin-top:1.4rem">Ferramentas</p>
       <ul>
         <li><a href="#" class="nav-link" onclick="openHistorico()"><span class="nav-icon">&#128337;</span> Hist&#243;rico</a></li>
         <li><a href="#" class="nav-link" onclick="openRelatorio()"><span class="nav-icon">&#128196;</span> Relat&#243;rio do Plant&#227;o</a></li>
-        <li><a href="#" class="nav-link" onclick="openBNMP()"><span class="nav-icon">&#128269;</span> Busca BNMP</a></li>
         <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
         <li><a href="#" class="nav-link" onclick="openEmailMenu()"><span class="nav-icon">&#128231;</span> Modelos de E-mail</a></li>
         <li><a href="#" class="nav-link" onclick="window.open('pre-atendimento.html','_blank')"><span class="nav-icon">&#128221;</span> Pr&#233;-Atendimento</a></li>
@@ -74,6 +76,7 @@
           </button>
         </div>
         <div id="recentOccurrence"></div>
+      <div id="andamentoSection"></div>
         <div class="home-search-wrap">
           <input class="home-search" id="homeSearch" type="text" placeholder="&#128269; Buscar ocorr&#234;ncia..." oninput="filterOccurrences()" autocomplete="off" />
         </div>
@@ -139,6 +142,7 @@
       <div class="cl-actions">
         <button class="btn-secondary" onclick="resetChecklist()">&#8635; Reiniciar</button>
         <button class="btn-secondary" onclick="backToHome()">&#8592; Voltar</button>
+        <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarChecklist()">&#10003; Finalizar</button>
         <button class="btn-primary" onclick="generatePDF()">&#128196; Gerar PDF</button>
       </div>
 
@@ -228,6 +232,14 @@
             <span class="triage-opt-icon">&#128106;</span>
             <span class="triage-opt-text">Guarda Municipal</span>
           </button>
+          <button class="triage-opt" data-group="condutor" data-value="pc" onclick="selectTriageOpt('condutor','pc',this)">
+            <span class="triage-opt-icon">&#128230;</span>
+            <span class="triage-opt-text">Pol&#237;cia Civil</span>
+          </button>
+          <button class="triage-opt" data-group="condutor" data-value="parte" onclick="selectTriageOpt('condutor','parte',this)">
+            <span class="triage-opt-icon">&#128100;</span>
+            <span class="triage-opt-text">Parte interessada</span>
+          </button>
         </div>
       </div>
 
@@ -287,8 +299,9 @@
     <div class="modal-header">
       <div>
         <h3>Abrir Plant&#227;o</h3>
-        <p class="modal-subtitle">Preencha os dados antes de iniciar o registro</p>
+        <p class="modal-subtitle">Opcional — pode pular e abrir depois</p>
       </div>
+      <button onclick="pularPlantao()" title="Continuar sem abrir plant&#227;o">&#215;</button>
     </div>
     <div class="modal-body">
       <div class="modal-form-group">
@@ -314,6 +327,7 @@
       <div id="plantaoInicioMsg" class="auth-msg error hidden"></div>
     </div>
     <div class="modal-footer">
+      <button class="btn-secondary" onclick="pularPlantao()">Pular por agora</button>
       <button class="btn-primary" id="btnAbrirPlantao" onclick="confirmarAberturaPlan()" style="width:auto;margin-top:0">Abrir plant&#227;o &#8594;</button>
     </div>
   </div>
