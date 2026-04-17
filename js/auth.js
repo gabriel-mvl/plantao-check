@@ -17,7 +17,6 @@ const EMAILJS_SERVICE_ID  = 'service_f8ahxdk';
 const EMAILJS_TEMPLATE_ID = 'template_xqp8nw7';
 const EMAILJS_PUBLIC_KEY  = '4ENO39pWC7a7b_oOB';
 
-// Detecta se o EmailJS foi configurado
 const EMAILJS_CONFIGURED = (
   EMAILJS_SERVICE_ID  !== 'SEU_SERVICE_ID' &&
   EMAILJS_TEMPLATE_ID !== 'SEU_TEMPLATE_ID' &&
@@ -82,6 +81,7 @@ function switchPanel(panelId) {
     document.getElementById(id)?.classList.add('hidden');
   });
   document.getElementById(panelId)?.classList.remove('hidden');
+  if (panelId === 'emailPanel') stopResendCountdown();
 }
 
 // ── DIGIT INPUT ──────────────────────────────────────────────
@@ -171,6 +171,7 @@ async function handleRequestCode() {
   switchPanel('verifyPanel');
   showMsg('verifyMsg', `Código enviado para ${email}. Verifique sua caixa de entrada.`, 'info');
   document.getElementById('d1')?.focus();
+  startResendCountdown();
 }
 
 // ── VERIFY CODE (step 2) ──────────────────────────────────────
@@ -205,6 +206,9 @@ async function resendCode() {
   const email = document.getElementById('verifyEmailDisplay')?.textContent || '';
   if (!email) return switchPanel('emailPanel');
 
+  const btn = document.getElementById('btnResend');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
   clearCodeInputs();
   hideMsg('verifyMsg');
 
@@ -215,8 +219,58 @@ async function resendCode() {
   DB.savePending(pending);
 
   const result = await sendCodeEmail(email, code);
-  if (!result.ok) return showMsg('verifyMsg', 'Erro ao reenviar. Tente novamente.');
-  showMsg('verifyMsg', 'Novo código enviado!', 'success');
+
+  if (!result.ok) {
+    if (btn) { btn.disabled = false; btn.textContent = '↺ Reenviar código'; }
+    return showMsg('verifyMsg', 'Erro ao reenviar. Tente novamente.');
+  }
+
+  showMsg('verifyMsg', 'Novo código enviado! Verifique sua caixa de entrada.', 'success');
+  startResendCountdown();
+}
+
+// ── COUNTDOWN ─────────────────────────────────────────────────
+let _countdownTimer = null;
+const RESEND_WAIT_S  = 90; // 1 minuto e 30 segundos
+
+function startResendCountdown() {
+  clearInterval(_countdownTimer);
+
+  const countdown = document.getElementById('resendCountdown');
+  const timerEl   = document.getElementById('resendTimer');
+  const btn       = document.getElementById('btnResend');
+
+  if (!countdown || !timerEl || !btn) return;
+
+  // Show countdown, hide button
+  countdown.classList.remove('hidden');
+  btn.classList.add('hidden');
+  btn.disabled = false;
+  btn.textContent = '↺ Reenviar código';
+
+  let remaining = RESEND_WAIT_S;
+
+  function tick() {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timerEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    if (remaining <= 0) {
+      clearInterval(_countdownTimer);
+      countdown.classList.add('hidden');
+      btn.classList.remove('hidden');
+    }
+    remaining--;
+  }
+
+  tick();
+  _countdownTimer = setInterval(tick, 1000);
+}
+
+function stopResendCountdown() {
+  clearInterval(_countdownTimer);
+  document.getElementById('resendCountdown')?.classList.add('hidden');
+  const btn = document.getElementById('btnResend');
+  if (btn) { btn.classList.remove('hidden'); btn.disabled = false; }
 }
 
 // ── LOGOUT (called from app) ──────────────────────────────────
