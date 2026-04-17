@@ -587,10 +587,7 @@ PCSP_DOCS.autorizacaoEntrada = {
 
       <p style="text-align:justify;margin-bottom:1rem">
         Estou ciente do direito fundamental à inviolabilidade domiciliar, garantido pelo
-        art. 5º, inciso XI, da Constituição Federal de 1988, segundo o qual
-        <em>"a casa é asilo inviolável do indivíduo, ninguém nela podendo penetrar sem
-        consentimento do morador, salvo em caso de flagrante delito ou desastre, ou
-        para prestar socorro, ou, durante o dia, por determinação judicial"</em>.
+        art. 5º, inciso XI, da Constituição Federal de 1988</em>.
       </p>
 
       <p style="text-align:justify;margin-bottom:1rem">
