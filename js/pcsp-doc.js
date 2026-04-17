@@ -142,15 +142,36 @@ const PCDoc = (() => {
           </div>`;
       }
       if (c.type === 'toggle') {
-        // Collect checkbox state + sub-field values
-        const checked = document.getElementById(`pcdoc_${c.id}`)?.checked || false;
-        campos[c.id] = checked;
-        if (checked) {
-          (c.subfields || []).forEach(sf => {
-            campos[sf.id] = document.getElementById(`pcdoc_${sf.id}`)?.value?.trim() || '';
-          });
-        }
-        return; // continue forEach
+        const subHtml = (c.subfields || []).map(sf => {
+          if (sf.type === 'select') {
+            const opts = (sf.options || []).map(o =>
+              `<option value="${_esc(o.value)}">${_esc(o.label)}</option>`
+            ).join('');
+            return `
+              <div class="modal-form-group" style="margin-top:.5rem">
+                <label>${_esc(sf.label)}</label>
+                <select id="pcdoc_${sf.id}"><option value="">Selecione...</option>${opts}</select>
+              </div>`;
+          }
+          return `
+            <div class="modal-form-group" style="margin-top:.5rem">
+              <label>${_esc(sf.label)}</label>
+              <input type="text" id="pcdoc_${sf.id}" placeholder="${_esc(sf.placeholder || '')}" autocomplete="off" />
+            </div>`;
+        }).join('');
+        return `
+          <div class="modal-form-group">
+            <label class="pcdoc-toggle-label">
+              <input type="checkbox" id="pcdoc_${c.id}"
+                     onchange="document.getElementById('pcdoc_sub_${c.id}').style.display=this.checked?'block':'none'" />
+              <span>${_esc(c.label)}</span>
+            </label>
+            <div id="pcdoc_sub_${c.id}" style="display:none;margin-top:.4rem;
+                 padding:.75rem;background:var(--bg-surface);border:1px solid var(--border);
+                 border-radius:var(--radius)">
+              ${subHtml}
+            </div>
+          </div>`;
       }
       if (c.type === 'address') {
         return `
