@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderNavList();
   await loadCustomOccurrences();
   await checkPlantaoAtivo();
+  renderDocCards();
 });
 
 // ── USER ─────────────────────────────────────────────────────
@@ -1766,5 +1767,14 @@ async function finalizarOcorrenciaHist(rowId) {
     openHistorico();
   } catch(e) {
     alert('Erro ao finalizar. Verifique sua conexão.');
+  }
+}
+
+// ── HOME: mostrar cards de documentos conforme disponibilidade ─
+function renderDocCards() {
+  // Reveal "Autorização Entrada" card when doc is registered
+  const entradaCard = document.getElementById('homeToolEntrada');
+  if (entradaCard && typeof PCSP_DOCS !== 'undefined' && PCSP_DOCS.autorizacaoEntrada) {
+    entradaCard.style.display = '';
   }
 }
