@@ -67,24 +67,108 @@
 
     <!-- HOME -->
     <div class="home-view" id="homeView">
-      <div class="home-hero">
-        <div class="home-hero-top">
-          <div>
-            <h2 class="home-title">Qual ocorr&#234;ncia?</h2>
-            <p class="home-sub">Selecione o tipo para abrir o checklist</p>
-          </div>
-          <button class="btn-plantao-diario" onclick="openPlantaoDiario()">
-            <span>&#9200;</span> Rotina do Plant&#227;o
-          </button>
-        </div>
-        <div id="recentOccurrence"></div>
+
+      <!-- HERO DO PLANTÃO ATIVO -->
+      <div id="recentOccurrence"></div>
       <div id="andamentoSection"></div>
-        <div class="home-search-wrap">
-          <input class="home-search" id="homeSearch" type="text" placeholder="&#128269; Buscar ocorr&#234;ncia..." oninput="filterOccurrences()" autocomplete="off" />
+
+      <!-- MÓDULOS DA PLATAFORMA -->
+      <div class="home-modules">
+
+        <!-- CHECKLISTS -->
+        <div class="home-module">
+          <div class="home-module-header">
+            <div class="home-module-icon">&#9989;</div>
+            <div>
+              <div class="home-module-title">Checklists de Ocorr&#234;ncia</div>
+              <div class="home-module-sub">Registre e acompanhe cada ocorr&#234;ncia do plant&#227;o</div>
+            </div>
+            <button class="btn-plantao-diario" onclick="openPlantaoDiario()" style="margin-left:auto;white-space:nowrap">
+              &#9200; Rotina
+            </button>
+          </div>
+          <div class="home-search-wrap" style="margin:0 0 .75rem">
+            <input class="home-search" id="homeSearch" type="text"
+                   placeholder="&#128269; Buscar ocorr&#234;ncia..."
+                   oninput="filterOccurrences()" autocomplete="off"
+                   style="max-width:100%" />
+          </div>
+          <div class="occurrence-grid" id="occurrenceGrid"></div>
+          <p class="no-results hidden" id="noResults">Nenhuma ocorr&#234;ncia encontrada.</p>
         </div>
-      </div>
-      <div class="occurrence-grid" id="occurrenceGrid"></div>
-      <p class="no-results hidden" id="noResults">Nenhuma ocorr&#234;ncia encontrada.</p>
+
+        <!-- FERRAMENTAS -->
+        <div class="home-module">
+          <div class="home-module-header">
+            <div class="home-module-icon">&#128295;</div>
+            <div>
+              <div class="home-module-title">Ferramentas</div>
+              <div class="home-module-sub">Recursos de apoio operacional</div>
+            </div>
+          </div>
+          <div class="home-tools-grid">
+            <button class="home-tool-card" onclick="openHistorico()">
+              <span class="home-tool-icon">&#128337;</span>
+              <span class="home-tool-name">Hist&#243;rico</span>
+              <span class="home-tool-desc">Ocorr&#234;ncias registradas</span>
+            </button>
+            <button class="home-tool-card" onclick="openRelatorio()">
+              <span class="home-tool-icon">&#128196;</span>
+              <span class="home-tool-name">Relat&#243;rio</span>
+              <span class="home-tool-desc">Resumo do plant&#227;o</span>
+            </button>
+            <button class="home-tool-card" onclick="openEmailMenu()">
+              <span class="home-tool-icon">&#128231;</span>
+              <span class="home-tool-name">E-mails</span>
+              <span class="home-tool-desc">Modelos prontos</span>
+            </button>
+            <button class="home-tool-card" onclick="openArtigosMenu()">
+              <span class="home-tool-icon">&#9878;</span>
+              <span class="home-tool-name">Legisla&#231;&#227;o</span>
+              <span class="home-tool-desc">Artigos de refer&#234;ncia</span>
+            </button>
+            <button class="home-tool-card" onclick="openQuesitosMenu()">
+              <span class="home-tool-icon">&#128203;</span>
+              <span class="home-tool-name">Quesitos</span>
+              <span class="home-tool-desc">Periciais — PDF PCSP</span>
+            </button>
+            <button class="home-tool-card" onclick="window.open('pre-atendimento.html','_blank')">
+              <span class="home-tool-icon">&#128221;</span>
+              <span class="home-tool-name">Pr&#233;-Atendimento</span>
+              <span class="home-tool-desc">Ficha imprim&#237;vel</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- DOCUMENTOS -->
+        <div class="home-module">
+          <div class="home-module-header">
+            <div class="home-module-icon">&#128196;</div>
+            <div>
+              <div class="home-module-title">Documentos</div>
+              <div class="home-module-sub">Gere documentos com cabe&#231;alho oficial</div>
+            </div>
+          </div>
+          <div class="home-tools-grid">
+            <button class="home-tool-card" onclick="PCDoc.open('autorizacaoSangue')">
+              <span class="home-tool-icon">&#129656;</span>
+              <span class="home-tool-name">Coleta de Sangue</span>
+              <span class="home-tool-desc">Autoriza&#231;&#227;o CONTRAN 432</span>
+            </button>
+            <button class="home-tool-card" onclick="PCDoc.open('autorizacaoCelular')">
+              <span class="home-tool-icon">&#128241;</span>
+              <span class="home-tool-name">Extens&#227;o Celular</span>
+              <span class="home-tool-desc">Autoriza&#231;&#227;o extens&#227;o dados</span>
+            </button>
+            <button class="home-tool-card home-tool-card-new" id="homeToolEntrada" style="display:none" onclick="PCDoc.open('autorizacaoEntrada')">
+              <span class="home-tool-icon">&#127968;</span>
+              <span class="home-tool-name">Entrada Resid.</span>
+              <span class="home-tool-desc">Autoriza&#231;&#227;o de acesso</span>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /home-modules -->
     </div>
 
     <!-- CHECKLIST VIEW -->
