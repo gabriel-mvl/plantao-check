@@ -911,3 +911,59 @@ body[data-theme="light"] input[type="date"] {
 .hist-open:hover  { background: var(--accent-dim); color: var(--accent); border-color: rgba(59,125,255,.3); }
 .hist-fin:hover   { background: rgba(45,212,160,.1); color: var(--success); border-color: rgba(45,212,160,.3); }
 .hist-del:hover   { background: rgba(240,84,116,.1); color: var(--danger); border-color: rgba(240,84,116,.3); }
+
+/* ── RELATÓRIO SIMPLIFICADO ── */
+.rel-plantao-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: .35rem .75rem;
+  margin-top: .6rem;
+}
+.rel-info-cell { display: flex; flex-direction: column; }
+.rel-info-cell-full { grid-column: 1 / -1; }
+
+.rel-section-block { padding: 1.1rem 1.5rem; border-top: 1px solid var(--border); }
+.rel-section-block-title {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: .88rem; margin-bottom: .75rem; letter-spacing: -.01em;
+}
+.rel-title-done { color: var(--success); }
+.rel-title-wip  { color: var(--accent); }
+.rel-empty-sub  { font-size: .82rem; color: var(--text-muted); padding: .25rem 0; }
+
+.rel-tabela {
+  width: 100%; border-collapse: collapse;
+  font-size: .83rem;
+}
+.rel-tabela th {
+  text-align: left; font-family: var(--font-display); font-weight: 700;
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-muted); padding: .35rem .5rem .35rem 0;
+  border-bottom: 1.5px solid var(--border);
+}
+.rel-tabela td {
+  padding: .55rem .5rem .55rem 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text-primary);
+}
+.rel-tabela tr:last-child td { border-bottom: none; }
+.rel-td-num  { width: 28px; color: var(--text-muted); font-family: var(--font-mono); font-size: .75rem; }
+.rel-td-tipo { font-weight: 600; }
+.rel-td-bo   { width: 110px; white-space: nowrap; }
+.rel-td-kw   { color: var(--text-secondary); font-size: .8rem; }
+.rel-linha-bo  { font-family: var(--font-mono); font-size: .78rem; color: var(--accent); }
+.rel-linha-sem { color: var(--text-muted); font-family: var(--font-mono); font-size: .78rem; }
+.rel-linha-kw  { font-size: .79rem; color: var(--text-secondary); }
+.rel-tabela-wip .rel-td-tipo { color: var(--text-secondary); }
+.rel-th-num { width: 28px; }
+
+/* ── RELATÓRIO PRINT ── */
+@media print {
+  .rel-plantao-grid { grid-template-columns: repeat(3, 1fr); gap: 2pt 8pt; }
+  .rel-section-block { padding: 8pt 14pt; }
+  .rel-section-block-title { font-size: 8.5pt; margin-bottom: 4pt; }
+  .rel-tabela th { font-size: 6.5pt; padding: 2pt 4pt 2pt 0; }
+  .rel-tabela td { font-size: 8pt; padding: 4pt 4pt 4pt 0; }
+  .rel-empty-sub { font-size: 7.5pt; }
+}
