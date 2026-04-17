@@ -1118,3 +1118,13 @@ body[data-theme="light"] input[type="date"] {
 
   @page { margin: 1.2cm; size: A4; }
 }
+
+/* ── AUTORIZAÇÃO SANGUE ── */
+.btn-print-doc {
+  padding: .52rem 1rem;
+  background: var(--bg-card); border: 1.5px solid var(--border);
+  border-radius: var(--radius); color: var(--text-secondary);
+  font-family: var(--font-display); font-weight: 700; font-size: .82rem;
+  transition: all .15s; cursor: pointer; margin-left: .45rem;
+}
+.btn-print-doc:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
