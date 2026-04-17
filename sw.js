@@ -7,20 +7,23 @@ const CACHE_NAME   = 'plantaocheck-v1';
 const CACHE_STATIC = 'plantaocheck-static-v1';
 
 // Arquivos essenciais para funcionamento offline
+// Derive base path from sw.js location (works on GitHub Pages subdirs)
+const BASE = self.location.pathname.replace('/sw.js', '');
+
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/app.html',
-  '/pre-atendimento.html',
-  '/css/style.css',
-  '/css/print.css',
-  '/js/app.js',
-  '/js/auth.js',
-  '/js/checklists.js',
-  '/js/templates.js',
-  '/js/artigos.js',
-  '/js/quesitos.js',
-  '/js/supabase.js',
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/app.html',
+  BASE + '/pre-atendimento.html',
+  BASE + '/css/style.css',
+  BASE + '/css/print.css',
+  BASE + '/js/app.js',
+  BASE + '/js/auth.js',
+  BASE + '/js/checklists.js',
+  BASE + '/js/templates.js',
+  BASE + '/js/artigos.js',
+  BASE + '/js/quesitos.js',
+  BASE + '/js/supabase.js',
 ];
 
 // ── INSTALL: pré-cache dos arquivos estáticos ─────────────────
