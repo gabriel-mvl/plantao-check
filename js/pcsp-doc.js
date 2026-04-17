@@ -363,10 +363,10 @@ PCSP_DOCS.autorizacaoSangue = {
       </p>
       <p style="text-align:justify;margin-bottom:2rem">
         Declaro que fui informado(a) de que a recusa em submeter-se ao exame acarreta a
-        penalidade prevista no art. 306, § 2º do CTB; que os resultados poderão ser utilizados
+        penalidade prevista no art. 306, § 2º do CTB; os resultados poderão ser utilizados
         como prova em processo administrativo e judicial; que a coleta será realizada por
-        profissional habilitado em unidade de saúde; e que a amostra coletada será enviada ao Instituto
-        Médico Legal (IML) para análise.
+        profissional habilitado em unidade de saúde; e que o exame será enviado ao Instituto
+        Médico Legal (IML).
       </p>
       <p style="text-align:center;margin-bottom:3rem">
         ${u.mun}, ${data}
@@ -374,6 +374,89 @@ PCSP_DOCS.autorizacaoSangue = {
       <div style="text-align:center;margin-top:3rem">
         <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
         <div>Assinatura do examinado(a)</div>
+        <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
+      </div>`;
+  },
+};
+
+// ── 2. AUTORIZAÇÃO PARA EXTRAÇÃO DE DADOS DE CELULAR ──────────
+PCSP_DOCS.autorizacaoCelular = {
+  id: 'autorizacaoCelular',
+  icone: '📱',
+  titulo: 'Autorização para Extração de Dados de Telefone Celular',
+  subtitulo: 'Manifestação livre e voluntária — art. 5º X e XII CF/88',
+  campos: [
+    { id: 'nome',      label: 'Nome completo do declarante',    placeholder: 'Ex: FULANO DE TAL' },
+    { id: 'rg',        label: 'RG',                             placeholder: 'Ex: 12.345.678-9' },
+    { id: 'endereco',  label: 'Endereço completo (com CEP)',    placeholder: 'Ex: Rua das Flores, 100, Centro, Itu/SP, CEP 13300-000' },
+    { id: 'numBO',     label: 'Número do BO',                   placeholder: 'Ex: AV0100-1/2026' },
+    { id: 'marca',     label: 'Marca e modelo do aparelho',     placeholder: 'Ex: Samsung Galaxy A54' },
+    { id: 'imei',      label: 'IMEI',                           placeholder: 'Ex: 000000000000000' },
+  ],
+  gerar(campos, u, ctx) {
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho',
+                   'julho','agosto','setembro','outubro','novembro','dezembro'];
+    const hoje  = new Date();
+    const data  = `${hoje.getDate()} de ${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
+
+    return `
+      <p style="text-align:justify;margin-bottom:1rem">
+        Eu, <strong>${campos.nome}</strong>, RG <strong>${campos.rg}</strong>,
+        residente e domiciliado(a) à <strong>${campos.endereco}</strong>, na condição de
+        indiciado(a) nos autos do BO nº <strong>${campos.numBO}</strong>,
+        DECLARO, de forma livre, expressa, voluntária e consciente, que:
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        Estou ciente de meus direitos e garantias constitucionais, especialmente os previstos
+        no art. 5º, incisos X e XII, da Constituição Federal de 1988, inclusive quanto à
+        inviolabilidade da intimidade, da vida privada e do sigilo de dados.
+      </p>
+
+      <p style="text-align:justify;margin-bottom:.6rem">
+        <strong>AUTORIZO</strong>, de maneira plena e irrestrita, a extração, espelhamento,
+        cópia, análise e preservação de todos os dados constantes no aparelho telefônico de
+        minha propriedade/posse, <strong>${campos.marca}</strong>, IMEI nº
+        <strong>${campos.imei}</strong>, incluindo:
+      </p>
+
+      <div style="margin:0 0 1rem 1.5rem">
+        <p style="margin-bottom:.3rem">a) dados armazenados localmente no dispositivo;</p>
+        <p style="margin-bottom:.3rem">b) registros de chamadas efetuadas, recebidas e não atendidas;</p>
+        <p style="margin-bottom:.3rem">c) mensagens SMS e MMS;</p>
+        <p style="margin-bottom:.3rem">d) conteúdos de aplicativos de mensagens e redes sociais (WhatsApp, Telegram, Instagram, Facebook e outros eventualmente instalados);</p>
+        <p style="margin-bottom:.3rem">e) arquivos de mídia (fotos, vídeos, áudios);</p>
+        <p style="margin-bottom:.3rem">f) contatos, agenda, anotações e documentos;</p>
+        <p style="margin-bottom:.3rem">g) histórico de navegação na internet;</p>
+        <p style="margin-bottom:.3rem">h) metadados associados a todos os conteúdos existentes no dispositivo.</p>
+      </div>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        <strong>AUTORIZO</strong> igualmente o acesso e a extração de dados vinculados às
+        contas associadas ao referido aparelho, inclusive aqueles armazenados em serviços
+        de armazenamento em nuvem (<em>cloud</em>), tais como Google Drive, iCloud, OneDrive
+        ou similares, bem como backups automáticos vinculados ao dispositivo.
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        Estou ciente de que a presente autorização implica renúncia ao sigilo dos dados
+        contidos no aparelho e nas contas a ele vinculadas, <strong>exclusivamente para
+        fins de investigação criminal</strong>.
+      </p>
+
+      <p style="text-align:justify;margin-bottom:1rem">
+        Declaro que a presente autorização é concedida sem qualquer coação, ameaça ou
+        promessa de vantagem, sendo manifestação livre da minha vontade. Por ser a
+        expressão da verdade, firmo o presente.
+      </p>
+
+      <p style="text-align:center;margin:2rem 0">
+        ${u.mun}, ${data}
+      </p>
+
+      <div style="text-align:center;margin-top:3rem">
+        <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
+        <div>Assinatura do(a) declarante</div>
         <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
       </div>`;
   },
