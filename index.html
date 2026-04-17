@@ -111,9 +111,10 @@
     // ── SERVICE WORKER ─────────────────────────────────────
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        // Use relative path to work on any subdirectory (e.g. GitHub Pages)
+        navigator.serviceWorker.register('./sw.js')
           .then(reg => console.log('[SW] Registrado:', reg.scope))
-          .catch(err => console.warn('[SW] Erro:', err));
+          .catch(err => console.warn('[SW] Erro (não crítico):', err));
       });
     }
 
