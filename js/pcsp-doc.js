@@ -620,12 +620,6 @@ PCSP_DOCS.autorizacaoEntrada = {
         <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
         <div>Assinatura do(a) declarante</div>
         <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
-      </div>
-
-      <div style="text-align:center;margin-top:2.5rem">
-        <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
-        <div>Assinatura do agente policial responsável pela diligência</div>
-        <div style="font-size:.9em;margin-top:.15rem">Nome / RG funcional / Matrícula</div>
-      </div>`;
+      </div>;
   },
 };
