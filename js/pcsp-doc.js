@@ -81,9 +81,9 @@ const PCDoc = (() => {
                   padding-bottom:.85rem;border-bottom:2px solid #000;
                   margin-bottom:1.4rem;font-family:Arial,Helvetica,sans-serif">
         <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/Bras%C3%A3o_Nacional_PCSP.png"
-             style="width:68px;height:68px;object-fit:contain;flex-shrink:0"
+             style="width:108px;height:108px;object-fit:contain;flex-shrink:0"
              alt="Brasão PCSP" />
-        <div style="font-size:10.5px;line-height:1.85;font-weight:bold;color:#000">
+        <div style="font-size:13.5px;line-height:1.85;font-weight:bold;color:#000">
           <div>${_esc(u.dept)}</div>
           ${u.div ? `<div>${_esc(u.div)}</div>` : ''}
           <div>${_esc(u.nome)}</div>
@@ -107,7 +107,7 @@ const PCDoc = (() => {
     return `
       <div style="font-family:'Times New Roman',Georgia,serif;color:#000;
                   font-size:12pt;line-height:1.85;max-width:680px;
-                  margin:0 auto;padding:.75rem 1.25rem">
+                  margin:0 auto;padding:.75rem .75rem">
         ${_headerHtml(u)}
         <div style="font-family:Arial,Helvetica,sans-serif;text-align:center;
                     font-weight:bold;font-size:13pt;margin-bottom:1.4rem;
@@ -694,10 +694,7 @@ PCSP_DOCS.autorizacaoEntrada = {
 
       <p style="text-align:justify;margin-bottom:1rem">
         Estou ciente do direito fundamental à inviolabilidade domiciliar, garantido pelo
-        art. 5º, inciso XI, da Constituição Federal de 1988, segundo o qual
-        <em>"a casa é asilo inviolável do indivíduo, ninguém nela podendo penetrar sem
-        consentimento do morador, salvo em caso de flagrante delito ou desastre, ou
-        para prestar socorro, ou, durante o dia, por determinação judicial"</em>.
+        art. 5º, inciso XI, da Constituição Federal de 1988.</em>
       </p>
 
       <p style="text-align:justify;margin-bottom:1rem">
