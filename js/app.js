@@ -341,7 +341,7 @@ function updatePdfMeta() {
   const triageEl = document.getElementById('pdfTriage');
   if (triageEl && triageAnswers.condutor) {
     const parts = [
-      triageAnswers.condutor === 'pm' ? 'Condutor: PM' : 'Condutor: GCM',
+      { pm:'Condutor: PM', gcm:'Condutor: GCM', pc:'Condutor: PC', parte:'Parte interessada' }[triageAnswers.condutor] || 'Condutor: PM',
       triageAnswers.flagrante ? 'Flagrante: Sim' : 'Flagrante: Não',
       triageAnswers.preso ? 'Preso: Sim' : 'Preso: Não',
     ];
@@ -511,8 +511,9 @@ function openTemplate(templateKey) {
 
   const body = document.getElementById('modalBody');
   body.innerHTML = tmpl.fields.map(f => {
+    const condutorTextoMap = { pm:'policial militar', gcm:'guarda municipal', pc:'policial civil', parte:'parte interessada' };
     const prefill = (f.id === 'tipoCondutor' && triageAnswers.condutor)
-      ? (triageAnswers.condutor === 'pm' ? 'policial militar' : 'guarda municipal')
+      ? (condutorTextoMap[triageAnswers.condutor] || 'policial militar')
       : '';
     return `
       <div class="modal-form-group">
@@ -768,6 +769,17 @@ function resetPlantao() {
   openPlantaoDiario();
 }
 
+async function finalizarOcorrenciaHist(rowId) {
+  if (!confirm('Marcar esta ocorrência como concluída?')) return;
+  try {
+    await DB_Ocorrencias.atualizar(rowId, { status: 'concluido', updated_at: new Date().toISOString() });
+    showToast('✓ Ocorrência finalizada');
+    openHistorico();
+  } catch(e) {
+    alert('Erro ao finalizar. Verifique sua conexão.');
+  }
+}
+
 function closePlantaoDiario() {
   document.getElementById('plantaoBackdrop').classList.add('hidden');
   document.getElementById('plantaoModal').classList.add('hidden');
@@ -802,6 +814,7 @@ async function checkPlantaoAtivo() {
   } else {
     openPlantaoModal();
   }
+  renderAndamentoSection();
 }
 
 function openPlantaoModal() {
@@ -856,6 +869,16 @@ function selectTurno(value, el) {
   el.dataset.value = value;
 }
 
+function pularPlantao() {
+  document.getElementById('plantaoInicioBackdrop')?.classList.add('hidden');
+  document.getElementById('plantaoInicioModal')?.classList.add('hidden');
+  // Render without an active plantao
+  renderNavList();
+  renderOccurrenceGrid();
+  renderRecentOccurrence();
+  renderAndamentoSection();
+}
+
 function renderAppWithPlantao() {
   // Update plantao info bar
   const bar = document.getElementById('plantaoBar');
@@ -874,6 +897,7 @@ function renderAppWithPlantao() {
   renderNavList();
   renderOccurrenceGrid();
   renderRecentOccurrence();
+  renderAndamentoSection();
 }
 
 async function encerrarPlantao() {
@@ -905,19 +929,32 @@ async function openHistorico() {
     }
     container.innerHTML = rows.map(row => {
       const dt = new Date(row.created_at).toLocaleString('pt-BR');
-      const statusLabel = row.status === 'concluido'
-        ? '<span class="hist-status done">Concluído</span>'
+      const isDone = row.status === 'concluido';
+      const statusLabel = isDone
+        ? '<span class="hist-status done">Conclu\u00eddo</span>'
         : '<span class="hist-status wip">Em andamento</span>';
-      const bo = row.num_bo ? `<span class="hist-bo">BO ${row.num_bo}</span>` : '';
-      const kw = row.palavras_chave ? `<span class="hist-kw">${row.palavras_chave}</span>` : '';
+      const bo  = row.num_bo ? `<span class="hist-bo">BO ${row.num_bo}</span>` : '';
+      const kw  = row.palavras_chave ? `<span class="hist-kw">${row.palavras_chave}</span>` : '';
+      const cs  = JSON.stringify(JSON.stringify(row.check_state));
+      const tr  = JSON.stringify(JSON.stringify(row.triage));
+      const nbo = JSON.stringify(row.num_bo||'');
+      const nkw = JSON.stringify(row.palavras_chave||'');
+      const nob = JSON.stringify(row.observacoes||'');
+      const finBtn = !isDone
+        ? `<button class="hist-action-btn hist-fin" onclick="finalizarOcorrenciaHist('${row.id}')">&#10003; Finalizar</button>`
+        : '';
       return `
-        <div class="hist-item" onclick="reabrirOcorrencia('${row.id}', '${row.tipo_id}', ${JSON.stringify(JSON.stringify(row.check_state))}, ${JSON.stringify(JSON.stringify(row.triage))}, ${JSON.stringify(row.num_bo||'')}, ${JSON.stringify(row.palavras_chave||'')}, ${JSON.stringify(row.observacoes||'')})">
-          <div class="hist-main">
+        <div class="hist-item">
+          <div class="hist-main" onclick="reabrirOcorrencia('${row.id}','${row.tipo_id}',${cs},${tr},${nbo},${nkw},${nob})">
             <span class="hist-nome">${row.tipo_nome}</span>
             ${statusLabel}
           </div>
           <div class="hist-meta">${bo}${kw}<span class="hist-dt">${dt}</span></div>
-          <button class="hist-del" onclick="event.stopPropagation();deletarOcorrencia('${row.id}')" title="Remover">🗑</button>
+          <div class="hist-action-row">
+            <button class="hist-action-btn hist-open" onclick="reabrirOcorrencia('${row.id}','${row.tipo_id}',${cs},${tr},${nbo},${nkw},${nob})">&#128065; Abrir</button>
+            ${finBtn}
+            <button class="hist-action-btn hist-del" onclick="deletarOcorrencia('${row.id}')">&#128465; Excluir</button>
+          </div>
         </div>`;
     }).join('');
   } catch(e) {
@@ -963,41 +1000,10 @@ async function deletarOcorrencia(id) {
   }
 }
 
-// ── BNMP — BUSCA DE PROCURADOS ────────────────────────────────
-function openBNMP() {
-  document.getElementById('bnmpBackdrop').classList.remove('hidden');
-  document.getElementById('bnmpModal').classList.remove('hidden');
-  document.getElementById('bnmpNome').focus();
-}
-
-function closeBNMP() {
-  document.getElementById('bnmpBackdrop').classList.add('hidden');
-  document.getElementById('bnmpModal').classList.add('hidden');
-}
-
-function buscarBNMP() {
-  const nome = document.getElementById('bnmpNome')?.value?.trim();
-  const cpf  = document.getElementById('bnmpCPF')?.value?.trim().replace(/\D/g,'');
-  const rg   = document.getElementById('bnmpRG')?.value?.trim();
-
-  if (!nome && !cpf && !rg) {
-    document.getElementById('bnmpMsg').classList.remove('hidden');
-    return;
-  }
-  document.getElementById('bnmpMsg').classList.add('hidden');
-
-  // Monta URL do BNMP com parâmetros
-  const params = new URLSearchParams();
-  if (nome) params.set('nomePessoa', nome);
-  if (cpf)  params.set('cpf', cpf);
-  // BNMP não aceita RG diretamente, mas incluímos no nome se informado
-  const nomeCompleto = nome + (rg ? ` RG ${rg}` : '');
-  if (nome) params.set('nomePessoa', nomeCompleto);
-
-  const url = `https://portalbnmp.cnj.jus.br/#/pesquisa-peca?${params.toString()}`;
-  window.open(url, '_blank', 'noopener');
-  closeBNMP();
-}
+// ── BNMP — removido (portal não aceita parâmetros externos) ──
+function openBNMP() { window.open('https://portalbnmp.cnj.jus.br', '_blank', 'noopener'); }
+function closeBNMP() {}
+function buscarBNMP() {}
 
 // ── CHECKLISTS PERSONALIZADOS ─────────────────────────────────
 window._customOccurrences = [];
@@ -1344,7 +1350,8 @@ function renderRelatorioOcorrencia(oc, num) {
     ? '<span class="rel-badge-done">Conclu&#237;do</span>'
     : '<span class="rel-badge-wip">Em andamento</span>';
 
-  const condutor = triage.condutor === 'gcm' ? 'GCM' : triage.condutor ? 'PM' : '—';
+  const condutorMap = { pm:'PM', gcm:'GCM', pc:'PC', parte:'Parte interessada' };
+  const condutor = condutorMap[triage.condutor] || (triage.condutor ? triage.condutor : '—');
   const flagrante = triage.flagrante ? 'Sim' : triage.flagrante === false ? 'Não' : '—';
   const preso = triage.preso ? 'Sim' : triage.preso === false ? 'Não' : '—';
 
@@ -1607,3 +1614,146 @@ document.addEventListener('keydown', e => {
     }
   }
 });
+
+// ── FINALIZAR CHECKLIST ───────────────────────────────────────
+async function finalizarChecklist() {
+  if (!currentOccurrence) return;
+  if (!confirm(`Finalizar "${currentOccurrence.name}"?\nIsso marca a ocorrência como concluída no histórico.`)) return;
+
+  // Mark all remaining items as done? No — just set status to concluido regardless of progress
+  const bo  = document.getElementById('metaBO')?.value || '';
+  const kw  = document.getElementById('metaKW')?.value || '';
+  const obs = document.getElementById('obsText')?.value || '';
+
+  // Force status to concluido in Supabase
+  const plantaoId = localStorage.getItem('pc_plantao_id');
+  if (plantaoId && session?.email) {
+    try {
+      const existing = await DB_Ocorrencias.listarPorPlantao(plantaoId);
+      const row = existing?.find(o => o.tipo_id === currentOccurrence.id);
+      if (row) {
+        await DB_Ocorrencias.atualizar(row.id, { status: 'concluido', updated_at: new Date().toISOString() });
+      } else {
+        await syncCheckState(currentOccurrence.id, checkState, obs, bo, kw, triageAnswers);
+        const rows2 = await DB_Ocorrencias.listarPorPlantao(plantaoId);
+        const row2  = rows2?.find(o => o.tipo_id === currentOccurrence.id);
+        if (row2) await DB_Ocorrencias.atualizar(row2.id, { status: 'concluido' });
+      }
+    } catch(e) { /* offline */ }
+  }
+
+  // Update local state
+  const key = `pc_status_${currentOccurrence.id}`;
+  localStorage.setItem(key, 'concluido');
+
+  // Show toast and go back
+  showToast(`✓ ${currentOccurrence.name} finalizado`);
+  stopOccurrenceTimer();
+  backToHome();
+}
+
+// ── TOAST NOTIFICATION ────────────────────────────────────────
+function showToast(msg) {
+  let toast = document.getElementById('appToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'appToast';
+    toast.className = 'app-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('toast-show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('toast-show'), 2800);
+}
+
+// ── SEÇÃO "EM ANDAMENTO" NA HOME ──────────────────────────────
+async function renderAndamentoSection() {
+  const el = document.getElementById('andamentoSection');
+  if (!el) return;
+
+  // Collect in-progress from localStorage first (fast)
+  const local = [];
+  const allOcc = [...OCCURRENCES, ...(window._customOccurrences || [])];
+  allOcc.forEach(occ => {
+    const saved   = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
+    const status  = localStorage.getItem(`pc_status_${occ.id}`);
+    if (saved && Object.values(saved).some(Boolean) && status !== 'concluido') {
+      const total   = occ.sections.reduce((a, s) => a + s.items.length, 0);
+      const checked = Object.values(saved).filter(Boolean).length;
+      local.push({ occ, checked, total, pct: Math.round((checked / total) * 100) });
+    }
+  });
+
+  if (!local.length) { el.innerHTML = ''; return; }
+
+  el.innerHTML = `
+    <div class="andamento-section">
+      <div class="andamento-title">&#9200; Em andamento</div>
+      ${local.map(({ occ, pct, checked, total }) => `
+        <div class="andamento-item">
+          <div class="andamento-main" onclick="startTriage('${occ.id}')">
+            <span class="andamento-icon">${occ.icon}</span>
+            <div class="andamento-info">
+              <span class="andamento-nome">${occ.name}</span>
+              <span class="andamento-prog">${checked}/${total} itens — ${pct}%</span>
+            </div>
+            <div class="andamento-bar-wrap">
+              <div class="andamento-bar-fill" style="width:${pct}%"></div>
+            </div>
+          </div>
+          <div class="andamento-btns">
+            <button class="andamento-btn-fin" onclick="finalizarChecklistById('${occ.id}')" title="Finalizar">&#10003;</button>
+            <button class="andamento-btn-del" onclick="excluirChecklistLocal('${occ.id}')" title="Excluir">&#128465;</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+async function finalizarChecklistById(occId) {
+  const occ = [...OCCURRENCES, ...(window._customOccurrences || [])].find(o => o.id === occId);
+  if (!occ || !confirm(`Finalizar "${occ.name}"?`)) return;
+  localStorage.setItem(`pc_status_${occId}`, 'concluido');
+  // Also update in Supabase if possible
+  const plantaoId = localStorage.getItem('pc_plantao_id');
+  if (plantaoId) {
+    try {
+      const rows = await DB_Ocorrencias.listarPorPlantao(plantaoId);
+      const row  = rows?.find(r => r.tipo_id === occId);
+      if (row) await DB_Ocorrencias.atualizar(row.id, { status: 'concluido' });
+    } catch(e) { /* offline */ }
+  }
+  showToast(`✓ ${occ.name} finalizado`);
+  renderAndamentoSection();
+  renderOccurrenceGrid();
+}
+
+function excluirChecklistLocal(occId) {
+  const occ = [...OCCURRENCES, ...(window._customOccurrences || [])].find(o => o.id === occId);
+  if (!occ || !confirm(`Excluir progresso de "${occ.name}"?\nIsso remove os dados locais desta ocorrência.`)) return;
+  localStorage.removeItem(`pc_check_${occId}`);
+  localStorage.removeItem(`pc_status_${occId}`);
+  localStorage.removeItem(`pc_ts_${occId}`);
+  renderAndamentoSection();
+  renderOccurrenceGrid();
+  renderRecentOccurrence();
+}
+
+// ── UPDATE backToHome to refresh andamento section ────────────
+const _origBackToHome = backToHome;
+backToHome = function() {
+  _origBackToHome();
+  renderAndamentoSection();
+};
+
+// ── FINALIZAR OCORRÊNCIA DO HISTÓRICO ────────────────────────
+async function finalizarOcorrenciaHist(rowId) {
+  if (!confirm('Marcar esta ocorrência como concluída?')) return;
+  try {
+    await DB_Ocorrencias.atualizar(rowId, { status: 'concluido', updated_at: new Date().toISOString() });
+    showToast('✓ Ocorrência finalizada');
+    openHistorico();
+  } catch(e) {
+    alert('Erro ao finalizar. Verifique sua conexão.');
+  }
+}
