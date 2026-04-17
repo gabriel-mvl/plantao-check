@@ -166,6 +166,19 @@ const PCDoc = (() => {
             </div>
           </div>`;
       }
+      if (c.type === 'select') {
+        const opts = (c.options || []).map(o =>
+          `<option value="${_esc(o.value)}">${_esc(o.label)}</option>`
+        ).join('');
+        return `
+          <div class="modal-form-group">
+            <label>${_esc(c.label)}</label>
+            <select id="pcdoc_${c.id}">
+              <option value="">Selecione...</option>
+              ${opts}
+            </select>
+          </div>`;
+      }
       return `
         <div class="modal-form-group">
           <label>${_esc(c.label)}</label>
@@ -482,6 +495,11 @@ PCSP_DOCS.autorizacaoCelular = {
     { id: 'nome',      label: 'Nome completo do declarante',    placeholder: 'Ex: FULANO DE TAL' },
     { id: 'rg',        label: 'RG',                             placeholder: 'Ex: 12.345.678-9' },
     { id: 'endereco',  label: 'Endereço completo',             type: 'address' },
+    { id: 'qualidade', label: 'Qualidade do declarante', type: 'select', options: [
+      { value: 'indiciado(a)',  label: 'Indiciado(a)'  },
+      { value: 'investigado(a)', label: 'Investigado(a)' },
+      { value: 'parte',         label: 'Parte'          },
+    ]},
     { id: 'numBO',     label: 'Número do BO',                   placeholder: 'Ex: AV0100-1/2026' },
     { id: 'marca',     label: 'Marca e modelo do aparelho',     placeholder: 'Ex: Samsung Galaxy A54' },
     { id: 'imei',      label: 'IMEI',                           placeholder: 'Ex: 000000000000000' },
@@ -496,7 +514,7 @@ PCSP_DOCS.autorizacaoCelular = {
       <p style="text-align:justify;margin-bottom:1rem">
         Eu, <strong>${campos.nome}</strong>, RG <strong>${campos.rg}</strong>,
         residente e domiciliado(a) à <strong>${campos.endereco}</strong>, na condição de
-        indiciado(a) nos autos do BO nº <strong>${campos.numBO}</strong>,
+        na condição de <strong>${campos.qualidade}</strong> nos autos do BO nº <strong>${campos.numBO}</strong>,
         DECLARO, de forma livre, expressa, voluntária e consciente, que:
       </p>
 
@@ -620,6 +638,12 @@ PCSP_DOCS.autorizacaoEntrada = {
         <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
         <div>Assinatura do(a) declarante</div>
         <div><strong>${campos.nome} — RG ${campos.rg}</strong></div>
-      </div>;
+      </div>
+
+      <div style="text-align:center;margin-top:2.5rem">
+        <div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div>
+        <div>Assinatura do agente policial responsável pela diligência</div>
+        <div style="font-size:.9em;margin-top:.15rem">Nome / RG funcional / Matrícula</div>
+      </div>`;
   },
 };
