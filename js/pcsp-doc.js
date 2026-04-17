@@ -107,7 +107,7 @@ const PCDoc = (() => {
     return `
       <div style="font-family:'Times New Roman',Georgia,serif;color:#000;
                   font-size:12pt;line-height:1.85;max-width:680px;
-                  margin:0 auto;padding:1.5rem 2rem">
+                  margin:0 auto;padding:.75rem 1.25rem">
         ${_headerHtml(u)}
         <div style="font-family:Arial,Helvetica,sans-serif;text-align:center;
                     font-weight:bold;font-size:13pt;margin-bottom:1.4rem;
@@ -413,7 +413,7 @@ const PCDoc = (() => {
         body{font-family:'Times New Roman',Georgia,serif;font-size:12pt;
              color:#000;background:#fff;padding:0;margin:0}
         strong{font-weight:bold}
-        @page{margin:2cm 2cm;size:A4}
+        @page{margin:1.2cm 1.5cm;size:A4}
         @media print{body{margin:0}}
       </style>
     </head><body>${PCDoc._lastHtml}</body>
@@ -694,11 +694,14 @@ PCSP_DOCS.autorizacaoEntrada = {
 
       <p style="text-align:justify;margin-bottom:1rem">
         Estou ciente do direito fundamental à inviolabilidade domiciliar, garantido pelo
-        art. 5º, inciso XI, da Constituição Federal de 1988.</em>
+        art. 5º, inciso XI, da Constituição Federal de 1988, segundo o qual
+        <em>"a casa é asilo inviolável do indivíduo, ninguém nela podendo penetrar sem
+        consentimento do morador, salvo em caso de flagrante delito ou desastre, ou
+        para prestar socorro, ou, durante o dia, por determinação judicial"</em>.
       </p>
 
       <p style="text-align:justify;margin-bottom:1rem">
-        Ciente disso, <strong>AUTORIZO</strong>, livremente e sem qualquer coação, ameaça ou
+        <strong>AUTORIZO</strong>, livremente e sem qualquer coação, ameaça ou
         promessa de vantagem, o ingresso de agentes da Polícia Civil do Estado de
         São Paulo no referido imóvel, bem como a realização de diligências de
         busca e apreensão necessárias à investigação policial em curso, nos termos
