@@ -967,3 +967,74 @@ body[data-theme="light"] input[type="date"] {
   .rel-tabela td { font-size: 8pt; padding: 4pt 4pt 4pt 0; }
   .rel-empty-sub { font-size: 7.5pt; }
 }
+
+/* ── APP SPLASH (session recovery) ── */
+.app-splash {
+  position: fixed; inset: 0; z-index: 9998;
+  background: var(--bg-base);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .35s;
+}
+.app-splash.splash-fade { opacity: 0; pointer-events: none; }
+.splash-inner { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.splash-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+.splash-inner span { font-size: .85rem; color: var(--text-muted); font-family: var(--font-mono); }
+
+/* ── RESEND COUNTDOWN ── */
+.resend-area {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .55rem; margin-top: .25rem;
+}
+.resend-countdown {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .55rem .9rem;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: .82rem; color: var(--text-secondary);
+  font-family: var(--font-body); line-height: 1.4;
+}
+.resend-countdown strong { color: var(--accent); font-family: var(--font-mono); font-size: .88rem; }
+.resend-wait-icon { font-size: 1rem; }
+.btn-resend {
+  width: 100%; padding: .6rem;
+  background: var(--bg-card); border: 1.5px solid var(--border);
+  border-radius: var(--radius); color: var(--text-secondary);
+  font-family: var(--font-display); font-weight: 700; font-size: .84rem;
+  transition: all .18s; cursor: pointer;
+}
+.btn-resend:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.btn-resend:disabled { opacity: .5; cursor: not-allowed; }
+.auth-link {
+  font-size: .8rem; color: var(--text-muted);
+  text-decoration: none; transition: color .15s;
+}
+.auth-link:hover { color: var(--accent); }
+
+/* ── PWA INSTALL BANNER ── */
+.install-banner {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+  margin-top: 1rem; padding: .75rem 1rem;
+  background: var(--accent-dim); border: 1.5px solid rgba(59,125,255,.25);
+  border-radius: var(--radius-lg);
+  font-size: .82rem; color: var(--text-secondary);
+  animation: celebIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+.install-icon { font-size: 1.2rem; flex-shrink: 0; }
+.install-banner span { flex: 1; }
+.install-banner button:first-of-type {
+  padding: .38rem .85rem;
+  background: var(--accent); color: #fff;
+  border-radius: var(--radius); font-weight: 700;
+  font-size: .8rem; flex-shrink: 0;
+}
+.install-banner button:first-of-type:hover { background: #2563eb; }
+.install-close {
+  background: none !important; color: var(--text-muted) !important;
+  font-size: 1rem; padding: .2rem .4rem !important;
+  flex-shrink: 0;
+}
