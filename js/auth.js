@@ -111,19 +111,26 @@ function clearCodeInputs() {
 // ── EMAIL SEND ───────────────────────────────────────────────
 async function sendCodeEmail(toEmail, code) {
   if (!EMAILJS_CONFIGURED) {
+    console.error('[EmailJS] Credenciais não configuradas');
     return { ok: false, error: 'EmailJS não configurado' };
   }
   try {
-    if (!window.emailjs) await loadEmailJS();
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    await loadEmailJS();
+
+    // EmailJS v4: init recebe objeto de opções
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
       { to_email: toEmail, code }
     );
+
+    console.log('[EmailJS] Resposta:', response);
     return response.status === 200 ? { ok: true } : { ok: false, error: response.text };
   } catch (err) {
-    return { ok: false, error: err };
+    console.error('[EmailJS] Erro ao enviar:', err);
+    return { ok: false, error: String(err?.text || err?.message || err) };
   }
 }
 
@@ -132,8 +139,8 @@ function loadEmailJS() {
     if (window.emailjs) { resolve(); return; }
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-    script.onload = resolve;
-    script.onerror = reject;
+    script.onload = () => { console.log('[EmailJS] SDK carregado'); resolve(); };
+    script.onerror = () => { console.error('[EmailJS] Falha ao carregar SDK'); reject(new Error('SDK load failed')); };
     document.head.appendChild(script);
   });
 }
@@ -164,7 +171,9 @@ async function handleRequestCode() {
   btn.disabled = false;
 
   if (!result.ok) {
-    return showMsg('emailMsg', 'Não foi possível enviar o código. Verifique o e-mail ou contate o administrador.');
+    const detail = typeof result.error === 'string' ? ` (${result.error})` : '';
+    console.error('[Auth] Falha no envio:', result.error);
+    return showMsg('emailMsg', `Não foi possível enviar o código. Tente novamente ou contate o administrador.${detail}`);
   }
 
   document.getElementById('verifyEmailDisplay').textContent = email;
