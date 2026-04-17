@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plantão Check — Acesso</title>
+  <meta name="theme-color" content="#0f1623" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PlantãoCheck" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="auth-page">
@@ -64,11 +71,16 @@
 
       <button class="btn-primary" onclick="handleVerify()">Entrar</button>
 
-      <p class="auth-switch">
-        <a href="#" onclick="resendCode()">Reenviar c&#243;digo</a>
-        &nbsp;&middot;&nbsp;
-        <a href="#" onclick="switchPanel('emailPanel')">Usar outro e-mail</a>
-      </p>
+      <div class="resend-area">
+        <div class="resend-countdown hidden" id="resendCountdown">
+          <span class="resend-wait-icon">&#8987;</span>
+          Aguarde <strong id="resendTimer">1:30</strong> para solicitar um novo c&#243;digo
+        </div>
+        <button class="btn-resend hidden" id="btnResend" onclick="resendCode()">
+          &#8635; Reenviar c&#243;digo
+        </button>
+        <a href="#" class="auth-link" onclick="switchPanel('emailPanel')">Usar outro e-mail</a>
+      </div>
     </div>
 
     <!-- AVISO LEGAL -->
@@ -84,8 +96,48 @@
 
     <div class="app-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
 
+    <!-- PWA INSTALL BANNER -->
+    <div class="install-banner hidden" id="installBanner">
+      <span class="install-icon">&#128241;</span>
+      <span>Instale o app na tela inicial para acesso r&#225;pido</span>
+      <button onclick="installPWA()">Instalar</button>
+      <button class="install-close" onclick="this.closest('.install-banner').classList.add('hidden')">&#215;</button>
+    </div>
+
   </div>
 
   <script src="js/auth.js"></script>
+  <script>
+    // ── SERVICE WORKER ─────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[SW] Registrado:', reg.scope))
+          .catch(err => console.warn('[SW] Erro:', err));
+      });
+    }
+
+    // ── PWA INSTALL PROMPT ─────────────────────────────────
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('installBanner');
+      if (banner) banner.classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('installBanner')?.classList.add('hidden');
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBanner')?.classList.add('hidden');
+    });
+  </script>
 </body>
 </html>
