@@ -1173,81 +1173,56 @@ body[data-theme="light"] input[type="date"] {
 .pcdoc-addr-row2 { display: flex; gap: .4rem; }
 .pcdoc-addr-row2 input { flex: 1; }
 
-/* ── HOME LAYOUT (2 colunas) ── */
-.home-layout {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  max-width: 1200px;
-  align-items: start;
+/* ── HOME SHORTCUTS ── */
+.home-shortcuts {
+  padding: 1rem 1.5rem .25rem;
+  display: flex; flex-direction: column; gap: .75rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: .25rem;
 }
-.home-col-main { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
-.home-col-side  { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
-
-.home-module {
+.home-shortcut-group { display: flex; flex-direction: column; gap: .4rem; }
+.home-shortcut-label {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text-muted);
+  font-family: var(--font-display);
+}
+.home-shortcut-row {
+  display: flex; flex-wrap: wrap; gap: .4rem;
+}
+.home-sc {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .38rem .75rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.2rem;
+  border-radius: var(--radius);
+  font-family: var(--font-display); font-weight: 600;
+  font-size: .8rem; color: var(--text-secondary);
+  cursor: pointer; white-space: nowrap;
+  transition: border-color .15s, color .15s, background .15s;
 }
-
-.home-module-header {
-  display: flex; align-items: center; gap: .75rem;
-  margin-bottom: .9rem;
-  flex-wrap: wrap;
-}
-.home-module-icon {
-  font-size: 1.2rem; flex-shrink: 0;
-  width: 36px; height: 36px;
-  display: flex; align-items: center; justify-content: center;
+.home-sc:hover {
+  border-color: rgba(59,125,255,.4);
+  color: var(--accent);
   background: var(--accent-dim);
-  border: 1px solid rgba(59,125,255,.2);
-  border-radius: var(--radius);
-}
-.home-module-title {
-  font-family: var(--font-display);
-  font-weight: 800; font-size: .95rem;
-  color: var(--text-primary);
-  letter-spacing: -.02em;
-}
-.home-module-sub {
-  font-size: .76rem; color: var(--text-secondary);
-  margin-top: .08rem; line-height: 1.4;
 }
 
-/* ── HOME TOOLS GRID ── */
-.home-tools-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-  gap: .55rem;
+/* ── HOME OCCURRENCE SECTION ── */
+.home-occ-section {
+  padding: 1rem 1.5rem 1.5rem;
 }
-.home-tools-grid-2col {
-  grid-template-columns: 1fr 1fr;
+.home-occ-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: .9rem; flex-wrap: wrap;
 }
-.home-tool-card {
-  display: flex; flex-direction: column; align-items: flex-start;
-  gap: .18rem; padding: .75rem .85rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer; text-align: left;
-  transition: border-color .18s, background .18s, transform .14s;
+.home-occ-title {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 1rem; color: var(--text-primary);
+  letter-spacing: -.02em; flex-shrink: 0;
 }
-.home-tool-card:hover {
-  border-color: rgba(59,125,255,.35);
-  background: var(--bg-hover);
-  transform: translateY(-2px);
+.home-occ-actions {
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
 }
-.home-tool-icon { font-size: 1.25rem; margin-bottom: .12rem; }
-.home-tool-name {
-  font-family: var(--font-display); font-weight: 700;
-  font-size: .83rem; color: var(--text-primary); line-height: 1.25;
-}
-.home-tool-desc {
-  font-size: .7rem; color: var(--text-secondary);
-  line-height: 1.4;
-}
+.home-occ-actions .home-search { width: 200px; margin: 0; }
 
 /* ── LEGIBILIDADE GLOBAL — melhorias de contraste ── */
 .cl-item { color: var(--text-primary); }
@@ -1279,12 +1254,10 @@ body[data-theme="light"] input[type="date"] {
 .occ-name { font-size: .92rem; }
 .occ-count { font-size: .74rem; }
 
-@media (max-width: 900px) {
-  .home-layout { grid-template-columns: 1fr; }
-}
 @media (max-width: 768px) {
-  .home-layout { padding: .9rem; gap: .9rem; }
-  .home-tools-grid, .home-tools-grid-2col { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .home-shortcuts { padding: .85rem 1rem .2rem; }
+  .home-occ-section { padding: .85rem 1rem 1.25rem; }
+  .home-occ-actions .home-search { width: 140px; }
 }
 
 /* ── PCDOC TOGGLE FIELD ── */
