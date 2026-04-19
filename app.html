@@ -327,7 +327,7 @@
 
   <!-- MODAL ABERTURA DE PLANTÃO -->
   <div class="modal-backdrop hidden" id="plantaoInicioBackdrop"></div>
-  <div class="modal hidden" id="plantaoInicioModal" style="max-width:460px">
+  <div class="modal hidden" id="plantaoInicioModal" style="max-width:480px">
     <div class="modal-header">
       <div>
         <h3>Abrir Plant&#227;o</h3>
@@ -335,7 +335,7 @@
       </div>
       <button onclick="pularPlantao()" title="Continuar sem abrir plant&#227;o">&#215;</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
       <div class="modal-form-group">
         <label>Data do plant&#227;o</label>
         <input type="date" id="plantaoData" />
@@ -349,12 +349,20 @@
         </div>
       </div>
       <div class="modal-form-group">
-        <label>Delegacia</label>
-        <input type="text" id="plantaoDelegacia" placeholder="Ex: 1ª DP de Sorocaba" />
+        <label>Departamento</label>
+        <select id="plantaoDept" onchange="onPlantaoDeptChange()">
+          <option value="">Selecione o departamento...</option>
+        </select>
       </div>
       <div class="modal-form-group">
-        <label>Delegado plantonista</label>
-        <input type="text" id="plantaoDelegado" placeholder="Nome do delegado" />
+        <label>Unidade policial</label>
+        <select id="plantaoUnidade" disabled onchange="onPlantaoUnidadeChange()">
+          <option value="">Selecione o departamento primeiro</option>
+        </select>
+      </div>
+      <div class="modal-form-group">
+        <label>Delegado(a) plantonista</label>
+        <input type="text" id="plantaoDelegado" placeholder="Nome do(a) delegado(a)" />
       </div>
       <div id="plantaoInicioMsg" class="auth-msg error hidden"></div>
     </div>
