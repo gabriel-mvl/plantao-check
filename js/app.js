@@ -863,14 +863,71 @@ function openPlantaoModal() {
   // Set today's date
   const today = new Date().toISOString().split('T')[0];
   const dateEl = document.getElementById('plantaoData');
-  if (dateEl) dateEl.value = today;
+  if (dateEl && !dateEl.value) dateEl.value = today;
+  // Populate dept select from PCSP_UNITS (lazy)
+  const deptSel = document.getElementById('plantaoDept');
+  if (deptSel && deptSel.options.length <= 1 && typeof PCSP_UNITS !== 'undefined') {
+    const seen = new Set();
+    const depts = [];
+    PCSP_UNITS.forEach(u => {
+      if (!seen.has(u.dept_raw)) { seen.add(u.dept_raw); depts.push({ raw: u.dept_raw, label: u.dept }); }
+    });
+    depts.sort((a, b) => a.raw.localeCompare(b.raw, 'pt-BR'));
+    depts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.raw; opt.textContent = d.label;
+      deptSel.appendChild(opt);
+    });
+  }
+}
+
+function onPlantaoDeptChange() {
+  const deptRaw = document.getElementById('plantaoDept')?.value;
+  const unitSel = document.getElementById('plantaoUnidade');
+  if (!unitSel) return;
+  if (!deptRaw) {
+    unitSel.innerHTML = '<option value="">Selecione o departamento primeiro</option>';
+    unitSel.disabled = true;
+    return;
+  }
+  const units = (typeof PCSP_UNITS !== 'undefined' ? PCSP_UNITS : [])
+    .filter(u => u.dept_raw === deptRaw)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  unitSel.innerHTML = '<option value="">Selecione a unidade...</option>' +
+    units.map((u, i) => `<option value="${i}|${u.dept_raw}">${u.nome}${u.mun && u.mun !== u.nome ? ' — ' + u.mun : ''}</option>`).join('');
+  unitSel.disabled = false;
+  // store filtered list
+  unitSel._units = units;
+}
+
+function onPlantaoUnidadeChange() {
+  const unitSel = document.getElementById('plantaoUnidade');
+  const val = unitSel?.value;
+  if (!val || !unitSel._units) return;
+  const idx = parseInt(val.split('|')[0]);
+  const u = unitSel._units[idx];
+  if (!u) return;
+  // Auto-fill hidden delegacia field
+  const delEl = document.getElementById('plantaoDelegacia');
+  if (delEl) delEl.value = u.nome;
 }
 
 async function confirmarAberturaPlan() {
-  const data      = document.getElementById('plantaoData')?.value;
-  const turno     = document.querySelector('.turno-opt.selected')?.dataset.value;
-  const delegacia = document.getElementById('plantaoDelegacia')?.value?.trim();
-  const delegado  = document.getElementById('plantaoDelegado')?.value?.trim();
+  const data    = document.getElementById('plantaoData')?.value;
+  const turno   = document.querySelector('.turno-opt.selected')?.dataset.value;
+  const delegado = document.getElementById('plantaoDelegado')?.value?.trim();
+
+  // Get delegacia from unit selector or fallback text field
+  const unitSel = document.getElementById('plantaoUnidade');
+  const unitVal = unitSel?.value;
+  let delegacia = '';
+  let plantaoUnidadeObj = null;
+  if (unitVal && unitSel._units) {
+    const idx = parseInt(unitVal.split('|')[0]);
+    plantaoUnidadeObj = unitSel._units[idx] || null;
+    if (plantaoUnidadeObj) delegacia = plantaoUnidadeObj.nome;
+  }
+  if (!delegacia) delegacia = document.getElementById('plantaoDelegacia')?.value?.trim() || '';
 
   const msg = document.getElementById('plantaoInicioMsg');
 
