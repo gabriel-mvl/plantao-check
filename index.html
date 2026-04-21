@@ -39,7 +39,20 @@
 
       <div class="form-group">
         <label>E-mail institucional</label>
-        <input type="email" id="loginEmail" placeholder="nome@orgao.gov.br" autocomplete="email" autofocus />
+        <div class="email-split-wrap">
+          <input type="text" id="loginUser" placeholder="nome.sobrenome"
+                 autocomplete="username" autofocus
+                 oninput="syncLoginEmail()" onkeydown="if(event.key==='Tab'){event.preventDefault();document.getElementById('loginSuffix').focus()}" />
+          <select id="loginSuffix" onchange="syncLoginEmail()">
+            <option value="@policiacivil.sp.gov.br">@policiacivil.sp.gov.br</option>
+            <option value="outro">Outro sufixo...</option>
+          </select>
+        </div>
+        <input type="text" id="loginSuffixCustom" class="hidden"
+               placeholder="@orgao.gov.br"
+               style="margin-top:.4rem"
+               oninput="syncLoginEmail()" />
+        <input type="hidden" id="loginEmail" />
       </div>
 
       <div id="emailMsg" class="auth-msg hidden"></div>
@@ -90,19 +103,14 @@
         Este aplicativo &#233; uma ferramenta de apoio operacional desenvolvida de forma independente.
         <strong>N&#227;o possui qualquer v&#237;nculo institucional</strong> com a Pol&#237;cia Civil do
         Estado de S&#227;o Paulo ou com qualquer &#243;rg&#227;o p&#250;blico.
+        <strong>Nenhum dado inserido &#233; armazenado em servidores externos.</strong>
         O uso &#233; de responsabilidade exclusiva do usu&#225;rio.
       </span>
     </div>
 
     <div class="app-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
 
-    <!-- PWA INSTALL BANNER -->
-    <div class="install-banner hidden" id="installBanner">
-      <span class="install-icon">&#128241;</span>
-      <span>Instale o app na tela inicial para acesso r&#225;pido</span>
-      <button onclick="installPWA()">Instalar</button>
-      <button class="install-close" onclick="this.closest('.install-banner').classList.add('hidden')">&#215;</button>
-    </div>
+
 
   </div>
 
@@ -118,27 +126,7 @@
       });
     }
 
-    // ── PWA INSTALL PROMPT ─────────────────────────────────
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', e => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const banner = document.getElementById('installBanner');
-      if (banner) banner.classList.remove('hidden');
-    });
 
-    function installPWA() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => {
-        deferredPrompt = null;
-        document.getElementById('installBanner')?.classList.add('hidden');
-      });
-    }
-
-    window.addEventListener('appinstalled', () => {
-      document.getElementById('installBanner')?.classList.add('hidden');
-    });
   </script>
 </body>
 </html>
