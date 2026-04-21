@@ -1287,3 +1287,43 @@ body[data-theme="light"] input[type="date"] {
 }
 #plantaoInicioModal select:focus { border-color: var(--border-focus); box-shadow: var(--shadow-glow); }
 #plantaoInicioModal select:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── RELATÓRIO — formulário de entrada manual ── */
+.rel-add-form {
+  padding: .75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+.rel-add-fields {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.rel-add-fields input[type="text"] {
+  padding: .5rem .7rem;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-primary);
+  font-size: .84rem; outline: none; min-width: 0;
+  transition: border-color .18s;
+}
+.rel-add-fields input[type="text"]:focus { border-color: var(--border-focus); box-shadow: var(--shadow-glow); }
+.rel-flag-label {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .82rem; color: var(--text-secondary);
+  font-family: var(--font-display); font-weight: 600;
+  white-space: nowrap; cursor: pointer; flex-shrink: 0;
+}
+.rel-flag-label input[type="checkbox"] {
+  width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer;
+}
+
+/* ── PLANTÃO BAR — botão editar ── */
+.plantao-bar-btns { display: flex; align-items: center; gap: .4rem; }
+.plantao-bar-btn-edit {
+  background: rgba(255,255,255,.08) !important;
+  font-size: .75rem !important;
+}
+
+/* ── PRINT: hide form, show table only ── */
+@media print {
+  .rel-add-form { display: none !important; }
+  .rel-td-del   { display: none !important; }
+}
