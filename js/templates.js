@@ -247,6 +247,9 @@ const TEMPLATES = {
     fields: [
       { id: 'comunicanteNome',       label: 'Nome do comunicante',                     placeholder: 'Ex: MARIA DA SILVA' },
       { id: 'comunicanteParentesco', label: 'Parentesco com o desaparecido',            placeholder: 'Ex: mae / companheiro / amigo' },
+      { id: 'comunicanteGenero', label: 'Genero do comunicante', type: 'select',
+        options: [{ value: 'F', label: 'Feminino' }, { value: 'M', label: 'Masculino' }]
+      },
       { id: 'genero', label: 'Genero do desaparecido', type: 'select',
         options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }]
       },
@@ -310,41 +313,61 @@ const TEMPLATES = {
       { id: 'locaisFrequentados', label: 'Locais frequentados',        placeholder: 'Ex: academia na Rua X', required: false },
     ],
     generate: function(f) {
-      var masc    = (f.genero || 'M') === 'M';
-      var o_a     = masc ? 'o' : 'a';
-      var do_da   = masc ? 'do' : 'da';
-      var O_A     = masc ? 'O' : 'A';
-      var nome    = f.nome || '[NOME DO DESAPARECIDO]';
-      var pri     = nome.trim().split(' ')[0];
-      var comunic = f.comunicanteNome ? f.comunicanteNome.trim().split(' ')[0] : 'o comunicante';
-      var doc     = f.rg ? ', portador' + (masc ? '' : 'a') + ' do RG/CPF ' + f.rg : '';
+      var masc      = (f.genero || 'M') === 'M';
+      var cMasc     = (f.comunicanteGenero || 'F') === 'M';
+      var o_a       = masc ? 'o' : 'a';
+      var do_da     = masc ? 'do' : 'da';
+      var O_A       = masc ? 'O' : 'A';
+      var oc_ac     = cMasc ? 'O' : 'A';
+      var declarante = cMasc ? 'o declarante' : 'a declarante';
+      var cientif_c = cMasc ? 'cientificado' : 'cientificada';
+      var nome      = f.nome || '[NOME DO DESAPARECIDO]';
+      var pri       = nome.trim().split(' ')[0];
+      var comunic   = f.comunicanteNome ? f.comunicanteNome.trim().split(' ')[0] : (cMasc ? 'o comunicante' : 'a comunicante');
+      var doc       = f.rg ? ', portador' + (masc ? '' : 'a') + ' do RG/CPF ' + f.rg : '';
 
+      // P1 — identificacao
       var p1 = 'Comparece nesta unidade policial ' + (f.comunicanteNome || '[COMUNICANTE]') + ', ' + (f.comunicanteParentesco || '[PARENTESCO]') + ' ' + do_da + ' desaparecid' + o_a + ', noticiando o desaparecimento de ' + nome + ', do sexo ' + (masc ? 'masculino' : 'feminino') + ', nascid' + o_a + ' em ' + (f.dataNasc || '[DATA DE NASCIMENTO]') + doc + '.';
 
+      // P2 — descricao fisica
       var sinais = f.sinais ? ' Apresenta os seguintes sinais particulares: ' + f.sinais + '.' : '';
-      var p2 = O_A + ' desaparecid' + o_a + ' e descrit' + o_a + ' com aproximadamente ' + (f.altura || '[ALTURA]') + ' de altura, ' + (f.peso || '[PESO]') + ', cor da pele ' + (f.corPele || '[COR DA PELE]') + ', cabelo ' + (f.cabelo || '[CABELO]') + ', olhos ' + (f.olhos || '[OLHOS]') + '.' + sinais + ' No momento do desaparecimento, vestia ' + (f.vestimenta || '[VESTIMENTA]') + '.';
+      var p2 = O_A + ' desaparecid' + o_a + ' \u00e9 descrit' + o_a + ' com aproximadamente ' + (f.altura || '[ALTURA]') + ' de altura, ' + (f.peso || '[PESO]') + ', cor da pele ' + (f.corPele || '[COR DA PELE]') + ', cabelo ' + (f.cabelo || '[CABELO]') + ', olhos ' + (f.olhos || '[OLHOS]') + '.' + sinais + ' No momento do desaparecimento, vestia ' + (f.vestimenta || '[VESTIMENTA]') + '.';
 
-      var p3 = 'Segundo ' + comunic + ', ' + pri + ' foi vist' + o_a + ' pela ultima vez em ' + (f.ultimoLocal || '[LOCAL]') + ', em ' + (f.dataHora || '[DATA E HORA]') + ', quando ' + (f.ultimoContato || '[ULTIMO CONTATO]') + '. A saida mostrou-se ' + (f.saidaVoluntaria || 'em circunstancias nao esclarecidas') + '. Desde entao nao ha noticias do seu paradeiro.';
+      // P3 — circunstancias
+      var contato = f.ultimoContato || '[ULTIMO CONTATO]';
+      var p3 = 'Segundo ' + comunic + ', ' + pri + ' foi vist' + o_a + ' pela \u00faltima vez em ' + (f.ultimoLocal || '[LOCAL]') + ', em ' + (f.dataHora || '[DATA E HORA]') + ', oportunidade em que ' + contato + '. A sa\u00edda mostrou-se ' + (f.saidaVoluntaria || 'em circunst\u00e2ncias n\u00e3o esclarecidas') + '. Desde ent\u00e3o n\u00e3o h\u00e1 not\u00edcias do seu paradeiro.';
 
-      var intencao = (f.intencaoSuicida && f.intencaoSuicida !== 'nao')
-        ? ' Consta ainda que ' + pri + ' ' + f.intencaoSuicida + ' anteriormente ao desaparecimento.' : '';
+      // P4 — contexto sensivel
+      var intencaoMap = {
+        'sim, tendo manifestado intencao de se machucar': 'havia manifestado inten\u00e7\u00e3o de se machucar anteriormente ao desaparecimento',
+        'sim, tendo manifestado intencao de desaparecer': 'havia manifestado inten\u00e7\u00e3o de desaparecer anteriormente',
+      };
+      var intencao = (f.intencaoSuicida && f.intencaoSuicida !== 'nao' && intencaoMap[f.intencaoSuicida])
+        ? ' Consta ainda que ' + pri + ' ' + intencaoMap[f.intencaoSuicida] + '.' : '';
       var suspeito = f.suspeito
-        ? ' O comunicante apontou ' + f.suspeito + ' como pessoa com quem ' + pri + ' mantinha relacionamento conflituoso.' : '';
-      var desBefore = (f.desapareceuAntes && f.desapareceuAntes !== 'nao')
-        ? pri + ' ja desapareceu anteriormente, ' + f.desapareceuAntes + '.'
+        ? ' ' + oc_ac + ' comunicante apontou ' + f.suspeito + ' como pessoa com quem ' + pri + ' mantinha relacionamento conflituoso.' : '';
+      var desMap = {
+        'sim, tendo retornado voluntariamente': 'j\u00e1 havia desaparecido anteriormente, tendo retornado voluntariamente',
+        'sim, sendo localizado por terceiros':  'j\u00e1 havia desaparecido anteriormente, tendo sido localizado por terceiros',
+      };
+      var desBefore = (f.desapareceuAntes && desMap[f.desapareceuAntes])
+        ? pri + ' ' + desMap[f.desapareceuAntes] + '.'
         : pri + ' nunca havia desaparecido anteriormente.';
-      var p4 = 'O comunicante informou que ' + pri + ' ' + (f.transtornoMental || 'nao apresenta historico conhecido de transtorno mental ou uso de substancias psicoativas') + '. Informou ainda que ' + desBefore + ' Quanto a situacao pessoal recente, ' + (f.conflitos || 'nao havia conflitos conhecidos') + '. Relatou que ' + (f.ameacas || 'nao havia relatos de ameacas ou violencia domestica') + '.' + intencao + suspeito;
+      var p4 = oc_ac + ' comunicante informou que ' + pri + ' ' + (f.transtornoMental || 'n\u00e3o apresenta hist\u00f3rico conhecido de transtorno mental ou uso de subst\u00e2ncias psicoativas') + '. Informou ainda que ' + desBefore + ' Quanto \u00e0 situa\u00e7\u00e3o pessoal recente, ' + (f.conflitos || 'n\u00e3o havia conflitos conhecidos') + '. Relatou que ' + (f.ameacas || 'n\u00e3o havia relatos de amea\u00e7as ou viol\u00eancia dom\u00e9stica') + '.' + intencao + suspeito;
 
+      // P5 — meios de localizacao
       var meios = [];
       if (f.celular)            meios.push('celular: ' + f.celular);
       if (f.redesSociais)       meios.push('redes sociais: ' + f.redesSociais);
-      if (f.veiculo)            meios.push('veiculo: ' + f.veiculo);
+      if (f.veiculo)            meios.push('ve\u00edculo: ' + f.veiculo);
       if (f.locaisFrequentados) meios.push('locais frequentados: ' + f.locaisFrequentados);
-      var p5 = meios.length ? 'Para fins de localizacao, foram fornecidas as seguintes informacoes: ' + meios.join('; ') + '.' : '';
+      var p5 = meios.length ? 'Para fins de localiza\u00e7\u00e3o, foram fornecidas as seguintes informa\u00e7\u00f5es: ' + meios.join('; ') + '.' : '';
 
-      var pFinal = 'Diante do exposto, a Autoridade Policial determinou a lavratura do presente boletim de ocorrencia, adotando-se as providencias legais cabiveis, incluindo o lancamento ' + do_da + ' desaparecid' + o_a + ' nos sistemas policiais competentes (SIGO/SCC/BNMP) e a comunicacao ao Ministerio Publico.';
+      // Paragrafos finais
+      var pFinal1 = 'Diante do exposto, a Autoridade Policial determinou a lavratura do presente boletim de ocorr\u00eancia, determinando o lan\u00e7amento de ' + nome + ' nos sistemas policiais na condi\u00e7\u00e3o de pessoa desaparecida, bem como as demais comunica\u00e7\u00f5es de praxe.';
+      var pFinal2 = 'Por fim, ' + declarante + ' foi ' + cientif_c + ' quanto \u00e0 necessidade de comparecer a uma unidade policial para registro de boletim de ocorr\u00eancia de \u201cencontro de pessoa\u201d na hip\u00f3tese de ' + o_a + ' desaparecid' + o_a + ' vir a ser localizado/a.';
 
-      return [p1, p2, p3, p4, p5, pFinal].filter(Boolean).join('\n\n');
+      return [p1, p2, p3, p4, p5, pFinal1, pFinal2].filter(Boolean).join('\n\n')
     }
   },
 
