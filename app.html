@@ -87,146 +87,150 @@
       <div id="recentOccurrence"></div>
       <div id="andamentoSection"></div>
 
-      <div class="home-grid">
+      <div class="home-sections">
 
-        <!-- CHECKLISTS — card principal -->
-        <div class="home-card home-card-checklist" onclick="openChecklistModal()">
-          <div class="home-card-icon">&#9989;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Checklist de Ocorr&#234;ncia</div>
-            <div class="home-card-sub">Selecionar tipo e abrir checklist</div>
+        <!-- PLANTÃO -->
+        <div class="home-section">
+          <div class="home-section-title">Plant&#227;o</div>
+          <div class="home-grid">
+            <div class="home-card home-card-checklist" onclick="openChecklistModal()">
+              <div class="home-card-icon">&#9989;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Checklist de Ocorr&#234;ncia</div>
+                <div class="home-card-sub">Selecionar tipo e abrir checklist</div>
+              </div>
+              <div class="home-card-arrow">&#8594;</div>
+            </div>
+            <div class="home-card" onclick="openRelatorio()">
+              <div class="home-card-icon">&#128196;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Relat&#243;rio do Plant&#227;o</div>
+                <div class="home-card-sub">Registre e imprima os BOs do turno</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openPlantaoDiario()">
+              <div class="home-card-icon">&#9200;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Rotina do Plant&#227;o</div>
+                <div class="home-card-sub">Procedimentos obrigat&#243;rios do turno</div>
+              </div>
+            </div>
           </div>
-          <div class="home-card-arrow">&#8594;</div>
         </div>
 
         <!-- FERRAMENTAS -->
-        <div class="home-card" onclick="openRelatorio()">
-          <div class="home-card-icon">&#128196;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Relat&#243;rio do Plant&#227;o</div>
-            <div class="home-card-sub">Registre e imprima os BOs do turno</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openEmailMenu()">
-          <div class="home-card-icon">&#128231;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Modelos de E-mail</div>
-            <div class="home-card-sub">Preencha e copie comunicados oficiais</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openQuesitosMenu()">
-          <div class="home-card-icon">&#128203;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Quesitos Periciais</div>
-            <div class="home-card-sub">Manual oficial da PCSP por crime</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openArtigosMenu()">
-          <div class="home-card-icon">&#9878;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Legisla&#231;&#227;o</div>
-            <div class="home-card-sub">CP, CPP e leis extravagantes</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="window.open('pre-atendimento.html','_blank')">
-          <div class="home-card-icon">&#128221;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Pr&#233;-Atendimento</div>
-            <div class="home-card-sub">Ficha para espontaneamente apresentados</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openPlantaoDiario()">
-          <div class="home-card-icon">&#9200;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Rotina do Plant&#227;o</div>
-            <div class="home-card-sub">Procedimentos obrigat&#243;rios do turno</div>
+        <div class="home-section">
+          <div class="home-section-title">Ferramentas</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="openEmailMenu()">
+              <div class="home-card-icon">&#128231;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Modelos de E-mail</div>
+                <div class="home-card-sub">Preencha e copie comunicados oficiais</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openQuesitosMenu()">
+              <div class="home-card-icon">&#128203;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Quesitos Periciais</div>
+                <div class="home-card-sub">Manual oficial da PCSP por crime</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openArtigosMenu()">
+              <div class="home-card-icon">&#9878;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Legisla&#231;&#227;o</div>
+                <div class="home-card-sub">CP, CPP e leis extravagantes</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="window.open('pre-atendimento.html','_blank')">
+              <div class="home-card-icon">&#128221;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Pr&#233;-Atendimento</div>
+                <div class="home-card-sub">Ficha para espontaneamente apresentados</div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- DOCUMENTOS -->
-        <div class="home-section-label">Documentos Oficiais</div>
-
-        <div class="home-card" onclick="PCDoc.open('autorizacaoSangue')">
-          <div class="home-card-icon">&#129656;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Coleta de Sangue</div>
-            <div class="home-card-sub">Autoriza&#231;&#227;o — CONTRAN 432/2013</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="PCDoc.open('autorizacaoCelular')">
-          <div class="home-card-icon">&#128241;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Extra&#231;&#227;o de Celular</div>
-            <div class="home-card-sub">Autoriza&#231;&#227;o de acesso a dados</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="PCDoc.open('autorizacaoEntrada')">
-          <div class="home-card-icon">&#127968;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Entrada em Resid&#234;ncia</div>
-            <div class="home-card-sub">Consentimento — art. 5&#186; XI CF</div>
+        <div class="home-section">
+          <div class="home-section-title">Documentos Oficiais</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="PCDoc.open('autorizacaoSangue')">
+              <div class="home-card-icon">&#129656;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Coleta de Sangue</div>
+                <div class="home-card-sub">Autoriza&#231;&#227;o — CONTRAN 432/2013</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="PCDoc.open('autorizacaoCelular')">
+              <div class="home-card-icon">&#128241;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Extra&#231;&#227;o de Celular</div>
+                <div class="home-card-sub">Autoriza&#231;&#227;o de acesso a dados</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="PCDoc.open('autorizacaoEntrada')">
+              <div class="home-card-icon">&#127968;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Entrada em Resid&#234;ncia</div>
+                <div class="home-card-sub">Consentimento — art. 5&#186; XI CF</div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- MODELOS DE TEXTO -->
-        <div class="home-section-label">Modelos de Texto</div>
-
-        <div class="home-card" onclick="openTemplate('historicoCaptura')">
-          <div class="home-card-icon">&#128269;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Captura de Procurado</div>
-            <div class="home-card-sub">Hist&#243;rico do BO de captura</div>
+        <div class="home-section">
+          <div class="home-section-title">Modelos de Texto</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="openTemplate('historicoCaptura')">
+              <div class="home-card-icon">&#128269;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Captura de Procurado</div>
+                <div class="home-card-sub">Hist&#243;rico do BO de captura</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('autorizacaoContato')">
+              <div class="home-card-icon">&#128222;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Autoriza&#231;&#227;o de Contato</div>
+                <div class="home-card-sub">WhatsApp e e-mail — movimenta&#231;&#245;es</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('autorizacaoFotografias')">
+              <div class="home-card-icon">&#128247;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Fotografias de Les&#245;es</div>
+                <div class="home-card-sub">Autoriza&#231;&#227;o e anexo ao procedimento</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('representacaoCriminal')">
+              <div class="home-card-icon">&#9878;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Representa&#231;&#227;o Criminal</div>
+                <div class="home-card-sub">Manifesta&#231;&#227;o contra o autor</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('medidaProtetiva')">
+              <div class="home-card-icon">&#128737;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Medida Protetiva</div>
+                <div class="home-card-sub">Lei Maria da Penha — art. 22/23/24</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('lavraturaTermoCircunstanciado')">
+              <div class="home-card-icon">&#128203;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Lavratura de TCO</div>
+                <div class="home-card-sub">Termo circunstanciado — Lei 9.099/95</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="home-card" onclick="openTemplate('autorizacaoContato')">
-          <div class="home-card-icon">&#128222;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Autoriza&#231;&#227;o de Contato</div>
-            <div class="home-card-sub">WhatsApp e e-mail — movimenta&#231;&#245;es</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openTemplate('autorizacaoFotografias')">
-          <div class="home-card-icon">&#128247;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Fotografias de Les&#245;es</div>
-            <div class="home-card-sub">Autoriza&#231;&#227;o e anexo ao procedimento</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openTemplate('representacaoCriminal')">
-          <div class="home-card-icon">&#9878;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Representa&#231;&#227;o Criminal</div>
-            <div class="home-card-sub">Manifesta&#231;&#227;o contra o autor</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openTemplate('medidaProtetiva')">
-          <div class="home-card-icon">&#128737;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Medida Protetiva</div>
-            <div class="home-card-sub">Lei Maria da Penha — art. 22/23/24</div>
-          </div>
-        </div>
-
-        <div class="home-card" onclick="openTemplate('lavraturaTermoCircunstanciado')">
-          <div class="home-card-icon">&#128203;</div>
-          <div class="home-card-body">
-            <div class="home-card-title">Lavratura de TCO</div>
-            <div class="home-card-sub">Termo circunstanciado — Lei 9.099/95</div>
-          </div>
-        </div>
-
-      </div><!-- /home-grid -->
+      </div><!-- /home-sections -->
 
       <!-- hidden inputs para o occurrence grid (usado internamente) -->
       <div style="display:none">
