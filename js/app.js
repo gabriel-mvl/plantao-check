@@ -526,6 +526,19 @@ function openTemplate(templateKey) {
           </select>
         </div>`;
     }
+    if (f.type === 'multiselect') {
+      const items = (f.options || []).map(o =>
+        `<label class="tmpl-check-label">
+           <input type="checkbox" class="tmpl-multi-${f.id}" value="${o.value}" />
+           <span>${o.label}</span>
+         </label>`
+      ).join('');
+      return `
+        <div class="modal-form-group">
+          <label>${f.label}</label>
+          <div class="tmpl-checks">${items}</div>
+        </div>`;
+    }
     const prefill = (f.id === 'tipoCondutor' && triageAnswers.condutor)
       ? (condutorTextoMap[triageAnswers.condutor] || 'policial militar')
       : '';
@@ -557,7 +570,17 @@ function generateTemplate() {
   const tmpl   = TEMPLATES[currentTemplate];
   const values = {};
   tmpl.fields.forEach(f => {
-    values[f.id] = (document.getElementById(`tmpl_${f.id}`)?.value || '').trim() || `[${f.label.toUpperCase()}]`;
+    if (f.type === 'multiselect') {
+      const checked = [...document.querySelectorAll(`.tmpl-multi-${f.id}:checked`)].map(el => el.value);
+      values[f.id] = checked;
+      return;
+    }
+    const raw = (document.getElementById(`tmpl_${f.id}`)?.value || '').trim();
+    if (f.required === false) {
+      values[f.id] = raw; // empty string = not filled, template decides
+    } else {
+      values[f.id] = raw || `[${f.label.toUpperCase()}]`;
+    }
   });
   const text = tmpl.generate(values);
   document.getElementById('generatedOutput').classList.remove('hidden');
