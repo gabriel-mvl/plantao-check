@@ -1452,3 +1452,21 @@ body[data-theme="light"] input[type="date"] {
 @media (max-width: 600px) {
   .home-grid { grid-template-columns: 1fr; padding: .9rem 1rem; gap: .5rem; }
 }
+
+/* ── TOPBAR — botão plantão ── */
+.btn-icon-plantao {
+  display: flex; align-items: center; gap: .35rem;
+  padding: .38rem .85rem !important;
+  font-size: .8rem !important; font-weight: 700;
+  font-family: var(--font-display) !important;
+  border-radius: var(--radius) !important;
+  border: 1.5px solid rgba(59,125,255,.3) !important;
+  color: var(--accent) !important;
+  background: var(--accent-dim) !important;
+  transition: background .15s, border-color .15s;
+}
+.btn-icon-plantao:hover {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
