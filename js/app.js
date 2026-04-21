@@ -92,6 +92,9 @@ function setActiveNav(id) {
 
 // ── OCCURRENCE GRID ──────────────────────────────────────────
 function renderOccurrenceGrid() {
+  // Also refresh checklist modal if it's open
+  const modalOpen = !document.getElementById('checklistModal')?.classList.contains('hidden');
+  if (modalOpen) { openChecklistModal(); return; }
   const grid = document.getElementById('occurrenceGrid');
   if (!grid) return;
   const all = [...OCCURRENCES, ...(window._customOccurrences || [])];
@@ -1424,6 +1427,7 @@ window._keyHandler = e => {
     closeCustomBuilder();
     closeArtigosMenu();
     PCDoc.close();
+    closeChecklistModal();
   }
 };
 document.addEventListener('keydown', window._keyHandler);
@@ -1933,4 +1937,62 @@ function renderDocCards() {
   if (entradaCard && typeof PCSP_DOCS !== 'undefined' && PCSP_DOCS.autorizacaoEntrada) {
     entradaCard.style.display = '';
   }
+}
+
+// ── MODAL DE SELEÇÃO DE CHECKLIST ────────────────────────────
+function openChecklistModal() {
+  const grid = document.getElementById('checklistModalGrid');
+  if (grid) {
+    const all = [...OCCURRENCES, ...(window._customOccurrences || [])];
+    grid.innerHTML = all.map(occ => {
+      const saved   = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
+      const total   = occ.sections.reduce((a, s) => a + s.items.length, 0);
+      const checked = saved ? Object.values(saved).filter(Boolean).length : 0;
+      const pct     = total ? Math.round((checked / total) * 100) : 0;
+      const started = checked > 0;
+      return `
+        <div class="occ-card ${started ? 'occ-started' : ''}" onclick="closeChecklistModal(); startTriage('${occ.id}')">
+          <div class="occ-card-top">
+            <div class="occ-icon">${occ.icon}</div>
+            ${started ? `<div class="occ-ring" title="${pct}% concluído">
+              <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" stroke-width="2.5" pathLength="100"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="${pct} ${100-pct}" stroke-dashoffset="25" stroke-linecap="round" pathLength="100"/>
+              </svg>
+              <span>${pct}%</span>
+            </div>` : ''}
+          </div>
+          <div class="occ-name">${occ.name}</div>
+          <div class="occ-count">${total} itens${started ? ` · <strong>${checked} feitos</strong>` : ''}</div>
+        </div>`;
+    }).join('') + `
+      <div class="occ-card occ-card-new" onclick="closeChecklistModal(); openCustomBuilder()">
+        <div class="occ-card-top"><div class="occ-icon">➕</div></div>
+        <div class="occ-name">Novo checklist</div>
+        <div class="occ-count">Criar modelo personalizado</div>
+      </div>`;
+  }
+  document.getElementById('checklistModalBackdrop')?.classList.remove('hidden');
+  document.getElementById('checklistModal')?.classList.remove('hidden');
+  document.getElementById('checklistSearch')?.focus();
+  if (window.innerWidth <= 768) toggleSidebar();
+}
+
+function closeChecklistModal() {
+  document.getElementById('checklistModalBackdrop')?.classList.add('hidden');
+  document.getElementById('checklistModal')?.classList.add('hidden');
+}
+
+function filterChecklistModal() {
+  const q = (document.getElementById('checklistSearch')?.value || '').toLowerCase().trim();
+  const cards = document.querySelectorAll('#checklistModalGrid .occ-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const name = card.querySelector('.occ-name')?.textContent.toLowerCase() || '';
+    const show = !q || name.includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const noRes = document.getElementById('checklistNoResults');
+  if (noRes) noRes.classList.toggle('hidden', visible > 0);
 }
