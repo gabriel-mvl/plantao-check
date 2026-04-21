@@ -106,7 +106,11 @@ const TEMPLATES = {
       { id: 'genero',       label: 'Gênero do(a) capturado(a)', type: 'select',
         options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }] },
       { id: 'nomeCompleto', label: 'Nome completo do(a) procurado(a)', placeholder: 'Ex: FULANO DE TAL' },
-      { id: 'tipoCondutor', label: 'Tipo de condutor',   placeholder: 'policial militar' },
+      { id: 'tipoCondutor', label: 'Tipo de condutor', type: 'select', options: [
+        { value: 'policial militar',  label: 'policial militar'  },
+        { value: 'policial civil',    label: 'policial civil'    },
+        { value: 'guarda municipal',  label: 'guarda municipal'  },
+      ]},
       { id: 'numMandado',   label: 'Número do mandado',  placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
       { id: 'numProcesso',  label: 'Número do processo', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
       { id: 'vara',         label: 'Vara / Juízo',       placeholder: 'Ex: 1ª Vara Criminal da Comarca' },
