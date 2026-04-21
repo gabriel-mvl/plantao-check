@@ -512,15 +512,27 @@ function openTemplate(templateKey) {
   document.getElementById('modalTitle').textContent = tmpl.title;
 
   const body = document.getElementById('modalBody');
+  const condutorTextoMap = { pm:'policial militar', gcm:'guarda municipal', pc:'policial civil', parte:'parte interessada' };
   body.innerHTML = tmpl.fields.map(f => {
-    const condutorTextoMap = { pm:'policial militar', gcm:'guarda municipal', pc:'policial civil', parte:'parte interessada' };
+    if (f.type === 'select') {
+      const opts = (f.options || []).map(o =>
+        `<option value="${o.value}">${o.label}</option>`
+      ).join('');
+      return `
+        <div class="modal-form-group">
+          <label>${f.label}</label>
+          <select id="tmpl_${f.id}" style="width:100%;padding:.52rem .7rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.85rem;outline:none">
+            ${opts}
+          </select>
+        </div>`;
+    }
     const prefill = (f.id === 'tipoCondutor' && triageAnswers.condutor)
       ? (condutorTextoMap[triageAnswers.condutor] || 'policial militar')
       : '';
     return `
       <div class="modal-form-group">
         <label>${f.label}</label>
-        <input type="text" id="tmpl_${f.id}" placeholder="${f.placeholder || ''}" value="${prefill}" />
+        <input type="text" id="tmpl_${f.id}" placeholder="${f.placeholder || ''}" value="${prefill}" autocomplete="off" />
       </div>`;
   }).join('') + `
     <div id="generatedOutput" class="hidden">
