@@ -1092,7 +1092,18 @@ body[data-theme="light"] input[type="date"] {
 
 /* ── PRINT RULES ── */
 @media print {
-  .no-print, .relatorio-actions, .topbar, .sidebar, .plantao-bar { display: none !important; }
+  /* Force light theme for printing regardless of user's theme */
+  body, .relatorio-view, .relatorio-doc,
+  .rel-header-simple, .rel-tabela-wrap, .rel-footer-simple {
+    background: #fff !important;
+    color: #000 !important;
+    color-scheme: light !important;
+  }
+
+  /* Hide UI chrome and form */
+  .no-print, .relatorio-actions, .topbar, .sidebar,
+  .plantao-bar, .rel-add-form, .pdf-obs-block { display: none !important; }
+
   body, .relatorio-view { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
   .relatorio-doc { box-shadow: none !important; border: none !important; }
 
@@ -1107,14 +1118,14 @@ body[data-theme="light"] input[type="date"] {
   .rel-header-muted { font-size: 7pt !important; color: #888 !important; }
 
   .rel-tabela-wrap { padding: 6pt 12pt 8pt !important; }
-  .rel-tabela th { font-size: 6.5pt !important; border-bottom: 1.5pt solid #000 !important; padding: 2pt 4pt 2pt 0 !important; }
-  .rel-tabela td { font-size: 8.5pt !important; border-bottom: .5pt solid #ccc !important; padding: 4pt 4pt 4pt 0 !important; color: #000 !important; }
+  .rel-tabela { background: #fff !important; }
+  .rel-tabela th { font-size: 6.5pt !important; border-bottom: 1.5pt solid #000 !important; padding: 2pt 4pt 2pt 0 !important; color: #000 !important; background: #fff !important; }
+  .rel-tabela td { font-size: 8.5pt !important; border-bottom: .5pt solid #ccc !important; padding: 4pt 4pt 4pt 0 !important; color: #000 !important; background: #fff !important; }
   .rel-td-num  { color: #666 !important; }
   .rel-td-bo   { color: #000 !important; }
   .rel-td-kw   { color: #444 !important; }
-  .rel-badge-done { color: #000 !important; }
-  .rel-badge-wip  { color: #666 !important; }
-  .rel-footer-simple { font-size: 6pt !important; color: #888 !important; border-top: .5pt solid #ccc !important; padding: 4pt 12pt !important; }
+  .rel-td-del  { display: none !important; }
+  .rel-footer-simple { font-size: 6pt !important; color: #888 !important; border-top: .5pt solid #ccc !important; padding: 4pt 12pt !important; background: #fff !important; }
 
   @page { margin: 1.2cm; size: A4; }
 }
