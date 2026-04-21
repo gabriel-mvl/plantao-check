@@ -1357,3 +1357,21 @@ body[data-theme="light"] input[type="date"] {
   width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer;
 }
 .tmpl-check-label:hover { color: var(--text-primary); }
+
+/* ── EMAIL SPLIT INPUT ── */
+.email-split-wrap {
+  display: flex; gap: .4rem; align-items: stretch;
+}
+.email-split-wrap input[type="text"] {
+  flex: 1; min-width: 0;
+}
+.email-split-wrap select {
+  flex-shrink: 0;
+  padding: .52rem .55rem;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-secondary);
+  font-size: .78rem; outline: none; cursor: pointer;
+  transition: border-color .18s;
+  max-width: 200px;
+}
+.email-split-wrap select:focus { border-color: var(--border-focus); }
