@@ -957,6 +957,23 @@ async function confirmarAberturaPlan() {
     localStorage.setItem(`pc_plantao_data_${plantaoAtivo.id}`, JSON.stringify(plantaoAtivo));
   }
 
+  // If editing existing plantao, update in place
+  if (window._editandoPlantao && plantaoAtivo) {
+    plantaoAtivo.data      = data;
+    plantaoAtivo.turno     = turno;
+    plantaoAtivo.delegacia = delegacia;
+    plantaoAtivo.delegado  = delegado;
+    if (plantaoUnidadeObj) plantaoAtivo._unidade = plantaoUnidadeObj;
+    localStorage.setItem('pc_plantao_id', plantaoAtivo.id);
+    localStorage.setItem(`pc_plantao_data_${plantaoAtivo.id}`, JSON.stringify(plantaoAtivo));
+    try {
+      if (plantaoAtivo.id && !plantaoAtivo.id.startsWith('local_')) {
+        await DB_Plantoes.atualizar(plantaoAtivo.id, { data, turno, delegacia, delegado });
+      }
+    } catch(e) { /* offline */ }
+    window._editandoPlantao = false;
+  }
+
   document.getElementById('plantaoInicioBackdrop')?.classList.add('hidden');
   document.getElementById('plantaoInicioModal')?.classList.add('hidden');
   renderAppWithPlantao();
@@ -989,7 +1006,10 @@ function renderAppWithPlantao() {
         <span class="plantao-bar-icon">📋</span>
         <span><strong>${plantaoAtivo.delegacia}</strong> — ${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno} — ${data} — Del. ${plantaoAtivo.delegado}</span>
       </span>
-      <button class="plantao-bar-btn" onclick="encerrarPlantao()">Encerrar plantão</button>`;
+      <div class="plantao-bar-btns">
+        <button class="plantao-bar-btn plantao-bar-btn-edit" onclick="editarPlantao()" title="Editar dados do plantão">&#9998; Editar</button>
+        <button class="plantao-bar-btn" onclick="encerrarPlantao()">Encerrar</button>
+      </div>`;
     bar.style.display = 'flex';
   }
 
@@ -997,6 +1017,28 @@ function renderAppWithPlantao() {
   renderOccurrenceGrid();
   renderRecentOccurrence();
   renderAndamentoSection();
+}
+
+function editarPlantao() {
+  if (!plantaoAtivo) return;
+  // Pre-fill modal with current plantao data
+  openPlantaoModal();
+  // After modal opens, fill fields
+  setTimeout(() => {
+    const dateEl = document.getElementById('plantaoData');
+    if (dateEl) dateEl.value = plantaoAtivo.data;
+    const delegadoEl = document.getElementById('plantaoDelegado');
+    if (delegadoEl) delegadoEl.value = plantaoAtivo.delegado || '';
+    // Select turno
+    document.querySelectorAll('.turno-opt').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.value === plantaoAtivo.turno);
+    });
+    // Change button to "Salvar alterações"
+    const btn = document.getElementById('btnAbrirPlantao');
+    if (btn) btn.textContent = 'Salvar alterações →';
+    // Flag as edit mode
+    window._editandoPlantao = true;
+  }, 50);
 }
 
 async function encerrarPlantao() {
@@ -1368,83 +1410,79 @@ syncCheckState = async function(...args) {
 };
 
 // ── RELATÓRIO DO PLANTÃO ──────────────────────────────────────
-async function openRelatorio() {
+// ── RELATÓRIO DO PLANTÃO — entrada manual ────────────────────
+// Armazena as linhas do relatório em memória por plantão
+let _relatorioLinhas = [];
+
+function openRelatorio() {
   if (!plantaoAtivo) {
     alert('Nenhum plantão ativo. Abra um plantão para gerar o relatório.');
     return;
   }
-
   showView('relatorioView');
   document.getElementById('topbarTitle').textContent = 'Relatório do Plantão';
   document.querySelectorAll('.nav-link[data-id]').forEach(el => el.classList.remove('active'));
   if (window.innerWidth <= 768) toggleSidebar();
+  // Load saved lines for this plantao
+  const saved = localStorage.getItem('rel_linhas_' + plantaoAtivo.id);
+  if (saved) { try { _relatorioLinhas = JSON.parse(saved); } catch(e) { _relatorioLinhas = []; } }
+  else _relatorioLinhas = [];
+  renderRelatorio();
+}
 
+function renderRelatorio() {
   const container = document.getElementById('relatorioContent');
-  container.innerHTML = '<div class="hist-loading">Carregando...</div>';
-
-  let ocorrencias = [];
-  try {
-    ocorrencias = await DB_Ocorrencias.listarPorPlantao(plantaoAtivo.id) || [];
-  } catch(e) {
-    const all = [...OCCURRENCES, ...(window._customOccurrences || [])];
-    all.forEach(occ => {
-      const saved  = JSON.parse(localStorage.getItem(`pc_check_${occ.id}`) || 'null');
-      const status = localStorage.getItem(`pc_status_${occ.id}`) || 'andamento';
-      if (saved && Object.values(saved).some(Boolean)) {
-        ocorrencias.push({
-          tipo_id: occ.id, tipo_nome: occ.name,
-          status, num_bo: '', palavras_chave: '', observacoes: '',
-          created_at: new Date().toISOString(),
-        });
-      }
-    });
-  }
-
+  if (!container) return;
   const dataFmt    = new Date(plantaoAtivo.data + 'T12:00:00').toLocaleDateString('pt-BR');
   const turnoLabel = { diurno: 'Diurno', noturno: 'Noturno', extraordinario: 'Extraordinário' };
-  const total      = ocorrencias.length;
-  const nFin       = ocorrencias.filter(o => o.status === 'concluido').length;
-  const nAnd       = total - nFin;
 
-  // Render one row per occurrence — all together, ordered
-  const linhas = ocorrencias.map((oc, i) => {
-    const isDone  = oc.status === 'concluido';
-    const boCell  = oc.num_bo ? oc.num_bo : '—';
-    const kwCell  = oc.palavras_chave || '';
-    const badge   = isDone
-      ? '<span class="rel-badge-done">&#10003;</span>'
-      : '<span class="rel-badge-wip">&#9201;</span>';
-    return `<tr>
+  const linhasHtml = _relatorioLinhas.map((l, i) => `
+    <tr>
       <td class="rel-td-num">${i + 1}</td>
-      <td class="rel-td-tipo">${oc.tipo_nome}</td>
-      <td class="rel-td-bo">${boCell}</td>
-      <td class="rel-td-kw">${kwCell}</td>
-      <td class="rel-td-status">${badge}</td>
-    </tr>`;
-  }).join('');
+      <td class="rel-td-bo">${l.bo || '—'}</td>
+      <td class="rel-td-tipo">${l.natureza || ''}</td>
+      <td class="rel-td-kw">${l.circ || ''}</td>
+      <td class="rel-td-status" style="text-align:center">${l.flagrante ? '&#9989;' : '&#8212;'}</td>
+      <td class="rel-td-del no-print">
+        <button onclick="removerLinhaRelatorio(${i})" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:.9rem" title="Remover">&#128465;</button>
+      </td>
+    </tr>`).join('');
 
-  const tabela = total ? `
-    <table class="rel-tabela">
-      <thead>
-        <tr>
-          <th style="width:28px">#</th>
-          <th>Ocorrência</th>
-          <th style="width:120px">Nº do BO</th>
-          <th>Palavras-chave</th>
-          <th style="width:32px"></th>
-        </tr>
-      </thead>
-      <tbody>${linhas}</tbody>
-    </table>` : '<p class="rel-empty-sub">Nenhuma ocorrência registrada neste plantão.</p>';
+  const tabelaHtml = `
+    <table class="rel-tabela" style="width:100%">
+      <thead><tr>
+        <th style="width:28px">#</th>
+        <th style="width:110px">Nº do BO</th>
+        <th>Natureza</th>
+        <th style="width:140px">Circunscrição</th>
+        <th style="width:70px;text-align:center">Flagrante</th>
+        <th style="width:32px" class="no-print"></th>
+      </tr></thead>
+      <tbody>${linhasHtml || '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:1rem">Nenhuma ocorrência adicionada.</td></tr>'}</tbody>
+    </table>`;
 
   container.innerHTML = `
     <div class="relatorio-actions no-print">
-      <button class="btn-primary" onclick="window.print()" style="width:auto;margin-top:0">&#128424; Imprimir / PDF</button>
       <button class="btn-secondary" onclick="backToHome()">&#8592; Voltar</button>
+      <button class="btn-primary" onclick="imprimirRelatorio()" style="width:auto;margin-top:0">&#128424; Imprimir / PDF</button>
     </div>
 
-    <div class="relatorio-doc" id="relatorioDoc">
+    <!-- FORMULÁRIO DE ENTRADA -->
+    <div class="rel-add-form no-print">
+      <div class="rel-add-fields">
+        <input type="text" id="relBO"       placeholder="Nº do BO" style="width:120px;flex-shrink:0" autocomplete="off" />
+        <input type="text" id="relNatureza" placeholder="Natureza" style="flex:1" autocomplete="off" />
+        <input type="text" id="relCirc"     placeholder="Circunscrição" style="width:140px;flex-shrink:0" autocomplete="off" />
+        <label class="rel-flag-label">
+          <input type="checkbox" id="relFlagrante" />
+          <span>Flagrante</span>
+        </label>
+        <button class="btn-primary" onclick="adicionarLinhaRelatorio()" style="width:auto;margin-top:0;flex-shrink:0">+ Adicionar</button>
+      </div>
+    </div>
 
+    <!-- DOCUMENTO -->
+    <div class="relatorio-doc" id="relatorioDoc">
       <div class="rel-header-simple">
         <div class="rel-header-left">
           <div class="rel-doc-title">RELAT&#211;RIO DO PLANT&#195;O</div>
@@ -1454,20 +1492,44 @@ async function openRelatorio() {
           <div class="rel-header-line"><strong>Delegacia:</strong> ${plantaoAtivo.delegacia}</div>
           <div class="rel-header-line"><strong>Delegado(a):</strong> ${plantaoAtivo.delegado}</div>
           <div class="rel-header-line"><strong>Data:</strong> ${dataFmt} &nbsp;|&nbsp; <strong>Turno:</strong> ${turnoLabel[plantaoAtivo.turno] || plantaoAtivo.turno}</div>
-          <div class="rel-header-line rel-header-muted">Gerado em ${new Date().toLocaleString('pt-BR')} &nbsp;|&nbsp; ${nFin} finalizada${nFin !== 1 ? 's' : ''}, ${nAnd} em andamento</div>
+          <div class="rel-header-line rel-header-muted">Total: ${_relatorioLinhas.length} ocorr&#234;ncia${_relatorioLinhas.length !== 1 ? 's' : ''} &nbsp;|&nbsp; ${_relatorioLinhas.filter(l=>l.flagrante).length} flagrante${_relatorioLinhas.filter(l=>l.flagrante).length !== 1 ? 's' : ''}</div>
         </div>
       </div>
-
-      <div class="rel-tabela-wrap">
-        ${tabela}
-      </div>
-
+      <div class="rel-tabela-wrap">${tabelaHtml}</div>
       <div class="rel-footer-simple">
-        Legenda: &#10003; Finalizado &nbsp;&nbsp; &#9201; Em andamento
-        &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
-        Plant&#227;oCheck &mdash; sem v&#237;nculo institucional &mdash; Desenvolvido por Gabriel Vital
+        Plant&#227;oCheck &mdash; ferramenta de apoio operacional independente, sem v&#237;nculo institucional &mdash; Desenvolvido por Gabriel Vital
       </div>
     </div>`;
+
+  // Focus BO field
+  document.getElementById('relBO')?.focus();
+}
+
+function adicionarLinhaRelatorio() {
+  const bo       = document.getElementById('relBO')?.value.trim();
+  const natureza = document.getElementById('relNatureza')?.value.trim();
+  const circ     = document.getElementById('relCirc')?.value.trim();
+  const flagrante= document.getElementById('relFlagrante')?.checked || false;
+  if (!bo && !natureza) {
+    showToast('Informe ao menos o nº do BO ou a natureza.');
+    return;
+  }
+  _relatorioLinhas.push({ bo, natureza, circ, flagrante });
+  localStorage.setItem('rel_linhas_' + plantaoAtivo.id, JSON.stringify(_relatorioLinhas));
+  // Clear fields and re-render
+  ['relBO','relNatureza','relCirc'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('relFlagrante').checked = false;
+  renderRelatorio();
+}
+
+function removerLinhaRelatorio(idx) {
+  _relatorioLinhas.splice(idx, 1);
+  localStorage.setItem('rel_linhas_' + plantaoAtivo.id, JSON.stringify(_relatorioLinhas));
+  renderRelatorio();
+}
+
+function imprimirRelatorio() {
+  window.print();
 }
 
 function renderRelatorioOcorrencia(oc, num) { return ''; } // legacy — unused
