@@ -49,7 +49,7 @@ function renderUser() {
 
 // ── THEME ────────────────────────────────────────────────────
 function applyStoredTheme() {
-  const theme = localStorage.getItem('pc_theme') || 'dark';
+  const theme = localStorage.getItem('pc_theme') || 'light';
   document.body.setAttribute('data-theme', theme);
   updateThemeBtn(theme);
 }
