@@ -226,4 +226,24 @@ const TEMPLATES = {
     }
   },
 
+  lavraturaTermoCircunstanciado: {
+    title: 'Lavratura de Termo Circunstanciado',
+    fields: [
+      { id: 'qtd', label: 'Quantas pessoas assinarão o termo?', type: 'select',
+        options: [
+          { value: '1', label: '1 pessoa' },
+          { value: 'N', label: 'Mais de 1 pessoa' },
+        ]
+      },
+    ],
+    generate: function(f) {
+      var plural = (f.qtd || '1') === 'N';
+      var envolvido  = plural ? 'Os envolvidos' : 'O(a) envolvido(a)';
+      var assinou    = plural ? 'assinaram' : 'assinou';
+      var intimados  = plural ? 'intimados' : 'intimado(a)';
+      var cientes    = plural ? 'cientes' : 'ciente';
+      return 'Diante dos fatos expostos, a Autoridade Policial, reconhecendo a natureza de menor potencial ofensivo da infração penal narrada, nos termos do art. 61 da Lei n.º 9.099/1995 e do art. 69 do mesmo diploma legal, determinou a lavratura do presente Termo Circunstanciado de Ocorrência, com o imediato encaminhamento das partes ao Juizado Especial Criminal competente. ' + envolvido + ' ' + assinou + ' o Termo de Compromisso de comparecimento perante o Juizado, assumindo a obrigação de comparecer quando regularmente ' + intimados + ', ' + cientes + ' de que o descumprimento poderá ensejar as providências previstas no art. 71 da Lei n.º 9.099/1995.';
+    }
+  },
+
 };
