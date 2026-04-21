@@ -1376,20 +1376,30 @@ body[data-theme="light"] input[type="date"] {
 }
 .email-split-wrap select:focus { border-color: var(--border-focus); }
 
-/* ── HOME GRID ── */
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: .65rem;
-  padding: 1.2rem 1.4rem;
+/* ── HOME SECTIONS ── */
+.home-sections {
+  display: flex; flex-direction: column;
+  padding: 1.1rem 1.4rem;
+  gap: 0;
 }
+.home-section {
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.home-section:last-child { border-bottom: none; }
 
-.home-section-label {
-  grid-column: 1 / -1;
+.home-section-title {
   font-size: .68rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .09em; color: var(--text-muted);
   font-family: var(--font-display);
-  padding-top: .5rem;
+  margin-bottom: .6rem;
+}
+
+/* ── HOME GRID (inside each section) ── */
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: .55rem;
 }
 
 .home-card {
