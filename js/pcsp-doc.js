@@ -541,14 +541,13 @@ PCSP_DOCS.autorizacaoSangue = {
     return `
       <p style="text-align:justify;margin-bottom:1.2rem">
         Eu, <strong>${campos.nome}</strong>, RG <strong>${campos.rg}</strong>, AUTORIZO, nos termos da
-        Resolução Contran nº 432/2013, a coleta de amostra de sangue para fins de dosagem
+        Resolução Contran nº 432/2013, a coleta de amostra de sangue para fins de exame de dosagem
         alcoólica e/ou identificação de substâncias psicoativas.
       </p>
       <p style="text-align:justify;margin-bottom:2rem">
-        Declaro que fui informado(a) de que a recusa em submeter-se ao exame acarreta a
-        penalidade prevista no art. 306, § 2º do CTB; que os resultados poderão ser utilizados
+        Declaro que fui informado(a) de que os resultados poderão ser utilizados
         como prova em processo administrativo e judicial; que a coleta será realizada por
-        profissional habilitado em unidade de saúde; e que o exame será enviado ao Instituto
+        profissional habilitado em unidade de saúde; e que a amostra será enviada ao Instituto
         Médico Legal (IML) para análise.
       </p>
       <p style="text-align:center;margin-bottom:3rem">
