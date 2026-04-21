@@ -139,4 +139,91 @@ const TEMPLATES = {
     }
   },
 
+  autorizacaoContato: {
+    title: 'Autorização de Contato',
+    fields: [
+      { id: 'whatsapp', label: 'Número de WhatsApp', placeholder: 'Ex: (11) 99999-9999', required: false },
+      { id: 'email',    label: 'E-mail',              placeholder: 'Ex: nome@email.com',   required: false },
+    ],
+    generate: function(f) {
+      var meios = [];
+      if (f.whatsapp) meios.push('WhatsApp (' + f.whatsapp + ')');
+      if (f.email)    meios.push('e-mail (' + f.email + ')');
+      if (!meios.length) return '[Informe ao menos um meio de contato.]';
+      var lista = meios.length === 2 ? meios[0] + ' e ' + meios[1] : meios[0];
+      return 'A declarante autoriza que a Autoridade Policial e os demais agentes responsáveis pelo procedimento realizem contato por meio de ' + lista + ', para comunicação sobre eventuais movimentações, intimações ou providências relacionadas ao presente registro.';
+    }
+  },
+
+  autorizacaoFotografias: {
+    title: 'Autorização de Fotografias',
+    fields: [],
+    generate: function(f) {
+      return 'A vítima declara possuir lesões aparentes decorrentes dos fatos narrados e, neste ato, autoriza expressamente a fotografação das referidas lesões pelos agentes policiais, bem como o anexo das imagens ao presente procedimento, para fins de instrução probatória.';
+    }
+  },
+
+  representacaoCriminal: {
+    title: 'Representação Criminal',
+    fields: [
+      { id: 'genero', label: 'Gênero do(a) declarante', type: 'select',
+        options: [{ value: 'F', label: 'Feminino' }, { value: 'M', label: 'Masculino' }] },
+    ],
+    generate: function(f) {
+      var masc = (f.genero || 'F') === 'M';
+      var decl  = masc ? 'o declarante' : 'a declarante';
+      var autor = masc ? 'o autor' : 'a autora';
+      return (masc ? 'O' : 'A') + ' declarante manifesta, neste ato, de forma expressa e inequívoca, o desejo de representar criminalmente contra ' + autor + ' dos fatos narrados no presente registro, requerendo a adoção de todas as providências legais cabíveis e o prosseguimento das investigações.';
+    }
+  },
+
+  medidaProtetiva: {
+    title: 'Medida Protetiva — Lei Maria da Penha',
+    fields: [
+      { id: 'medidas', label: 'Medidas requeridas (selecione uma ou mais)', type: 'multiselect',
+        options: [
+          { value: 'afastamento',    label: 'Afastamento do lar (art. 22, II)' },
+          { value: 'aproximacao',    label: 'Proibição de aproximação (art. 22, III, a)' },
+          { value: 'contato',        label: 'Proibição de contato (art. 22, III, b)' },
+          { value: 'lugares',        label: 'Proibição de frequentar lugares (art. 22, III, c)' },
+          { value: 'visitas',        label: 'Restrição ou suspensão de visitas (art. 22, IV)' },
+          { value: 'armas',          label: 'Suspensão do porte de armas (art. 22, I)' },
+          { value: 'alimentos',      label: 'Prestação de alimentos provisionais (art. 22, V)' },
+          { value: 'reeducacao',     label: 'Comparecimento a programas de reeducação (art. 22, VI)' },
+          { value: 'protecao',       label: 'Encaminhamento a programa de proteção (art. 23, I)' },
+          { value: 'bens',           label: 'Restituição de documentos e bens (art. 24, II)' },
+          { value: 'venda',          label: 'Proibição de venda de bens comuns (art. 24, III)' },
+          { value: 'acompanhamento', label: 'Acompanhamento para retirada de pertences (art. 23, III)' },
+        ]
+      },
+    ],
+    generate: function(f) {
+      var medidas = f.medidas || [];
+      if (!medidas.length) return '[Selecione ao menos uma medida protetiva.]';
+      var map = {
+        afastamento:    'afastamento do agressor do lar (art. 22, inciso II)',
+        aproximacao:    'proibição de se aproximar da vítima, de seus familiares e das testemunhas, com fixação de limite mínimo de distância (art. 22, inciso III, alínea "a")',
+        contato:        'proibição de contato com a vítima, seus familiares e testemunhas por qualquer meio de comunicação (art. 22, inciso III, alínea "b")',
+        lugares:        'proibição de frequentar determinados locais para preservar a integridade física e psicológica da vítima (art. 22, inciso III, alínea "c")',
+        visitas:        'restrição ou suspensão de visitas aos dependentes menores (art. 22, inciso IV)',
+        armas:          'suspensão da posse ou restrição do porte de armas de fogo (art. 22, inciso I)',
+        alimentos:      'prestação de alimentos provisionais à vítima e/ou aos filhos (art. 22, inciso V)',
+        reeducacao:     'comparecimento obrigatório a programas de reeducação e reabilitação (art. 22, inciso VI)',
+        protecao:       'encaminhamento da vítima e de seus dependentes a programas oficiais de proteção (art. 23, inciso I)',
+        bens:           'determinação de restituição de documentos e bens indevidamente subtraídos (art. 24, inciso II)',
+        venda:          'proibição de alienação ou disposição de bens e valores comuns do casal (art. 24, inciso III)',
+        acompanhamento: 'acompanhamento pela autoridade policial para retirada de pertences do lar (art. 23, inciso III)',
+      };
+      var lista = medidas.map(function(m, i) {
+        var texto = map[m] || m;
+        if (i === 0) return texto.charAt(0).toUpperCase() + texto.slice(1);
+        return texto;
+      });
+      var listaFmt = lista.length === 1
+        ? lista[0]
+        : lista.slice(0, -1).join('; ') + '; e ' + lista[lista.length - 1];
+      return 'A declarante requer, nos termos da Lei n.º 11.340/2006 (Lei Maria da Penha), a concessão das seguintes medidas protetivas de urgência: ' + listaFmt + '. Requer, ainda, que as presentes medidas sejam comunicadas ao Ministério Público e submetidas à apreciação do Juízo competente com a máxima urgência.';
+    }
+  },
+
 };
