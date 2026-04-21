@@ -1,253 +1,706 @@
-/* ============================================================
-   PLANTÃO CHECK — Templates de Texto v3
-   ============================================================ */
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plantão Check — Ocorrências</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/print.css" media="print" />
+</head>
+<body class="app-page" data-theme="light">
 
-function formatarDataExtenso(iso) {
-  if (!iso) return '[DATA]';
-  const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO',
-                 'JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
-  const [ano, mes, dia] = iso.split('-');
-  return parseInt(dia,10) + ' DE ' + meses[parseInt(mes,10)-1] + ' DE ' + ano;
-}
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <span class="sb-icon">&#9878;</span>
+        <span class="sb-title">Plant&#227;o<span class="sb-accent">Check</span></span>
+      </div>
+      <button class="sidebar-close" onclick="toggleSidebar()">&#215;</button>
+    </div>
+    <div class="sidebar-user" id="sidebarUser"></div>
+    <nav class="sidebar-nav">
 
-const EMAIL_TEMPLATES = [
+      <button class="btn-home-nav" onclick="backToHome(); if(window.innerWidth<=768) toggleSidebar();">
+        &#127968; P&#225;gina inicial
+      </button>
 
-  { id:'emailDesaparecimento', icon:'🔍', title:'Desaparecimento de Pessoa',
-    fields:[
-      {id:'delpol', label:'Delegacia',             placeholder:'Ex: DELPOL DA COMARCA'},
-      {id:'data', label:'Data', type:'date'},
-      {id:'nome',   label:'Nome do desaparecido',  placeholder:'Ex: FULANO DE TAL'},
-      {id:'numBO',  label:'Número do BO',          placeholder:'Ex: AV0100-1/2026'},
-    ],
-    generate:(f)=>`${f.delpol}, ${formatarDataExtenso(f.data)}\n\nExcelentíssimo Delegado de Polícia,\n\nPelo presente, comunico o desaparecimento de ${f.nome}, conforme boletim de ocorrência ${f.numBO}.\n\n[COPIAR E COLAR O BOLETIM DE OCORRÊNCIA INTEIRO AQUI — NÃO COLOCAR EM ANEXO]\n\nDelegado de Polícia`,
-    anexos:[],
-    aviso:'Copiar e colar o boletim de ocorrência inteiro no corpo da mensagem. NÃO colocar o boletim em anexo.',
-  },
+      <p class="nav-label">Plant&#227;o</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="openRelatorio()"><span class="nav-icon">&#128196;</span> Relat&#243;rio do Plant&#227;o</a></li>
+        <li><a href="#" class="nav-link" onclick="openChecklistModal(); if(window.innerWidth<=768) toggleSidebar();"><span class="nav-icon">&#9989;</span> Checklists de Ocorr&#234;ncia</a></li>
+        <li><a href="#" class="nav-link" onclick="openPlantaoDiario(); if(window.innerWidth<=768) toggleSidebar();"><span class="nav-icon">&#9200;</span> Rotina do Plant&#227;o</a></li>
+      </ul>
 
-  { id:'emailGuincho', icon:'🏗', title:'Acionamento de Guincho / Veículo Apreendido',
-    fields:[
-      {id:'delpol',          label:'Delegacia',                     placeholder:'Ex: DELPOL DA COMARCA'},
-      {id:'data', label:'Data', type:'date'},
-      {id:'numBO',           label:'Número do BO',                  placeholder:'Ex: AV0438-1/2026'},
-      {id:'veiculo',         label:'Veículo (marca/modelo)',        placeholder:'Ex: HONDA/CG 125 FAN'},
-      {id:'placa',           label:'Placa',                         placeholder:'Ex: DPT3930'},
-      {id:'lacre',           label:'Número do lacre',               placeholder:'Ex: 0122261'},
-      {id:'dataAcionamento', label:'Data e hora do acionamento',    placeholder:'Ex: 14/04/2026 às 17:50'},
-      {id:'dataChegada',     label:'Data e hora da chegada',        placeholder:'Ex: 14/04/2026 às 19:45'},
-      {id:'protocolo',       label:'Protocolo do guincho',          placeholder:'Ex: delitu1404261758'},
-    ],
-    generate:(f)=>`${f.delpol}, ${formatarDataExtenso(f.data)}\n\nPrezados,\n\nPelo presente informo que foi feita a solicitação de guincho no boletim de ocorrência nº ${f.numBO} para o veículo ${f.veiculo}, placa ${f.placa}, lacre nº ${f.lacre}.\n\nData e hora de acionamento do guincho: ${f.dataAcionamento}\nHora e data da chegada do guincho: ${f.dataChegada}\nProtocolo do guincho: ${f.protocolo}\nVeículo: ${f.veiculo} (placa ${f.placa})\nLacre: ${f.lacre}\nFoi recolhido ao pátio: SIM\n\nAtenciosamente,\nEscrivão de Polícia`,
-    anexos:['Boletim de Ocorrência','Auto de Exibição e Apreensão','Papeleta do Guincho'],
-    aviso:'',
-  },
+      <p class="nav-label" style="margin-top:1.1rem">Ferramentas</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="openEmailMenu()"><span class="nav-icon">&#128231;</span> Modelos de E-mail</a></li>
+        <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
+        <li><a href="#" class="nav-link" onclick="openArtigosMenu()"><span class="nav-icon">&#9878;</span> Legisla&#231;&#227;o</a></li>
+        <li><a href="#" class="nav-link" onclick="window.open('pre-atendimento.html','_blank')"><span class="nav-icon">&#128221;</span> Pr&#233;-Atendimento</a></li>
+      </ul>
 
-  { id:'emailEncaminhamientoTJ', icon:'⚖', title:'Encaminhamento de Expediente ao TJ (APF)',
-    fields:[
-      {id:'delpol',    label:'Delegacia',                             placeholder:'Ex: DELPOL DA COMARCA'},
-      {id:'data', label:'Data', type:'date'},
-      {id:'numAPF',    label:'Número do Auto de Prisão em Flagrante', placeholder:'Ex: AV0100-1/2026'},
-      {id:'natureza',  label:'Natureza(s)',                           placeholder:'Ex: Tráfico de Drogas, Associação'},
-      {id:'indiciado', label:'Nome do indiciado',                     placeholder:'Ex: FULANO DE TAL'},
-    ],
-    generate:(f)=>`${f.delpol}, ${formatarDataExtenso(f.data)}\n\nPrezado(a),\n\nEncaminho expediente do auto de prisão em flagrante nº ${f.numAPF}, natureza(s): ${f.natureza}, indiciado: ${f.indiciado}.\n\nAtenciosamente,\nEscrivão de Polícia`,
-    anexos:['Livro do APF','Capa do APF'],
-    aviso:'Anexar o livro e a capa do APF.',
-  },
+      <p class="nav-label" style="margin-top:1.1rem">Documentos</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoSangue')"><span class="nav-icon">&#129656;</span> Coleta de Sangue</a></li>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoCelular')"><span class="nav-icon">&#128241;</span> Extra&#231;&#227;o Celular</a></li>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoEntrada')"><span class="nav-icon">&#127968;</span> Entrada em Resid&#234;ncia</a></li>
+      </ul>
 
-  { id:'emailCaptura', icon:'🔒', title:'Captura de Procurado',
-    fields:[
-      {id:'delpol',   label:'Delegacia',             placeholder:'Ex: DELPOL DA COMARCA'},
-      {id:'data',     label:'Data',                  type:'date'},
-      {id:'nome',     label:'Nome do capturado',     placeholder:'Ex: FULANO DE TAL'},
-      {id:'rg',       label:'RG',                    placeholder:'Ex: 00.000.000-0'},
-      {id:'cpf',      label:'CPF',                   placeholder:'Ex: 000.000.000-00'},
-      {id:'mandado',  label:'Mandado nº',            placeholder:'Ex: 0000001-00.2024.8.26.0000'},
-      {id:'processo', label:'Processo nº',           placeholder:'Ex: 0000001-00.2024.8.26.0000'},
-      {id:'orgao',    label:'Órgão judicial',        placeholder:'Ex: 1ª Vara Criminal da Comarca'},
-    ],
-    generate:(f)=>`${f.delpol}, ${formatarDataExtenso(f.data)}\n\nPrezados,\n\nPelo presente, comunico captura de procurado conforme informações processuais abaixo:\n\nNome: ${f.nome}\nRG: ${f.rg}\nCPF: ${f.cpf}\nMandado nº: ${f.mandado}\nProcesso nº: ${f.processo}\nÓrgão judicial: ${f.orgao}\n\nAtenciosamente,\nEscrivão de Polícia`,
-    anexos:['Mandado de Prisão Cumprido','Boletim de Ocorrência','Requisição de IML','Ficha Clínica','Auto de Qualificação','DVC'],
-    aviso:'',
-  },
+      <p class="nav-label" style="margin-top:1.1rem">Modelos de Texto</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="openTemplate('historicoCaptura')"><span class="nav-icon">&#128269;</span> Captura de Procurado</a></li>
+        <li><a href="#" class="nav-link" onclick="openTemplate('autorizacaoContato')"><span class="nav-icon">&#128222;</span> Autoriza&#231;&#227;o de Contato</a></li>
+        <li><a href="#" class="nav-link" onclick="openTemplate('autorizacaoFotografias')"><span class="nav-icon">&#128247;</span> Fotografias de Les&#245;es</a></li>
+        <li><a href="#" class="nav-link" onclick="openTemplate('representacaoCriminal')"><span class="nav-icon">&#9878;</span> Representa&#231;&#227;o Criminal</a></li>
+        <li><a href="#" class="nav-link" onclick="openTemplate('medidaProtetiva')"><span class="nav-icon">&#128737;</span> Medida Protetiva</a></li>
+        <li><a href="#" class="nav-link" onclick="openTemplate('lavraturaTermoCircunstanciado')"><span class="nav-icon">&#128203;</span> Lavratura de TCO</a></li>
+      </ul>
 
-  { id:'emailRelevancia', icon:'📢', title:'Ocorrência de Relevância',
-    fields:[
-      {id:'delpol', label:'Delegacia',              placeholder:'Ex: DELPOL DA COMARCA'},
-      {id:'data',   label:'Data',                  type:'date'},
-      {id:'crime',  label:'Natureza da ocorrência', placeholder:'Ex: HOMICÍDIO DOLOSO'},
-      {id:'numBO',  label:'Número do BO',           placeholder:'Ex: AV0100-1/2026'},
-    ],
-    generate:(f)=>`${f.delpol}, ${formatarDataExtenso(f.data)}\n\nExcelentíssimo Delegado de Polícia,\n\nPelo presente, comunico ocorrência de relevância versando sobre ${f.crime}, conforme boletim de ocorrência nº ${f.numBO}.\n\n[COPIAR E COLAR O BOLETIM DE OCORRÊNCIA INTEIRO AQUI — NÃO COLOCAR EM ANEXO]\n\nDelegado de Polícia`,
-    anexos:[],
-    aviso:'Copiar e colar o boletim de ocorrência inteiro no corpo da mensagem. NÃO colocar em anexo.',
-  },
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">&#9728; Modo Claro</button>
+      <button class="btn-logout" onclick="handleLogout()">Sair</button>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-  { id:'emailIML', icon:'🏥', title:'Encaminhamento ao IML — Exame Indireto',
-    fields:[
-      {id:'delpol', label:'Delegacia',               placeholder:'Ex: DELPOL DA COMARCA'},
-      {id:'data', label:'Data', type:'date'},
-      {id:'nome',   label:'Nome da pessoa',          placeholder:'Ex: FULANO DE TAL'},
-      {id:'tipo',   label:'Tipo (preso / vítima)',   placeholder:'Ex: preso / vítima de lesão corporal'},
-    ],
-    generate:(f)=>`${f.delpol}, ${formatarDataExtenso(f.data)}\n\nPrezados,\n\nPelo presente, encaminho a ficha clínica de ${f.nome} (${f.tipo}) para realização do exame indireto, conforme requisição em anexo.\n\nAtenciosamente,\nEscrivão de Polícia`,
-    anexos:['Ficha Clínica','Requisição de IML'],
-    aviso:'Lesão corporal: enviar também fotos das lesões aparentes.',
-  },
+  <!-- MAIN -->
+  <main class="main-content" id="mainContent">
 
-];
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <div class="topbar-title" id="topbarTitle"></div>
+      <div class="sync-indicator hidden" id="syncIndicator" title="Sincronizando...">&#9729;</div>
+      <div class="topbar-actions">
+        <button class="btn-icon btn-icon-plantao" id="btnTopbarPlantao"
+                onclick="editarOuAbrirPlantao()"
+                title="Dados do plantão">&#128203; Plant&#227;o</button>
+      </div>
+    </header>
 
+    <!-- PLANTÃO BAR -->
+    <div class="plantao-bar hidden" id="plantaoBar"></div>
 
-// ── TEMPLATES DE HISTÓRICO DE BO ──────────────────────────────
-const TEMPLATES = {
+    <!-- HOME -->
+    <div class="home-view" id="homeView">
 
-  historicoCaptura: {
-    title: 'Histórico do BO — Captura de Procurado',
-    fields: [
-      { id: 'genero',       label: 'Gênero do(a) capturado(a)', type: 'select',
-        options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }] },
-      { id: 'nomeCompleto', label: 'Nome completo do(a) procurado(a)', placeholder: 'Ex: FULANO DE TAL' },
-      { id: 'tipoCondutor', label: 'Tipo de condutor', type: 'select', options: [
-        { value: 'policial militar',  label: 'policial militar'  },
-        { value: 'policial civil',    label: 'policial civil'    },
-        { value: 'guarda municipal',  label: 'guarda municipal'  },
-      ]},
-      { id: 'numMandado',   label: 'Número do mandado',  placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'numProcesso',  label: 'Número do processo', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'vara',         label: 'Vara / Juízo',       placeholder: 'Ex: 1ª Vara Criminal da Comarca' },
-      { id: 'dataExpedicao',label: 'Data de expedição',  placeholder: 'Ex: 10/01/2025' },
-      { id: 'validade',     label: 'Validade do mandado',placeholder: 'Ex: indeterminada' },
-      { id: 'tipoPrisao',   label: 'Tipo de prisão',     placeholder: 'Ex: preventiva / temporária / definitiva' },
-      { id: 'nomeContato',  label: 'Nome do familiar/contato', placeholder: 'Ex: Maria da Silva' },
-      { id: 'parentesco',   label: 'Parentesco',         placeholder: 'Ex: mãe / esposa / irmão' },
-      { id: 'telContato',   label: 'Telefone do contato',placeholder: 'Ex: (11) 99999-9999' },
-    ],
-    generate: function(f) {
-      var masc = (f.genero || 'M') === 'M';
-      var condutor = f.tipoCondutor || 'policial militar';
-      var nomeCompleto = f.nomeCompleto || '[NOME COMPLETO DO PROCURADO]';
-      var primeiroNome = nomeCompleto.trim().split(' ')[0];
-      var o_a       = masc ? 'o' : 'a';
-      var conduzido = masc ? 'conduzido' : 'conduzida';
-      var capturado = masc ? 'capturado' : 'capturada';
-      var encaminh  = masc ? 'encaminhado' : 'encaminhada';
-      var apresent  = masc ? 'apresentado' : 'apresentada';
-      var est_a     = masc ? 'este' : 'esta';
-      var cientif   = masc ? 'cientificado' : 'cientificada';
+      <div id="recentOccurrence"></div>
+      <div id="andamentoSection"></div>
 
-      return 'Comparece o condutor, ' + condutor + ' acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem d' + o_a + ' indivídu' + o_a + ' posteriormente identificad' + o_a + ' como ' + nomeCompleto + '.\n\n' +
-        'Em consulta aos sistemas policiais, verificou-se que ' + primeiroNome + ' constava como procurad' + o_a + ' pela Justiça. Em revista pessoal, nada de ilícito foi encontrado, não sendo nenhum objeto exibido para apreensão.\n\n' +
-        'Diante dos fatos, ' + primeiroNome + ' foi ' + encaminh + ' à unidade de saúde local para realização de avaliação médica cautelar e, em seguida, ' + apresent + ' neste Plantão Policial para adoção das providências de polícia judiciária.\n\n' +
-        'Já em solo policial, em consulta detalhada aos sistemas Analítico, Prodesp, Muralha Paulista e Infoseg, bem como ao Banco Nacional de Mandados de Prisão (BNMP), confirmou-se o mandado de prisão em desfavor d' + o_a + ' ' + conduzido + ', conforme número ' + f.numMandado + ', processo ' + f.numProcesso + ', expedido pela ' + f.vara + ' em ' + f.dataExpedicao + ', com validade até ' + f.validade + ', na modalidade: prisão ' + f.tipoPrisao + '.\n\n' +
-        'Ressalte-se que foi feito contato com ' + f.nomeContato + ', ' + f.parentesco + ' d' + o_a + ' ' + capturado + ', pelo telefone ' + f.telContato + ', sendo ' + est_a + ' ' + cientif + ' de sua prisão, bem como do local onde se encontra.\n\n' +
-        'Por fim, a autoridade policial determinou a lavratura do presente registro, procedendo-se às comunicações de praxe. Nada mais.';
+      <div class="home-sections">
+
+        <!-- PLANTÃO -->
+        <div class="home-section">
+          <div class="home-section-title">Plant&#227;o</div>
+          <div class="home-grid">
+            <div class="home-card home-card-checklist" onclick="openChecklistModal()">
+              <div class="home-card-icon">&#9989;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Checklist de Ocorr&#234;ncia</div>
+                <div class="home-card-sub">Selecionar tipo e abrir checklist</div>
+              </div>
+              <div class="home-card-arrow">&#8594;</div>
+            </div>
+            <div class="home-card" onclick="openRelatorio()">
+              <div class="home-card-icon">&#128196;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Relat&#243;rio do Plant&#227;o</div>
+                <div class="home-card-sub">Registre e imprima os BOs do turno</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openPlantaoDiario()">
+              <div class="home-card-icon">&#9200;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Rotina do Plant&#227;o</div>
+                <div class="home-card-sub">Procedimentos obrigat&#243;rios do turno</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FERRAMENTAS -->
+        <div class="home-section">
+          <div class="home-section-title">Ferramentas</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="openEmailMenu()">
+              <div class="home-card-icon">&#128231;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Modelos de E-mail</div>
+                <div class="home-card-sub">Preencha e copie comunicados oficiais</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openQuesitosMenu()">
+              <div class="home-card-icon">&#128203;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Quesitos Periciais</div>
+                <div class="home-card-sub">Manual oficial da PCSP por crime</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openArtigosMenu()">
+              <div class="home-card-icon">&#9878;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Legisla&#231;&#227;o</div>
+                <div class="home-card-sub">CP, CPP e leis extravagantes</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="window.open('pre-atendimento.html','_blank')">
+              <div class="home-card-icon">&#128221;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Pr&#233;-Atendimento</div>
+                <div class="home-card-sub">Ficha para espontaneamente apresentados</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCUMENTOS -->
+        <div class="home-section">
+          <div class="home-section-title">Documentos Oficiais</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="PCDoc.open('autorizacaoSangue')">
+              <div class="home-card-icon">&#129656;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Coleta de Sangue</div>
+                <div class="home-card-sub">Autoriza&#231;&#227;o — CONTRAN 432/2013</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="PCDoc.open('autorizacaoCelular')">
+              <div class="home-card-icon">&#128241;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Extra&#231;&#227;o de Celular</div>
+                <div class="home-card-sub">Autoriza&#231;&#227;o de acesso a dados</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="PCDoc.open('autorizacaoEntrada')">
+              <div class="home-card-icon">&#127968;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Entrada em Resid&#234;ncia</div>
+                <div class="home-card-sub">Consentimento — art. 5&#186; XI CF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODELOS DE TEXTO -->
+        <div class="home-section">
+          <div class="home-section-title">Modelos de Texto</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="openTemplate('historicoCaptura')">
+              <div class="home-card-icon">&#128269;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Captura de Procurado</div>
+                <div class="home-card-sub">Hist&#243;rico do BO de captura</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('autorizacaoContato')">
+              <div class="home-card-icon">&#128222;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Autoriza&#231;&#227;o de Contato</div>
+                <div class="home-card-sub">WhatsApp e e-mail — movimenta&#231;&#245;es</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('autorizacaoFotografias')">
+              <div class="home-card-icon">&#128247;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Fotografias de Les&#245;es</div>
+                <div class="home-card-sub">Autoriza&#231;&#227;o e anexo ao procedimento</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('representacaoCriminal')">
+              <div class="home-card-icon">&#9878;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Representa&#231;&#227;o Criminal</div>
+                <div class="home-card-sub">Manifesta&#231;&#227;o contra o autor</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('medidaProtetiva')">
+              <div class="home-card-icon">&#128737;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Medida Protetiva</div>
+                <div class="home-card-sub">Lei Maria da Penha — art. 22/23/24</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openTemplate('lavraturaTermoCircunstanciado')">
+              <div class="home-card-icon">&#128203;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Lavratura de TCO</div>
+                <div class="home-card-sub">Termo circunstanciado — Lei 9.099/95</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /home-sections -->
+
+      <!-- hidden inputs para o occurrence grid (usado internamente) -->
+      <div style="display:none">
+        <input id="homeSearch" type="text" />
+        <div id="occurrenceGrid"></div>
+        <p id="noResults"></p>
+      </div>
+
+    </div>
+
+  <!-- MODAL CHECKLIST — seleção de tipo de ocorrência -->
+  <div class="modal-backdrop hidden" id="checklistModalBackdrop" onclick="closeChecklistModal()"></div>
+  <div class="modal hidden" id="checklistModal" style="max-width:560px">
+    <div class="modal-header">
+      <div><h3>&#9989; Checklist de Ocorr&#234;ncia</h3><p class="modal-subtitle">Selecione o tipo para abrir o checklist</p></div>
+      <button onclick="closeChecklistModal()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <div class="home-search-wrap" style="margin-bottom:.75rem">
+        <input class="home-search" id="checklistSearch" type="text"
+               placeholder="&#128269; Buscar tipo de ocorr&#234;ncia..."
+               oninput="filterChecklistModal()" autocomplete="off" style="max-width:100%" />
+      </div>
+      <div id="checklistModalGrid" class="occurrence-grid"></div>
+      <p class="no-results hidden" id="checklistNoResults">Nenhuma ocorr&#234;ncia encontrada.</p>
+    </div>
+  </div>
+
+    <!-- CHECKLIST VIEW -->
+    <div class="checklist-view hidden" id="checklistView">
+
+      <!-- PDF HEADER (s&#243; aparece na impress&#227;o) -->
+      <div class="pdf-header" id="pdfHeader">
+        <div class="pdf-header-top">
+          <div class="pdf-logo-mark"><span>&#9878;</span></div>
+          <div class="pdf-logo-text">
+            <div class="pdf-logo-name">Plant&#227;o<span>Check</span></div>
+            <div class="pdf-logo-sub">Sistema de Checklist do Plant&#227;o Policial</div>
+          </div>
+        </div>
+        <div class="pdf-occurrence-block">
+          <div class="pdf-occurrence-name" id="pdfOccName"></div>
+          <div class="pdf-triage-line" id="pdfTriage"></div>
+          <div class="pdf-bo-line" id="pdfBoLine"></div>
+          <div class="pdf-kw-line" id="pdfKwLine"></div>
+        </div>
+      </div>
+
+      <!-- CELEBRATION BANNER -->
+      <div class="celebration-banner hidden" id="celebrationBanner">
+        <span class="cel-icon">&#10003;</span>
+        <span class="cel-text">Checklist conclu&#237;do!</span>
+      </div>
+
+      <div class="cl-header">
+        <div style="flex:1">
+          <h2 class="cl-title" id="clTitle"></h2>
+          <p class="cl-desc" id="clDesc"></p>
+          <div class="cl-meta">
+            <input class="cl-meta-input bo" id="metaBO" type="text" placeholder="N&#186; do BO (opcional)" oninput="updatePdfMeta()" />
+            <input class="cl-meta-input kw" id="metaKW" type="text" placeholder="Palavras-chave (opcional)" oninput="updatePdfMeta()" />
+          </div>
+        </div>
+        <div class="cl-progress-wrap">
+          <div class="cl-progress-bar"><div class="cl-progress-fill" id="clProgressFill"></div></div>
+          <span class="cl-progress-label" id="clProgressLabel">0 / 0</span>
+          <span class="occ-timer" id="occTimer">00m 00s</span>
+        </div>
+      </div>
+
+      <div class="cl-body" id="clBody"></div>
+
+      <!-- OBSERVAÇÕES LIVRES -->
+      <div class="obs-section">
+        <div class="obs-header">
+          <span class="obs-icon">&#128221;</span>
+          <span class="obs-label">Observações da ocorrência</span>
+          <span class="obs-hint">Opcional — aparece no PDF</span>
+        </div>
+        <textarea id="obsText" class="obs-textarea" placeholder="Registre aqui informações complementares, particularidades da ocorrência, decisões do delegado, etc." oninput="updateObsForPdf()" rows="4"></textarea>
+      </div>
+
+      <div class="cl-actions">
+        <button class="btn-secondary" onclick="resetChecklist()">&#8635; Reiniciar</button>
+        <button class="btn-secondary" onclick="backToHome()">&#8592; Voltar</button>
+        <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarChecklist()">&#10003; Finalizar</button>
+        <button class="btn-primary" onclick="generatePDF()">&#128196; Gerar PDF</button>
+      </div>
+
+      <!-- PDF OBS (s&#243; na impress&#227;o) -->
+      <div class="pdf-obs-block" id="pdfObsBlock" style="display:none">
+        <div class="pdf-obs-title">Observações</div>
+        <div class="pdf-obs-text" id="pdfObs"></div>
+      </div>
+
+      <!-- PDF FOOTER -->
+      <div class="pdf-print-footer" id="pdfFooter">
+        Plant&#227;oCheck &mdash; Ferramenta independente, sem v&#237;nculo institucional &mdash; <span id="pdfDate"></span>
+      </div>
+
+    </div>
+
+    <!-- REFERENCE VIEW -->
+    <div class="ref-view hidden" id="refView">
+      <div class="ref-body" id="refBody"></div>
+    </div>
+
+    <!-- HISTÓRICO VIEW -->
+    <div class="ref-view hidden" id="historicoView">
+      <div class="ref-body">
+        <div class="ref-section">
+          <div class="ref-section-title">&#128203; Hist&#243;rico de Ocorr&#234;ncias</div>
+          <div id="historicoList" style="padding:.5rem 0"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RELATÓRIO DO PLANTÃO (print only) -->
+    <div class="relatorio-view hidden" id="relatorioView">
+      <div id="relatorioContent"></div>
+    </div>
+
+  </main>
+
+  <!-- GLOBAL FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-legal">
+      Este aplicativo é uma ferramenta de apoio operacional desenvolvida de forma independente.
+      <strong>Não possui qualquer vínculo institucional</strong> com a Polícia Civil do Estado de
+      São Paulo ou com qualquer órgão público. O uso é de responsabilidade exclusiva do usuário.
+    </div>
+    <div class="footer-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
+  </footer>
+
+  <!-- PLANTÃO DIÁRIO MODAL -->
+  <div class="modal-backdrop hidden" id="plantaoBackdrop" onclick="closePlantaoDiario()"></div>
+  <div class="modal hidden" id="plantaoModal">
+    <div class="modal-header">
+      <div>
+        <h3>Rotina do Plant&#227;o</h3>
+        <p class="modal-subtitle">Procedimentos obrigat&#243;rios — independente de ocorr&#234;ncia</p>
+      </div>
+      <button onclick="closePlantaoDiario()">&#215;</button>
+    </div>
+    <div class="modal-body" id="plantaoBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="resetPlantao()">&#8635; Reiniciar</button>
+      <button class="btn-primary" onclick="closePlantaoDiario()" style="width:auto;margin-top:0">Fechar</button>
+    </div>
+  </div>
+
+  <!-- TRIAGE MODAL -->
+  <div class="modal-backdrop hidden" id="triageBackdrop" onclick="closeTriageModal()"></div>
+  <div class="modal triage-modal hidden" id="triageModal">
+    <div class="modal-header">
+      <div>
+        <h3 id="triageOccName"></h3>
+        <p class="modal-subtitle">Responda antes de iniciar o checklist</p>
+      </div>
+      <button onclick="closeTriageModal()">&#215;</button>
+    </div>
+    <input type="hidden" id="triageOccId" />
+    <div class="modal-body triage-body">
+
+      <div class="triage-question">
+        <p class="triage-q-label">Quem está conduzindo a ocorrência?</p>
+        <div class="triage-opts">
+          <button class="triage-opt" data-group="condutor" data-value="pm" onclick="selectTriageOpt('condutor','pm',this)">
+            <span class="triage-opt-icon">&#128110;</span>
+            <span class="triage-opt-text">Policial Militar</span>
+          </button>
+          <button class="triage-opt" data-group="condutor" data-value="gcm" onclick="selectTriageOpt('condutor','gcm',this)">
+            <span class="triage-opt-icon">&#128106;</span>
+            <span class="triage-opt-text">Guarda Municipal</span>
+          </button>
+          <button class="triage-opt" data-group="condutor" data-value="pc" onclick="selectTriageOpt('condutor','pc',this)">
+            <span class="triage-opt-icon">&#128680;</span>
+            <span class="triage-opt-text">Pol&#237;cia Civil</span>
+          </button>
+          <button class="triage-opt" data-group="condutor" data-value="parte" onclick="selectTriageOpt('condutor','parte',this)">
+            <span class="triage-opt-icon">&#128100;</span>
+            <span class="triage-opt-text">Parte interessada</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="triage-question" id="triageRowFlagrante">
+        <p class="triage-q-label">A ocorrência é um flagrante?</p>
+        <div class="triage-opts">
+          <button class="triage-opt" data-group="flagrante" data-value="sim" onclick="selectTriageOpt('flagrante','sim',this)">
+            <span class="triage-opt-icon">&#10003;</span>
+            <span class="triage-opt-text">Sim, é flagrante</span>
+          </button>
+          <button class="triage-opt" data-group="flagrante" data-value="nao" onclick="selectTriageOpt('flagrante','nao',this)">
+            <span class="triage-opt-icon">&#8722;</span>
+            <span class="triage-opt-text">Não é flagrante</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="triage-question" id="triageRowPreso">
+        <p class="triage-q-label">Há autor preso a encaminhar?</p>
+        <div class="triage-opts">
+          <button class="triage-opt" data-group="preso" data-value="sim" onclick="selectTriageOpt('preso','sim',this)">
+            <span class="triage-opt-icon">&#10003;</span>
+            <span class="triage-opt-text">Sim, há preso</span>
+          </button>
+          <button class="triage-opt" data-group="preso" data-value="nao" onclick="selectTriageOpt('preso','nao',this)">
+            <span class="triage-opt-icon">&#8722;</span>
+            <span class="triage-opt-text">Não há preso</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="triageMsg" class="auth-msg error hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeTriageModal()">Cancelar</button>
+      <button class="btn-primary" onclick="confirmTriage()" style="width:auto;margin-top:0">Abrir checklist &#8594;</button>
+    </div>
+  </div>
+
+  <!-- TEMPLATE MODAL -->
+  <div class="modal-backdrop hidden" id="modalBackdrop" onclick="closeModal()"></div>
+  <div class="modal hidden" id="templateModal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Gerar texto</h3>
+      <button onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Fechar</button>
+      <button class="btn-primary" onclick="generateTemplate()" style="width:auto;margin-top:0">Gerar texto</button>
+    </div>
+  </div>
+
+  <!-- MODAL ABERTURA DE PLANTÃO -->
+  <div class="modal-backdrop hidden" id="plantaoInicioBackdrop"></div>
+  <div class="modal hidden" id="plantaoInicioModal" style="max-width:480px">
+    <div class="modal-header">
+      <div>
+        <h3>Abrir Plant&#227;o</h3>
+        <p class="modal-subtitle">Opcional — pode pular e abrir depois</p>
+      </div>
+      <button onclick="pularPlantao()" title="Continuar sem abrir plant&#227;o">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+      <div class="modal-form-group">
+        <label>Data do plant&#227;o</label>
+        <input type="date" id="plantaoData" />
+      </div>
+      <div class="modal-form-group">
+        <label>Turno</label>
+        <div class="triage-opts">
+          <button class="turno-opt triage-opt" data-value="diurno" onclick="selectTurno('diurno',this)"><span class="triage-opt-icon">&#9728;</span><span class="triage-opt-text">Diurno</span></button>
+          <button class="turno-opt triage-opt" data-value="noturno" onclick="selectTurno('noturno',this)"><span class="triage-opt-icon">&#127769;</span><span class="triage-opt-text">Noturno</span></button>
+          <button class="turno-opt triage-opt" data-value="extraordinario" onclick="selectTurno('extraordinario',this)"><span class="triage-opt-icon">&#11088;</span><span class="triage-opt-text">Extraordin&#225;rio</span></button>
+        </div>
+      </div>
+      <div class="modal-form-group">
+        <label>Departamento</label>
+        <select id="plantaoDept" onchange="onPlantaoDeptChange()">
+          <option value="">Selecione o departamento...</option>
+        </select>
+      </div>
+      <div class="modal-form-group">
+        <label>Unidade policial</label>
+        <select id="plantaoUnidade" disabled onchange="onPlantaoUnidadeChange()">
+          <option value="">Selecione o departamento primeiro</option>
+        </select>
+      </div>
+      <div class="modal-form-group">
+        <label>Delegado(a) plantonista</label>
+        <input type="text" id="plantaoDelegado" placeholder="Nome do(a) delegado(a)" />
+      </div>
+      <div id="plantaoInicioMsg" class="auth-msg error hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="pularPlantao()">Pular por agora</button>
+      <button class="btn-primary" id="btnAbrirPlantao" onclick="confirmarAberturaPlan()" style="width:auto;margin-top:0">Abrir plant&#227;o &#8594;</button>
+    </div>
+  </div>
+
+  <!-- MODAL BNMP -->
+  <div class="modal-backdrop hidden" id="bnmpBackdrop" onclick="closeBNMP()"></div>
+  <div class="modal hidden" id="bnmpModal" style="max-width:440px">
+    <div class="modal-header">
+      <div><h3>&#128269; Busca BNMP</h3><p class="modal-subtitle">Banco Nacional de Mandados de Pris&#227;o — CNJ</p></div>
+      <button onclick="closeBNMP()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-form-group">
+        <label>Nome completo</label>
+        <input type="text" id="bnmpNome" placeholder="Nome do indiv&#237;duo" />
+      </div>
+      <div class="modal-form-group">
+        <label>CPF (opcional)</label>
+        <input type="text" id="bnmpCPF" placeholder="000.000.000-00" maxlength="14" />
+      </div>
+      <div class="modal-form-group">
+        <label>RG (opcional)</label>
+        <input type="text" id="bnmpRG" placeholder="N&#250;mero do RG" />
+      </div>
+      <div id="bnmpMsg" class="auth-msg error hidden">Informe pelo menos um campo para buscar.</div>
+      <p style="font-size:.76rem;color:var(--text-muted);margin-top:.5rem">O BNMP ser&#225; aberto em nova aba com os dados pr&#233;-preenchidos. Caso a busca n&#227;o funcione automaticamente, consulte diretamente em portalbnmp.cnj.jus.br</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeBNMP()">Cancelar</button>
+      <button class="btn-primary" onclick="buscarBNMP()" style="width:auto;margin-top:0">Abrir no BNMP &#8594;</button>
+    </div>
+  </div>
+
+  <!-- MODAL CHECKLIST PERSONALIZADO -->
+  <div class="modal-backdrop hidden" id="customBackdrop" onclick="closeCustomBuilder()"></div>
+  <div class="modal hidden" id="customBuilderModal" style="max-width:580px;max-height:90vh">
+    <div class="modal-header">
+      <div><h3 id="customBuilderTitle">Novo checklist personalizado</h3><p class="modal-subtitle">Crie seu pr&#243;prio modelo de ocorr&#234;ncia</p></div>
+      <button onclick="closeCustomBuilder()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <input type="hidden" id="customEditId" />
+      <div style="display:flex;gap:.6rem">
+        <div class="modal-form-group" style="flex:1">
+          <label>Nome do checklist</label>
+          <input type="text" id="customNome" placeholder="Ex: Suicídio, Furto a veículo..." />
+        </div>
+        <div class="modal-form-group" style="width:80px">
+          <label>&#205;cone</label>
+          <input type="text" id="customIcone" placeholder="&#128203;" maxlength="2" style="text-align:center;font-size:1.3rem" />
+        </div>
+      </div>
+      <div style="margin-top:.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem">
+          <span style="font-size:.8rem;font-weight:600;color:var(--text-secondary);font-family:var(--font-display);text-transform:uppercase;letter-spacing:.05em">Se&#231;&#245;es e itens</span>
+          <button class="btn-template" onclick="addCustomSection()">+ Nova se&#231;&#227;o</button>
+        </div>
+        <div id="customSections"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCustomBuilder()">Cancelar</button>
+      <button class="btn-primary" id="btnSalvarCustom" onclick="salvarCustomChecklist()" style="width:auto;margin-top:0">Salvar checklist</button>
+    </div>
+  </div>
+
+  <!-- MODAL MENU LEGISLAÇÃO -->
+  <div class="modal-backdrop hidden" id="artigosMenuBackdrop" onclick="closeArtigosMenu()"></div>
+  <div class="modal hidden" id="artigosMenuModal" style="max-width:440px">
+    <div class="modal-header">
+      <div><h3>&#9878; Legisla&#231;&#227;o</h3><p class="modal-subtitle">Artigos mais usados no plant&#227;o</p></div>
+      <button onclick="closeArtigosMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" id="artigosMenuBody"></div>
+  </div>
+
+  <!-- MODAL MENU QUESITOS -->
+  <div class="modal-backdrop hidden" id="quesitosMenuBackdrop" onclick="closeQuesitosMenu()"></div>
+  <div class="modal hidden" id="quesitosMenuModal" style="max-width:500px">
+    <div class="modal-header">
+      <div><h3>&#128203; Quesitos Periciais</h3><p class="modal-subtitle">Selecione o tipo de crime</p></div>
+      <button onclick="closeQuesitosMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <div class="home-search-wrap" style="margin-bottom:.75rem">
+        <input class="home-search" id="quesitosSearch" type="text" placeholder="&#128269; Buscar quesito ou crime..." oninput="filterQuesitos()" autocomplete="off" style="max-width:100%" />
+      </div>
+      <div id="quesitosMenuBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL MENU E-MAILS -->
+  <div class="modal-backdrop hidden" id="emailMenuBackdrop" onclick="closeEmailMenu()"></div>
+  <div class="modal hidden" id="emailMenuModal" style="max-width:480px">
+    <div class="modal-header">
+      <div><h3>&#128231; Modelos de E-mail</h3><p class="modal-subtitle">Selecione o modelo para preencher e copiar</p></div>
+      <button onclick="closeEmailMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailMenuBody"></div>
+  </div>
+
+  <!-- MODAL EDITOR DE E-MAIL -->
+  <div class="modal-backdrop hidden" id="emailEditorBackdrop" onclick="closeEmailEditor()"></div>
+  <div class="modal hidden" id="emailEditorModal" style="max-width:600px">
+    <div class="modal-header">
+      <div>
+        <h3 id="emailEditorTitle">E-mail</h3>
+        <p class="modal-subtitle" id="emailEditorSubtitle"></p>
+      </div>
+      <button onclick="closeEmailEditor()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailEditorBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeEmailEditor()">Fechar</button>
+      <button class="btn-primary" id="btnGerarEmail" onclick="gerarEmail()" style="width:auto;margin-top:0">Gerar e-mail</button>
+    </div>
+  </div>
+
+  <!-- MODAL MENU QUESITOS -->
+  <div class="modal-backdrop hidden" id="quesitosMenuBackdrop" onclick="closeQuesitosMenu()"></div>
+  <div class="modal hidden" id="quesitosMenuModal" style="max-width:500px">
+    <div class="modal-header">
+      <div><h3>&#128203; Quesitos Periciais</h3><p class="modal-subtitle">Selecione o tipo de crime</p></div>
+      <button onclick="closeQuesitosMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <div class="home-search-wrap" style="margin-bottom:.75rem">
+        <input class="home-search" id="quesitosSearch" type="text" placeholder="&#128269; Buscar quesito ou crime..." oninput="filterQuesitos()" autocomplete="off" style="max-width:100%" />
+      </div>
+      <div id="quesitosMenuBody"></div>
+    </div>
+  </div>
+
+  <!-- MODAL MENU E-MAILS -->
+  <div class="modal-backdrop hidden" id="emailMenuBackdrop" onclick="closeEmailMenu()"></div>
+  <div class="modal hidden" id="emailMenuModal" style="max-width:480px">
+    <div class="modal-header">
+      <div><h3>&#128231; Modelos de E-mail</h3><p class="modal-subtitle">Selecione o modelo para preencher e copiar</p></div>
+      <button onclick="closeEmailMenu()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailMenuBody"></div>
+  </div>
+
+  <!-- MODAL EDITOR DE E-MAIL -->
+  <div class="modal-backdrop hidden" id="emailEditorBackdrop" onclick="closeEmailEditor()"></div>
+  <div class="modal hidden" id="emailEditorModal" style="max-width:600px">
+    <div class="modal-header">
+      <div>
+        <h3 id="emailEditorTitle">E-mail</h3>
+        <p class="modal-subtitle" id="emailEditorSubtitle"></p>
+      </div>
+      <button onclick="closeEmailEditor()">&#215;</button>
+    </div>
+    <div class="modal-body" id="emailEditorBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeEmailEditor()">Fechar</button>
+      <button class="btn-primary" id="btnGerarEmail" onclick="gerarEmail()" style="width:auto;margin-top:0">Gerar e-mail</button>
+    </div>
+  </div>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/artigos.js"></script>
+  <script src="js/quesitos.js"></script>
+  <script src="js/checklists.js"></script>
+  <script src="js/templates.js"></script>
+  <!-- MODAL GENÉRICO DE DOCUMENTOS PCSP -->
+  <div class="modal-backdrop hidden" id="pcdocBackdrop" onclick="PCDoc.close()"></div>
+  <div class="modal hidden" id="pcdocModal" style="max-width:560px">
+    <div class="modal-header">
+      <div>
+        <h3 id="pcdocModalTitle">Documento</h3>
+        <p class="modal-subtitle" id="pcdocModalSub"></p>
+      </div>
+      <button onclick="PCDoc.close()">&#215;</button>
+    </div>
+    <div class="modal-body" id="pcdocModalBody" style="max-height:70vh;overflow-y:auto"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="PCDoc.close()">Fechar</button>
+      <button class="btn-primary" onclick="PCDoc.gerar()" style="width:auto;margin-top:0">Gerar documento</button>
+    </div>
+  </div>
+
+  <script src="js/pcsp-units.js"></script>
+  <script src="js/pcsp-doc.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(err => console.warn('[SW]', err));
     }
-  },
-
-  autorizacaoContato: {
-    title: 'Autorização de Contato',
-    fields: [
-      { id: 'whatsapp', label: 'Número de WhatsApp', placeholder: 'Ex: (11) 99999-9999', required: false },
-      { id: 'email',    label: 'E-mail',              placeholder: 'Ex: nome@email.com',   required: false },
-    ],
-    generate: function(f) {
-      var meios = [];
-      if (f.whatsapp) meios.push('WhatsApp (' + f.whatsapp + ')');
-      if (f.email)    meios.push('e-mail (' + f.email + ')');
-      if (!meios.length) return '[Informe ao menos um meio de contato.]';
-      var lista = meios.length === 2 ? meios[0] + ' e ' + meios[1] : meios[0];
-      return 'A declarante autoriza que a Autoridade Policial e os demais agentes responsáveis pelo procedimento realizem contato por meio de ' + lista + ', para comunicação sobre eventuais movimentações, intimações ou providências relacionadas ao presente registro.';
-    }
-  },
-
-  autorizacaoFotografias: {
-    title: 'Autorização de Fotografias',
-    fields: [],
-    generate: function(f) {
-      return 'A vítima declara possuir lesões aparentes decorrentes dos fatos narrados e, neste ato, autoriza expressamente a fotografação das referidas lesões pelos agentes policiais, bem como o anexo das imagens ao presente procedimento, para fins de instrução probatória.';
-    }
-  },
-
-  representacaoCriminal: {
-    title: 'Representação Criminal',
-    fields: [
-      { id: 'genero', label: 'Gênero do(a) declarante', type: 'select',
-        options: [{ value: 'F', label: 'Feminino' }, { value: 'M', label: 'Masculino' }] },
-    ],
-    generate: function(f) {
-      var masc = (f.genero || 'F') === 'M';
-      var decl  = masc ? 'o declarante' : 'a declarante';
-      var autor = masc ? 'o autor' : 'a autora';
-      return (masc ? 'O' : 'A') + ' declarante manifesta, neste ato, de forma expressa e inequívoca, o desejo de representar criminalmente contra ' + autor + ' dos fatos narrados no presente registro, requerendo a adoção de todas as providências legais cabíveis e o prosseguimento das investigações.';
-    }
-  },
-
-  medidaProtetiva: {
-    title: 'Medida Protetiva — Lei Maria da Penha',
-    fields: [
-      { id: 'medidas', label: 'Medidas requeridas (selecione uma ou mais)', type: 'multiselect',
-        options: [
-          { value: 'afastamento',    label: 'Afastamento do lar (art. 22, II)' },
-          { value: 'aproximacao',    label: 'Proibição de aproximação (art. 22, III, a)' },
-          { value: 'contato',        label: 'Proibição de contato (art. 22, III, b)' },
-          { value: 'lugares',        label: 'Proibição de frequentar lugares (art. 22, III, c)' },
-          { value: 'visitas',        label: 'Restrição ou suspensão de visitas (art. 22, IV)' },
-          { value: 'armas',          label: 'Suspensão do porte de armas (art. 22, I)' },
-          { value: 'alimentos',      label: 'Prestação de alimentos provisionais (art. 22, V)' },
-          { value: 'reeducacao',     label: 'Comparecimento a programas de reeducação (art. 22, VI)' },
-          { value: 'protecao',       label: 'Encaminhamento a programa de proteção (art. 23, I)' },
-          { value: 'bens',           label: 'Restituição de documentos e bens (art. 24, II)' },
-          { value: 'venda',          label: 'Proibição de venda de bens comuns (art. 24, III)' },
-          { value: 'acompanhamento', label: 'Acompanhamento para retirada de pertences (art. 23, III)' },
-        ]
-      },
-    ],
-    generate: function(f) {
-      var medidas = f.medidas || [];
-      if (!medidas.length) return '[Selecione ao menos uma medida protetiva.]';
-      var map = {
-        afastamento:    'afastamento do agressor do lar (art. 22, inciso II)',
-        aproximacao:    'proibição de se aproximar da vítima, de seus familiares e das testemunhas, com fixação de limite mínimo de distância (art. 22, inciso III, alínea "a")',
-        contato:        'proibição de contato com a vítima, seus familiares e testemunhas por qualquer meio de comunicação (art. 22, inciso III, alínea "b")',
-        lugares:        'proibição de frequentar determinados locais para preservar a integridade física e psicológica da vítima (art. 22, inciso III, alínea "c")',
-        visitas:        'restrição ou suspensão de visitas aos dependentes menores (art. 22, inciso IV)',
-        armas:          'suspensão da posse ou restrição do porte de armas de fogo (art. 22, inciso I)',
-        alimentos:      'prestação de alimentos provisionais à vítima e/ou aos filhos (art. 22, inciso V)',
-        reeducacao:     'comparecimento obrigatório a programas de reeducação e reabilitação (art. 22, inciso VI)',
-        protecao:       'encaminhamento da vítima e de seus dependentes a programas oficiais de proteção (art. 23, inciso I)',
-        bens:           'determinação de restituição de documentos e bens indevidamente subtraídos (art. 24, inciso II)',
-        venda:          'proibição de alienação ou disposição de bens e valores comuns do casal (art. 24, inciso III)',
-        acompanhamento: 'acompanhamento pela autoridade policial para retirada de pertences do lar (art. 23, inciso III)',
-      };
-      var lista = medidas.map(function(m, i) {
-        var texto = map[m] || m;
-        if (i === 0) return texto.charAt(0).toUpperCase() + texto.slice(1);
-        return texto;
-      });
-      var listaFmt = lista.length === 1
-        ? lista[0]
-        : lista.slice(0, -1).join('; ') + '; e ' + lista[lista.length - 1];
-      return 'A declarante requer, nos termos da Lei n.º 11.340/2006 (Lei Maria da Penha), a concessão das seguintes medidas protetivas de urgência: ' + listaFmt + '. Requer, ainda, que as presentes medidas sejam comunicadas ao Ministério Público e submetidas à apreciação do Juízo competente com a máxima urgência.';
-    }
-  },
-
-  lavraturaTermoCircunstanciado: {
-    title: 'Lavratura de Termo Circunstanciado',
-    fields: [
-      { id: 'qtd', label: 'Quantas pessoas assinarão o termo?', type: 'select',
-        options: [
-          { value: '1', label: '1 pessoa' },
-          { value: 'N', label: 'Mais de 1 pessoa' },
-        ]
-      },
-    ],
-    generate: function(f) {
-      var plural = (f.qtd || '1') === 'N';
-      var envolvido  = plural ? 'Os envolvidos' : 'O(a) envolvido(a)';
-      var assinou    = plural ? 'assinaram' : 'assinou';
-      var intimados  = plural ? 'intimados' : 'intimado(a)';
-      var cientes    = plural ? 'cientes' : 'ciente';
-      return 'Diante dos fatos expostos, a Autoridade Policial, reconhecendo a natureza de menor potencial ofensivo da infração penal narrada, nos termos do art. 61 da Lei n.º 9.099/1995 e do art. 69 do mesmo diploma legal, determinou a lavratura do presente Termo Circunstanciado de Ocorrência, com o imediato encaminhamento das partes ao Juizado Especial Criminal competente. ' + envolvido + ' ' + assinou + ' o Termo de Compromisso de comparecimento perante o Juizado, assumindo a obrigação de comparecer quando regularmente ' + intimados + ', ' + cientes + ' de que o descumprimento poderá ensejar as providências previstas no art. 71 da Lei n.º 9.099/1995.';
-    }
-  },
-
-};
+  </script>
+</body>
+</html>
