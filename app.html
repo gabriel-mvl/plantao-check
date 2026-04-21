@@ -70,11 +70,12 @@
 
     <header class="topbar">
       <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
-      <div class="topbar-title" id="topbarTitle">Selecione uma ocorr&#234;ncia</div>
+      <div class="topbar-title" id="topbarTitle"></div>
       <div class="sync-indicator hidden" id="syncIndicator" title="Sincronizando...">&#9729;</div>
       <div class="topbar-actions">
-        <button class="btn-icon" onclick="window.print()" title="Imprimir">&#128424;</button>
-        <button class="btn-icon" onclick="generatePDF()" title="Gerar PDF">&#128196;</button>
+        <button class="btn-icon btn-icon-plantao" id="btnTopbarPlantao"
+                onclick="editarOuAbrirPlantao()"
+                title="Dados do plantão">&#128203; Plant&#227;o</button>
       </div>
     </header>
 
