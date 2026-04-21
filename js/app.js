@@ -481,7 +481,7 @@ function backToHome() {
   stopOccurrenceTimer();
   currentOccurrence = null;
   showView('homeView');
-  document.getElementById('topbarTitle').textContent = 'Selecione uma ocorrência';
+  document.getElementById('topbarTitle').textContent = '';
   document.querySelectorAll('.nav-link[data-id]').forEach(el => el.classList.remove('active'));
   renderNavList();
   renderOccurrenceGrid();
@@ -1056,6 +1056,14 @@ function renderAppWithPlantao() {
   renderOccurrenceGrid();
   renderRecentOccurrence();
   renderAndamentoSection();
+}
+
+function editarOuAbrirPlantao() {
+  if (plantaoAtivo) {
+    editarPlantao();
+  } else {
+    openPlantaoModal();
+  }
 }
 
 function editarPlantao() {
