@@ -20,33 +20,43 @@
     </div>
     <div class="sidebar-user" id="sidebarUser"></div>
     <nav class="sidebar-nav">
+
       <button class="btn-home-nav" onclick="backToHome(); if(window.innerWidth<=768) toggleSidebar();">
         &#127968; P&#225;gina inicial
       </button>
-      <p class="nav-label">Ocorr&#234;ncias</p>
-      <ul id="navList"></ul>
-      <p class="nav-label" style="margin-top:1.4rem">Ferramentas</p>
+
+      <p class="nav-label">Plant&#227;o</p>
       <ul>
         <li><a href="#" class="nav-link" onclick="openRelatorio()"><span class="nav-icon">&#128196;</span> Relat&#243;rio do Plant&#227;o</a></li>
-        <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
+        <li><a href="#" class="nav-link" onclick="openChecklistModal(); if(window.innerWidth<=768) toggleSidebar();"><span class="nav-icon">&#9989;</span> Checklists de Ocorr&#234;ncia</a></li>
+        <li><a href="#" class="nav-link" onclick="openPlantaoDiario(); if(window.innerWidth<=768) toggleSidebar();"><span class="nav-icon">&#9200;</span> Rotina do Plant&#227;o</a></li>
+      </ul>
+
+      <p class="nav-label" style="margin-top:1.1rem">Ferramentas</p>
+      <ul>
         <li><a href="#" class="nav-link" onclick="openEmailMenu()"><span class="nav-icon">&#128231;</span> Modelos de E-mail</a></li>
+        <li><a href="#" class="nav-link" onclick="openQuesitosMenu()"><span class="nav-icon">&#128203;</span> Quesitos Periciais</a></li>
+        <li><a href="#" class="nav-link" onclick="openArtigosMenu()"><span class="nav-icon">&#9878;</span> Legisla&#231;&#227;o</a></li>
         <li><a href="#" class="nav-link" onclick="window.open('pre-atendimento.html','_blank')"><span class="nav-icon">&#128221;</span> Pr&#233;-Atendimento</a></li>
-        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoSangue')"><span class="nav-icon">&#129656;</span> Autoriza&#231;&#227;o Sangue</a></li>
-        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoCelular')"><span class="nav-icon">&#128241;</span> Autoriza&#231;&#227;o Celular</a></li>
-        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoEntrada')"><span class="nav-icon">&#127968;</span> Autoriza&#231;&#227;o Entrada</a></li>
+      </ul>
+
+      <p class="nav-label" style="margin-top:1.1rem">Documentos</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoSangue')"><span class="nav-icon">&#129656;</span> Coleta de Sangue</a></li>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoCelular')"><span class="nav-icon">&#128241;</span> Extra&#231;&#227;o Celular</a></li>
+        <li><a href="#" class="nav-link" onclick="PCDoc.open('autorizacaoEntrada')"><span class="nav-icon">&#127968;</span> Entrada em Resid&#234;ncia</a></li>
+      </ul>
+
+      <p class="nav-label" style="margin-top:1.1rem">Modelos de Texto</p>
+      <ul>
         <li><a href="#" class="nav-link" onclick="openTemplate('historicoCaptura')"><span class="nav-icon">&#128269;</span> Captura de Procurado</a></li>
         <li><a href="#" class="nav-link" onclick="openTemplate('autorizacaoContato')"><span class="nav-icon">&#128222;</span> Autoriza&#231;&#227;o de Contato</a></li>
-        <li><a href="#" class="nav-link" onclick="openTemplate('autorizacaoFotografias')"><span class="nav-icon">&#128247;</span> Autoriza&#231;&#227;o de Fotografias</a></li>
+        <li><a href="#" class="nav-link" onclick="openTemplate('autorizacaoFotografias')"><span class="nav-icon">&#128247;</span> Fotografias de Les&#245;es</a></li>
         <li><a href="#" class="nav-link" onclick="openTemplate('representacaoCriminal')"><span class="nav-icon">&#9878;</span> Representa&#231;&#227;o Criminal</a></li>
         <li><a href="#" class="nav-link" onclick="openTemplate('medidaProtetiva')"><span class="nav-icon">&#128737;</span> Medida Protetiva</a></li>
         <li><a href="#" class="nav-link" onclick="openTemplate('lavraturaTermoCircunstanciado')"><span class="nav-icon">&#128203;</span> Lavratura de TCO</a></li>
       </ul>
-      <p class="nav-label" style="margin-top:1.4rem">Refer&#234;ncias</p>
-      <ul>
-        <li><a href="#" class="nav-link" onclick="openRef('requisicoes')"><span class="nav-icon">&#128203;</span> Requisi&#231;&#245;es IML/IC</a></li>
-        <li><a href="#" class="nav-link" onclick="openRef('orientacoes')"><span class="nav-icon">&#128204;</span> Orienta&#231;&#245;es Gerais</a></li>
-        <li><a href="#" class="nav-link" onclick="openArtigosMenu()"><span class="nav-icon">&#9878;</span> Legisla&#231;&#227;o</a></li>
-      </ul>
+
     </nav>
     <div class="sidebar-footer">
       <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">&#9728; Modo Claro</button>
@@ -77,55 +87,173 @@
       <div id="recentOccurrence"></div>
       <div id="andamentoSection"></div>
 
-      <!-- ATALHOS: ferramentas + documentos -->
-      <div class="home-shortcuts">
+      <div class="home-grid">
 
-        <div class="home-shortcut-group">
-          <div class="home-shortcut-label">Ferramentas</div>
-          <div class="home-shortcut-row">
-            <button class="home-sc" onclick="openRelatorio()">&#128196; Relat&#243;rio</button>
-            <button class="home-sc" onclick="openEmailMenu()">&#128231; E-mails</button>
-            <button class="home-sc" onclick="openArtigosMenu()">&#9878; Legisla&#231;&#227;o</button>
-            <button class="home-sc" onclick="openQuesitosMenu()">&#128203; Quesitos</button>
-            <button class="home-sc" onclick="window.open('pre-atendimento.html','_blank')">&#128221; Pr&#233;-Atendimento</button>
+        <!-- CHECKLISTS — card principal -->
+        <div class="home-card home-card-checklist" onclick="openChecklistModal()">
+          <div class="home-card-icon">&#9989;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Checklist de Ocorr&#234;ncia</div>
+            <div class="home-card-sub">Selecionar tipo e abrir checklist</div>
+          </div>
+          <div class="home-card-arrow">&#8594;</div>
+        </div>
+
+        <!-- FERRAMENTAS -->
+        <div class="home-card" onclick="openRelatorio()">
+          <div class="home-card-icon">&#128196;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Relat&#243;rio do Plant&#227;o</div>
+            <div class="home-card-sub">Registre e imprima os BOs do turno</div>
           </div>
         </div>
 
-        <div class="home-shortcut-group">
-          <div class="home-shortcut-label">Documentos</div>
-          <div class="home-shortcut-row">
-            <button class="home-sc" onclick="PCDoc.open('autorizacaoSangue')">&#129656; Coleta de Sangue</button>
-            <button class="home-sc" onclick="PCDoc.open('autorizacaoCelular')">&#128241; Extra&#231;&#227;o Celular</button>
-            <button class="home-sc" onclick="PCDoc.open('autorizacaoEntrada')">&#127968; Entrada em Resid&#234;ncia</button>
-            <button class="home-sc" onclick="openTemplate('historicoCaptura')">&#128269; Captura de Procurado</button>
-            <button class="home-sc" onclick="openTemplate('autorizacaoContato')">&#128222; Autoriza&#231;&#227;o de Contato</button>
-            <button class="home-sc" onclick="openTemplate('autorizacaoFotografias')">&#128247; Autoriza&#231;&#227;o de Fotografias</button>
-            <button class="home-sc" onclick="openTemplate('representacaoCriminal')">&#9878; Representa&#231;&#227;o Criminal</button>
-            <button class="home-sc" onclick="openTemplate('medidaProtetiva')">&#128737; Medida Protetiva</button>
-            <button class="home-sc" onclick="openTemplate('lavraturaTermoCircunstanciado')">&#128203; Lavratura de TCO</button>
+        <div class="home-card" onclick="openEmailMenu()">
+          <div class="home-card-icon">&#128231;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Modelos de E-mail</div>
+            <div class="home-card-sub">Preencha e copie comunicados oficiais</div>
           </div>
         </div>
 
-      </div>
-
-      <!-- CHECKLISTS DE OCORRÊNCIA -->
-      <div class="home-occ-section">
-        <div class="home-occ-header">
-          <div class="home-occ-title">Checklists de Ocorr&#234;ncia</div>
-          <div class="home-occ-actions">
-            <input class="home-search" id="homeSearch" type="text"
-                   placeholder="&#128269; Buscar..."
-                   oninput="filterOccurrences()" autocomplete="off" />
-            <button class="btn-plantao-diario" onclick="openPlantaoDiario()">
-              &#9200; Rotina do Plant&#227;o
-            </button>
+        <div class="home-card" onclick="openQuesitosMenu()">
+          <div class="home-card-icon">&#128203;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Quesitos Periciais</div>
+            <div class="home-card-sub">Manual oficial da PCSP por crime</div>
           </div>
         </div>
-        <div class="occurrence-grid" id="occurrenceGrid"></div>
-        <p class="no-results hidden" id="noResults">Nenhuma ocorr&#234;ncia encontrada.</p>
+
+        <div class="home-card" onclick="openArtigosMenu()">
+          <div class="home-card-icon">&#9878;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Legisla&#231;&#227;o</div>
+            <div class="home-card-sub">CP, CPP e leis extravagantes</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="window.open('pre-atendimento.html','_blank')">
+          <div class="home-card-icon">&#128221;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Pr&#233;-Atendimento</div>
+            <div class="home-card-sub">Ficha para espontaneamente apresentados</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="openPlantaoDiario()">
+          <div class="home-card-icon">&#9200;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Rotina do Plant&#227;o</div>
+            <div class="home-card-sub">Procedimentos obrigat&#243;rios do turno</div>
+          </div>
+        </div>
+
+        <!-- DOCUMENTOS -->
+        <div class="home-section-label">Documentos Oficiais</div>
+
+        <div class="home-card" onclick="PCDoc.open('autorizacaoSangue')">
+          <div class="home-card-icon">&#129656;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Coleta de Sangue</div>
+            <div class="home-card-sub">Autoriza&#231;&#227;o — CONTRAN 432/2013</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="PCDoc.open('autorizacaoCelular')">
+          <div class="home-card-icon">&#128241;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Extra&#231;&#227;o de Celular</div>
+            <div class="home-card-sub">Autoriza&#231;&#227;o de acesso a dados</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="PCDoc.open('autorizacaoEntrada')">
+          <div class="home-card-icon">&#127968;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Entrada em Resid&#234;ncia</div>
+            <div class="home-card-sub">Consentimento — art. 5&#186; XI CF</div>
+          </div>
+        </div>
+
+        <!-- MODELOS DE TEXTO -->
+        <div class="home-section-label">Modelos de Texto</div>
+
+        <div class="home-card" onclick="openTemplate('historicoCaptura')">
+          <div class="home-card-icon">&#128269;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Captura de Procurado</div>
+            <div class="home-card-sub">Hist&#243;rico do BO de captura</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="openTemplate('autorizacaoContato')">
+          <div class="home-card-icon">&#128222;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Autoriza&#231;&#227;o de Contato</div>
+            <div class="home-card-sub">WhatsApp e e-mail — movimenta&#231;&#245;es</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="openTemplate('autorizacaoFotografias')">
+          <div class="home-card-icon">&#128247;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Fotografias de Les&#245;es</div>
+            <div class="home-card-sub">Autoriza&#231;&#227;o e anexo ao procedimento</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="openTemplate('representacaoCriminal')">
+          <div class="home-card-icon">&#9878;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Representa&#231;&#227;o Criminal</div>
+            <div class="home-card-sub">Manifesta&#231;&#227;o contra o autor</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="openTemplate('medidaProtetiva')">
+          <div class="home-card-icon">&#128737;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Medida Protetiva</div>
+            <div class="home-card-sub">Lei Maria da Penha — art. 22/23/24</div>
+          </div>
+        </div>
+
+        <div class="home-card" onclick="openTemplate('lavraturaTermoCircunstanciado')">
+          <div class="home-card-icon">&#128203;</div>
+          <div class="home-card-body">
+            <div class="home-card-title">Lavratura de TCO</div>
+            <div class="home-card-sub">Termo circunstanciado — Lei 9.099/95</div>
+          </div>
+        </div>
+
+      </div><!-- /home-grid -->
+
+      <!-- hidden inputs para o occurrence grid (usado internamente) -->
+      <div style="display:none">
+        <input id="homeSearch" type="text" />
+        <div id="occurrenceGrid"></div>
+        <p id="noResults"></p>
       </div>
 
     </div>
+
+  <!-- MODAL CHECKLIST — seleção de tipo de ocorrência -->
+  <div class="modal-backdrop hidden" id="checklistModalBackdrop" onclick="closeChecklistModal()"></div>
+  <div class="modal hidden" id="checklistModal" style="max-width:560px">
+    <div class="modal-header">
+      <div><h3>&#9989; Checklist de Ocorr&#234;ncia</h3><p class="modal-subtitle">Selecione o tipo para abrir o checklist</p></div>
+      <button onclick="closeChecklistModal()">&#215;</button>
+    </div>
+    <div class="modal-body" style="max-height:65vh;overflow-y:auto">
+      <div class="home-search-wrap" style="margin-bottom:.75rem">
+        <input class="home-search" id="checklistSearch" type="text"
+               placeholder="&#128269; Buscar tipo de ocorr&#234;ncia..."
+               oninput="filterChecklistModal()" autocomplete="off" style="max-width:100%" />
+      </div>
+      <div id="checklistModalGrid" class="occurrence-grid"></div>
+      <p class="no-results hidden" id="checklistNoResults">Nenhuma ocorr&#234;ncia encontrada.</p>
+    </div>
+  </div>
 
     <!-- CHECKLIST VIEW -->
     <div class="checklist-view hidden" id="checklistView">
