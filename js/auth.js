@@ -52,6 +52,23 @@ function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.gov\.br$/.test(email.trim().toLowerCase());
 }
 
+function syncLoginEmail() {
+  const user    = (document.getElementById('loginUser')?.value || '').trim();
+  const sel     = document.getElementById('loginSuffix');
+  const custom  = document.getElementById('loginSuffixCustom');
+  const hidden  = document.getElementById('loginEmail');
+
+  if (sel?.value === 'outro') {
+    custom?.classList.remove('hidden');
+    const suf = (custom?.value || '').trim();
+    if (hidden) hidden.value = user + suf;
+  } else {
+    custom?.classList.add('hidden');
+    const suf = sel?.value || '@policiacivil.sp.gov.br';
+    if (hidden) hidden.value = user + suf;
+  }
+}
+
 function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
