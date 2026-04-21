@@ -4,11 +4,10 @@
 
 function formatarDataExtenso(iso) {
   if (!iso) return '[DATA]';
-  const meses = ['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO',
+  const meses = ['JANEIRO','FEVEREIRO','MARÇO','ABRIL','MAIO','JUNHO',
                  'JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
   const [ano, mes, dia] = iso.split('-');
-  const m = meses[parseInt(mes,10)-1].replace('MARCO','MARÇO');
-  return parseInt(dia,10) + ' DE ' + m + ' DE ' + ano;
+  return parseInt(dia,10) + ' DE ' + meses[parseInt(mes,10)-1] + ' DE ' + ano;
 }
 
 const EMAIL_TEMPLATES = [
@@ -97,53 +96,46 @@ const EMAIL_TEMPLATES = [
 
 ];
 
+
 // ── TEMPLATES DE HISTÓRICO DE BO ──────────────────────────────
 const TEMPLATES = {
 
   historicoCaptura: {
-    title:'Histórico do BO — Captura de Procurado',
-    fields:[
-      {id:'genero',       label:'Gênero do(a) capturado(a)', type:'select',
-       options:[{value:'M',label:'Masculino'},{value:'F',label:'Feminino'}]},
-      {id:'nomeCompleto', label:'Nome completo do(a) procurado(a)', placeholder:'Ex: FULANO DE TAL'},
-      {id:'tipoCondutor', label:'Tipo de condutor', placeholder:'policial militar'},
-      {id:'numMandado',   label:'Número do mandado',   placeholder:'Ex: 0000001-00.2024.8.26.0000'},
-      {id:'numProcesso',  label:'Número do processo',  placeholder:'Ex: 0000001-00.2024.8.26.0000'},
-      {id:'vara',         label:'Vara / Juízo',        placeholder:'Ex: 1ª Vara Criminal da Comarca'},
-      {id:'dataExpedicao',label:'Data de expedição',   placeholder:'Ex: 10/01/2025'},
-      {id:'validade',     label:'Validade do mandado', placeholder:'Ex: indeterminada'},
-      {id:'tipoPrisao',   label:'Tipo de prisão',      placeholder:'Ex: preventiva / temporária / definitiva'},
-      {id:'nomeContato',  label:'Nome do familiar/contato', placeholder:'Ex: Maria da Silva'},
-      {id:'parentesco',   label:'Parentesco',          placeholder:'Ex: mãe / esposa / irmão'},
-      {id:'telContato',   label:'Telefone do contato', placeholder:'Ex: (11) 99999-9999'},
+    title: 'Histórico do BO — Captura de Procurado',
+    fields: [
+      { id: 'genero',       label: 'Gênero do(a) capturado(a)', type: 'select',
+        options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }] },
+      { id: 'nomeCompleto', label: 'Nome completo do(a) procurado(a)', placeholder: 'Ex: FULANO DE TAL' },
+      { id: 'tipoCondutor', label: 'Tipo de condutor',   placeholder: 'policial militar' },
+      { id: 'numMandado',   label: 'Número do mandado',  placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
+      { id: 'numProcesso',  label: 'Número do processo', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
+      { id: 'vara',         label: 'Vara / Juízo',       placeholder: 'Ex: 1ª Vara Criminal da Comarca' },
+      { id: 'dataExpedicao',label: 'Data de expedição',  placeholder: 'Ex: 10/01/2025' },
+      { id: 'validade',     label: 'Validade do mandado',placeholder: 'Ex: indeterminada' },
+      { id: 'tipoPrisao',   label: 'Tipo de prisão',     placeholder: 'Ex: preventiva / temporária / definitiva' },
+      { id: 'nomeContato',  label: 'Nome do familiar/contato', placeholder: 'Ex: Maria da Silva' },
+      { id: 'parentesco',   label: 'Parentesco',         placeholder: 'Ex: mãe / esposa / irmão' },
+      { id: 'telContato',   label: 'Telefone do contato',placeholder: 'Ex: (11) 99999-9999' },
     ],
-    generate:(f)=>{
-      const masc = (f.genero || 'M') === 'M';
-      const condutor = f.tipoCondutor || 'policial militar';
-      // Extract first name from full name
-      const nomeCompleto = f.nomeCompleto || '[NOME COMPLETO DO PROCURADO]';
-      const primeiroNome = nomeCompleto.trim().split(/\s+/)[0];
-      // Gender-adapted terms
-      const o_a        = masc ? 'o' : 'a';
-      const do_da      = masc ? 'do' : 'da';
-      const ao_a       = masc ? 'ao' : 'à';
-      const conduzido  = masc ? 'conduzido' : 'conduzida';
-      const capturado  = masc ? 'capturado' : 'capturada';
-      const encaminh   = masc ? 'encaminhado' : 'encaminhada';
-      const apresentado= masc ? 'apresentado' : 'apresentada';
-      const preso_a    = masc ? 'preso' : 'presa';
+    generate: function(f) {
+      var masc = (f.genero || 'M') === 'M';
+      var condutor = f.tipoCondutor || 'policial militar';
+      var nomeCompleto = f.nomeCompleto || '[NOME COMPLETO DO PROCURADO]';
+      var primeiroNome = nomeCompleto.trim().split(' ')[0];
+      var o_a       = masc ? 'o' : 'a';
+      var conduzido = masc ? 'conduzido' : 'conduzida';
+      var capturado = masc ? 'capturado' : 'capturada';
+      var encaminh  = masc ? 'encaminhado' : 'encaminhada';
+      var apresent  = masc ? 'apresentado' : 'apresentada';
+      var est_a     = masc ? 'este' : 'esta';
+      var cientif   = masc ? 'cientificado' : 'cientificada';
 
-      return \`Comparece o condutor, \${condutor} acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem d\${o_a} indivídu\${o_a} posteriormente identificad\${o_a} como \${nomeCompleto}.
-
-Em consulta aos sistemas policiais, verificou-se que \${primeiroNome} constava como procurad\${o_a} pela Justiça. Em revista pessoal, nada de ilícito foi encontrado, não sendo nenhum objeto exibido para apreensão.
-
-Diante dos fatos, \${primeiroNome} foi \${encaminh}\${o_a} à unidade de saúde local para realização de avaliação médica cautelar e, em seguida, \${apresentado}\${o_a} neste Plantão Policial para adoção das providências de polícia judiciária.
-
-Já em solo policial, em consulta detalhada aos sistemas Analítico, Prodesp, Muralha Paulista e Infoseg, bem como ao Banco Nacional de Mandados de Prisão (BNMP), confirmou-se o mandado de prisão em desfavor d\${o_a} \${conduzido}, conforme número \${f.numMandado}, processo \${f.numProcesso}, expedido pela \${f.vara} em \${f.dataExpedicao}, com validade até \${f.validade}, na modalidade: prisão \${f.tipoPrisao}.
-
-Ressalte-se que foi feito contato com \${f.nomeContato}, \${f.parentesco} d\${o_a} \${capturado}, pelo telefone \${f.telContato}, sendo est\${masc ? 'e' : 'a'} cientificad\${masc ? 'o' : 'a'} de sua prisão, bem como do local onde se encontra.
-
-Por fim, a autoridade policial determinou a lavratura do presente registro, procedendo-se às comunicações de praxe. Nada mais.\`;
+      return 'Comparece o condutor, ' + condutor + ' acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem d' + o_a + ' indivídu' + o_a + ' posteriormente identificad' + o_a + ' como ' + nomeCompleto + '.\n\n' +
+        'Em consulta aos sistemas policiais, verificou-se que ' + primeiroNome + ' constava como procurad' + o_a + ' pela Justiça. Em revista pessoal, nada de ilícito foi encontrado, não sendo nenhum objeto exibido para apreensão.\n\n' +
+        'Diante dos fatos, ' + primeiroNome + ' foi ' + encaminh + ' à unidade de saúde local para realização de avaliação médica cautelar e, em seguida, ' + apresent + ' neste Plantão Policial para adoção das providências de polícia judiciária.\n\n' +
+        'Já em solo policial, em consulta detalhada aos sistemas Analítico, Prodesp, Muralha Paulista e Infoseg, bem como ao Banco Nacional de Mandados de Prisão (BNMP), confirmou-se o mandado de prisão em desfavor d' + o_a + ' ' + conduzido + ', conforme número ' + f.numMandado + ', processo ' + f.numProcesso + ', expedido pela ' + f.vara + ' em ' + f.dataExpedicao + ', com validade até ' + f.validade + ', na modalidade: prisão ' + f.tipoPrisao + '.\n\n' +
+        'Ressalte-se que foi feito contato com ' + f.nomeContato + ', ' + f.parentesco + ' d' + o_a + ' ' + capturado + ', pelo telefone ' + f.telContato + ', sendo ' + est_a + ' ' + cientif + ' de sua prisão, bem como do local onde se encontra.\n\n' +
+        'Por fim, a autoridade policial determinou a lavratura do presente registro, procedendo-se às comunicações de praxe. Nada mais.';
     }
   },
 
