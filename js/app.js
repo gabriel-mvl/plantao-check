@@ -1023,6 +1023,7 @@ function selectTurno(value, el) {
 function pularPlantao() {
   document.getElementById('plantaoInicioBackdrop')?.classList.add('hidden');
   document.getElementById('plantaoInicioModal')?.classList.add('hidden');
+  document.getElementById('plantaoBar')?.classList.add('hidden');
   // Render without an active plantao
   renderNavList();
   renderOccurrenceGrid();
@@ -1045,7 +1046,7 @@ function renderAppWithPlantao() {
         <button class="plantao-bar-btn plantao-bar-btn-edit" onclick="editarPlantao()" title="Editar dados do plantão">&#9998; Editar</button>
         <button class="plantao-bar-btn" onclick="encerrarPlantao()">Encerrar</button>
       </div>`;
-    bar.style.display = 'flex';
+    bar.classList.remove('hidden');
   }
 
   renderNavList();
