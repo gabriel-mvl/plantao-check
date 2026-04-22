@@ -59,6 +59,11 @@
         <li><a href="#" class="nav-link" onclick="openTemplate('historicoDesaparecimento')"><span class="nav-icon">&#128269;</span> Desaparecimento</a></li>
       </ul>
 
+      <p class="nav-label" style="margin-top:1.1rem">Links &#218;teis</p>
+      <ul>
+        <li><a href="#" class="nav-link" onclick="openLinks()"><span class="nav-icon">&#128279;</span> Ver todos os links</a></li>
+      </ul>
+
     </nav>
     <div class="sidebar-footer">
       <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">&#9728; Modo Claro</button>
@@ -247,6 +252,21 @@
           </div>
         </div>
 
+        <!-- LINKS ÚTEIS -->
+        <div class="home-section">
+          <div class="home-section-title">Links &#218;teis</div>
+          <div class="home-grid">
+            <div class="home-card" onclick="openLinks()">
+              <div class="home-card-icon">&#128279;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Links &#218;teis</div>
+                <div class="home-card-sub">BNMP, C&#243;rtex, Infoseg, Muralha, TJ-SP e mais</div>
+              </div>
+              <div class="home-card-arrow">&#8594;</div>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /home-sections -->
 
       <!-- hidden inputs para o occurrence grid (usado internamente) -->
@@ -353,6 +373,41 @@
     <!-- REFERENCE VIEW -->
     <div class="ref-view hidden" id="refView">
       <div class="ref-body" id="refBody"></div>
+    </div>
+
+    <!-- LINKS ÚTEIS VIEW -->
+    <div class="ref-view hidden" id="linksView">
+      <div class="ref-body">
+        <div class="ref-section">
+          <div class="ref-section-title">&#128279; Links &#218;teis</div>
+          <div class="links-list">
+            <a class="link-item" href="https://portalbnmp.cnj.jus.br/" target="_blank" rel="noopener">
+              <div class="link-item-name">BNMP</div>
+              <div class="link-item-desc">Banco Nacional de Mandados de Pris&#227;o — CNJ</div>
+            </a>
+            <a class="link-item" href="https://cortex.mj.gov.br/index.php" target="_blank" rel="noopener">
+              <div class="link-item-name">C&#243;rtex</div>
+              <div class="link-item-desc">Plataforma integrada de seguran&#231;a p&#250;blica — MJ</div>
+            </a>
+            <a class="link-item" href="https://seguranca.sinesp.gov.br/sinesp-seguranca/login.jsf" target="_blank" rel="noopener">
+              <div class="link-item-name">Infoseg</div>
+              <div class="link-item-desc">Sistema Nacional de Informa&#231;&#245;es de Seguran&#231;a P&#250;blica — SINESP</div>
+            </a>
+            <a class="link-item" href="https://operacional.muralhapaulista.sp.gov.br/" target="_blank" rel="noopener">
+              <div class="link-item-name">Muralha Paulista</div>
+              <div class="link-item-desc">Sistema operacional de monitoramento — SP</div>
+            </a>
+            <a class="link-item" href="https://esaj.tjsp.jus.br/esaj?servico=190090" target="_blank" rel="noopener">
+              <div class="link-item-name">TJ-SP</div>
+              <div class="link-item-desc">Portal de servi&#231;os do Tribunal de Justi&#231;a de S&#227;o Paulo</div>
+            </a>
+            <a class="link-item" href="https://dipol.policiacivil.sp.gov.br/sup-unidades/" target="_blank" rel="noopener">
+              <div class="link-item-name">Unidades PC-SP</div>
+              <div class="link-item-desc">Consulta de unidades da Pol&#237;cia Civil do Estado de S&#227;o Paulo</div>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- HISTÓRICO VIEW -->
