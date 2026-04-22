@@ -919,7 +919,11 @@ PCDoc._addTroca = function() {
     if (typeof showToast === 'function') showToast('Preencha data, turno e os dois nomes.');
     return;
   }
-  PCDoc._trocas.push({ data, turno, nomeEntra: nomeE, nomeSai: nomeS, feriado: ferial });
+  PCDoc._trocas.push({ data, turno,
+    nomeEntra: nomeE, nomeSai: nomeS,
+    carreiraEntra: carreiraE, carreiraEntraNome: nomeERaw,
+    carreiraSai: carreiraS, carreiraSaiNome: nomeSRaw,
+    feriado: ferial });
   document.getElementById('alteracaoData').value = '';
   document.getElementById('alteracaoNomeEntra').value = '';
   document.getElementById('alteracaoNomeSai').value = '';
@@ -955,32 +959,49 @@ PCDoc._gerarAlteracao = function() {
       : (fdsOuFer ? 'das 08:00 às 20:00 hs' : 'das 08:00 às 18:00 hs');
     return '<p style="margin-bottom:.9rem">' +
       'Dia ' + fmt + ' (' + dia + ' – ' + t.turno + ') – ' + iniFim + '<br>' +
-      t.nomeEntra + ' no lugar ' + (t.nomeSai.match(/^Delegad/i) ? 'da ' : 'do ') + t.nomeSai + '.' +
+      '<strong>' + t.nomeEntra + '</strong> no lugar ' + (t.nomeSai.match(/^Delegad/i) ? 'da ' : 'do ') + '<strong>' + t.nomeSai + '</strong>.' +
       '</p>';
   }).join('');
 
-  const nomesVistos = [];
+  // Build unique persons preserving carreira + nome separately
+  const pessoasVistas = [];
+  const pessoasKeys   = [];
   PCDoc._trocas.forEach(function(t) {
-    if (!nomesVistos.includes(t.nomeEntra)) nomesVistos.push(t.nomeEntra);
-    if (!nomesVistos.includes(t.nomeSai))   nomesVistos.push(t.nomeSai);
+    if (!pessoasKeys.includes(t.nomeEntra)) {
+      pessoasKeys.push(t.nomeEntra);
+      pessoasVistas.push({ nome: t.carreiraEntraNome || t.nomeEntra, carreira: t.carreiraEntra || '' });
+    }
+    if (!pessoasKeys.includes(t.nomeSai)) {
+      pessoasKeys.push(t.nomeSai);
+      pessoasVistas.push({ nome: t.carreiraSaiNome  || t.nomeSai,   carreira: t.carreiraSai   || '' });
+    }
   });
-  const assinaturas = nomesVistos.map(function(n) {
-    return '<div style="margin-top:3.5rem">' +
-      '<div style="border-top:1px solid #000;width:60%;margin-bottom:.4rem"></div>' +
-      '<div>' + n + '</div>' +
+
+  // Each signature: line + NOME EM CAIXA ALTA sem negrito + Carreira em negrito
+  const assinaturas = pessoasVistas.map(function(p) {
+    return '<div style="margin-top:4rem">' +
+      '<div style="border-top:1px solid #000;width:40%;margin-bottom:.5rem"></div>' +
+      '<div style="text-transform:uppercase;letter-spacing:.02em">' + p.nome + '</div>' +
+      (p.carreira ? '<div><strong>' + p.carreira + '</strong></div>' : '') +
       '</div>';
   }).join('');
 
-  const delBlock = delegado
-    ? '<p style="margin-bottom:.3rem"><strong>' + delegado + '</strong></p><p>Delegado de Polícia Titular — ' + u.nome + '</p>'
-    : '<p style="margin-bottom:.3rem"><strong>_______________________________</strong></p><p>Delegado de Polícia Titular — ' + u.nome + '</p>';
+  // Delegado block — centered, same format
+  const delNome     = delegado || '_______________________________';
+  const delCarreira = 'Delegado(a) de Polícia Titular — ' + u.nome;
+  const delBlock =
+    '<div style="margin-top:4rem;text-align:center">' +
+    '<div style="border-top:1px solid #000;width:40%;margin:0 auto .5rem"></div>' +
+    '<div style="text-transform:uppercase;letter-spacing:.02em">' + delNome + '</div>' +
+    '<div><strong>' + delCarreira + '</strong></div>' +
+    '</div>';
 
   const corpo =
     '<p style="margin-bottom:1.1rem">Solicitamos autorização para alteração na escala de plantão de <strong>' + cidade + '</strong>, ficando da seguinte forma:</p>' +
     linhasTrocas +
     assinaturas +
-    '<div style="margin-top:4rem"><p style="margin-bottom:.4rem">Nada a opor</p>' +
-    '<div style="margin-top:3.5rem">' + delBlock + '</div></div>';
+    '<div style="margin-top:5rem"><p style="margin-bottom:.4rem">Nada a opor</p>' +
+    delBlock + '</div>';
 
   const html = PCDoc._docHtml(u, 'AUTORIZAÇÃO PARA ALTERAÇÃO DE PLANTÃO', corpo);
   PCDoc._lastHtml = html;
