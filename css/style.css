@@ -1523,12 +1523,13 @@ body[data-theme="light"] input[type="date"] {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  text-decoration: none;
+  text-decoration: none !important;
   transition: border-color .15s, background .15s;
 }
 .home-link-item:hover {
   border-color: rgba(59,125,255,.35);
   background: var(--bg-hover);
+  text-decoration: none !important;
 }
 .home-link-icon { font-size: 1rem; flex-shrink: 0; color: var(--accent); }
 .home-link-name {
