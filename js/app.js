@@ -517,6 +517,20 @@ function openTemplate(templateKey) {
   const body = document.getElementById('modalBody');
   const condutorTextoMap = { pm:'policial militar', gcm:'guarda municipal', pc:'policial civil', parte:'parte interessada' };
   body.innerHTML = tmpl.fields.map(f => {
+    if (f.type === 'radio') {
+      const btns = (f.options || []).map(o =>
+        `<label class="tmpl-radio-label">
+           <input type="radio" name="tmpl_radio_${f.id}" value="${o.value}" />
+           <span>${o.label}</span>
+         </label>`
+      ).join('');
+      return `
+        <div class="modal-form-group">
+          <label>${f.label}</label>
+          <div class="tmpl-radio-group" id="tmpl_radio_${f.id}">${btns}</div>
+          <input type="hidden" id="tmpl_${f.id}" />
+        </div>`;
+    }
     if (f.type === 'select') {
       const opts = (f.options || []).map(o =>
         `<option value="${o.value}">${o.label}</option>`
@@ -573,6 +587,11 @@ function generateTemplate() {
   const tmpl   = TEMPLATES[currentTemplate];
   const values = {};
   tmpl.fields.forEach(f => {
+    if (f.type === 'radio') {
+      const checked = document.querySelector(`input[name="tmpl_radio_${f.id}"]:checked`);
+      values[f.id] = checked ? checked.value : (f.required === false ? '' : '[...]');
+      return;
+    }
     if (f.type === 'multiselect') {
       const checked = [...document.querySelectorAll(`.tmpl-multi-${f.id}:checked`)].map(el => el.value);
       values[f.id] = checked;
