@@ -505,6 +505,10 @@ const PCDoc = (() => {
           <option value="">Selecione o departamento primeiro</option>
         </select>
       </div>
+      <div class="modal-form-group">
+        <label>Delegado(a) titular</label>
+        <input type="text" id="alteracaoDelegado" placeholder="Nome completo do delegado titular" autocomplete="off" />
+      </div>
 
       <div style="border-top:1px solid var(--border);margin:1rem 0 .75rem;padding-top:.75rem">
         <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-family:var(--font-display);margin-bottom:.75rem">Adicionar troca</div>
@@ -578,8 +582,7 @@ const PCDoc = (() => {
                     border-radius:var(--radius);padding:.9rem;font-size:.8rem;
                     max-height:280px;overflow-y:auto;line-height:1.7"></div>
         <div style="display:flex;gap:.5rem;margin-top:.6rem">
-          <button class="btn-secondary" id="pcdocBtnCopy" onclick="PCDoc._copy()" style="flex:1">📋 Copiar</button>
-          <button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">🖨 Imprimir</button>
+          <button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">🖨 Imprimir / PDF</button>
         </div>
       </div>`;
 
@@ -940,7 +943,8 @@ PCDoc._gerarAlteracao = function() {
   const u = (PCDoc._unitListRef || [])[parseInt(unitIdx)];
   if (!u) { if (typeof showToast === 'function') showToast('Selecione a unidade policial.'); return; }
 
-  const cidade = u.mun || u.nome;
+  const cidade   = u.mun || u.nome;
+  const delegado = document.getElementById('alteracaoDelegado')?.value?.trim() || '';
 
   const linhasTrocas = PCDoc._trocas.map(function(t) {
     const dia      = PCDoc._diaSemana(t.data);
@@ -949,36 +953,38 @@ PCDoc._gerarAlteracao = function() {
     const iniFim   = t.turno === 'noturno'
       ? (fdsOuFer ? 'das 20:00 às 08:00 hs' : 'das 18:00 às 08:00 hs')
       : (fdsOuFer ? 'das 08:00 às 20:00 hs' : 'das 08:00 às 18:00 hs');
-    return '<p style="margin-bottom:.75rem">' +
-      'Dia ' + fmt + ' (' + dia + ' \u2013 ' + t.turno + ') \u2013 ' + iniFim + '<br>' +
-      t.nomeEntra + ' no lugar ' + (t.nomeSai.match(/^(Delegad)/i) ? 'da ' : 'do ') + t.nomeSai + '.' +
+    return '<p style="margin-bottom:.9rem">' +
+      'Dia ' + fmt + ' (' + dia + ' – ' + t.turno + ') – ' + iniFim + '<br>' +
+      t.nomeEntra + ' no lugar ' + (t.nomeSai.match(/^Delegad/i) ? 'da ' : 'do ') + t.nomeSai + '.' +
       '</p>';
   }).join('');
 
-  // Unique names for signature lines (preserve insertion order)
   const nomesVistos = [];
   PCDoc._trocas.forEach(function(t) {
     if (!nomesVistos.includes(t.nomeEntra)) nomesVistos.push(t.nomeEntra);
     if (!nomesVistos.includes(t.nomeSai))   nomesVistos.push(t.nomeSai);
   });
   const assinaturas = nomesVistos.map(function(n) {
-    return '<div style="margin-top:2rem">' +
-      '<div style="border-top:1px solid #000;width:55%;margin-bottom:.3rem"></div>' +
+    return '<div style="margin-top:3.5rem">' +
+      '<div style="border-top:1px solid #000;width:60%;margin-bottom:.4rem"></div>' +
       '<div>' + n + '</div>' +
       '</div>';
   }).join('');
 
+  const delBlock = delegado
+    ? '<p style="margin-bottom:.3rem"><strong>' + delegado + '</strong></p><p>Delegado de Polícia Titular — ' + u.nome + '</p>'
+    : '<p style="margin-bottom:.3rem"><strong>_______________________________</strong></p><p>Delegado de Polícia Titular — ' + u.nome + '</p>';
+
   const corpo =
-    '<p style="margin-bottom:1.1rem">Solicitamos autoriza\u00e7\u00e3o para altera\u00e7\u00e3o na escala de plant\u00e3o de <strong>' + cidade + '</strong>, ficando da seguinte forma:</p>' +
+    '<p style="margin-bottom:1.1rem">Solicitamos autorização para alteração na escala de plantão de <strong>' + cidade + '</strong>, ficando da seguinte forma:</p>' +
     linhasTrocas +
     assinaturas +
-    '<div style="margin-top:3rem">' +
-    '<p>Nada a opor</p>' +
-    '<p style="margin-top:2rem;font-weight:bold">' + u.nome + '</p>' +
-    '<p>Delegado de Pol\u00edcia Titular \u2014 ' + u.nome + '</p>' +
-    '</div>';
+    '<div style="margin-top:4rem"><p style="margin-bottom:.4rem">Nada a opor</p>' +
+    '<div style="margin-top:3.5rem">' + delBlock + '</div></div>';
 
-  const html = PCDoc._docHtml(u, 'AUTORIZA\u00c7\u00c3O PARA ALTERA\u00c7\u00c3O DE PLANT\u00c3O', corpo);
+  const html = PCDoc._docHtml(u, 'AUTORIZAÇÃO PARA ALTERAÇÃO DE PLANTÃO', corpo);
+  PCDoc._lastHtml = html;
+  PCDoc._lastDoc  = PCSP_DOCS.alteracaoPlantao;
 
   const prev = document.getElementById('pcdocPreview');
   const out  = document.getElementById('pcdocOutput');
