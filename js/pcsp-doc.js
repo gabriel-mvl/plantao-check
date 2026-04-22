@@ -566,7 +566,11 @@ const PCDoc = (() => {
       if (title) title.textContent = doc.titulo;
       const sub = document.getElementById('pcdocModalSub');
       if (sub) sub.textContent = doc.subtitulo || '';
-      _renderModal(doc);
+      if (doc.customModal) {
+        _renderModalCustom(doc);
+      } else {
+        _renderModal(doc);
+      }
       document.getElementById('pcdocBackdrop')?.classList.remove('hidden');
       document.getElementById('pcdocModal')?.classList.remove('hidden');
       if (typeof toggleSidebar === 'function' && window.innerWidth <= 768) toggleSidebar();
