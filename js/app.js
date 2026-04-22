@@ -2031,3 +2031,11 @@ function filterChecklistModal() {
   const noRes = document.getElementById('checklistNoResults');
   if (noRes) noRes.classList.toggle('hidden', visible > 0);
 }
+
+// ── LINKS ÚTEIS ──────────────────────────────────────────────
+function openLinks() {
+  showView('linksView');
+  document.getElementById('topbarTitle').textContent = 'Links Úteis';
+  document.querySelectorAll('.nav-link[data-id]').forEach(el => el.classList.remove('active'));
+  if (window.innerWidth <= 768) toggleSidebar();
+}
