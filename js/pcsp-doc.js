@@ -626,6 +626,7 @@ const PCDoc = (() => {
     _onCepInput: _onCepInput,
     _copy,
     _print,
+    _docHtml,
     _lastHtml: null,
     _lastUnit: null,
     _lastCampos: null,
