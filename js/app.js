@@ -538,7 +538,8 @@ function openTemplate(templateKey) {
       return `
         <div class="modal-form-group">
           <label>${f.label}</label>
-          <select id="tmpl_${f.id}" style="width:100%;padding:.52rem .7rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.85rem;outline:none">
+          <select id="tmpl_${f.id}" style="width:100%;padding:.52rem .7rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.85rem;outline:none"
+            onchange="(function(sel){var dep=document.getElementById('tmpl_dep_'+sel.id.replace('tmpl_',''));if(dep)dep.style.display=sel.value==='__outros__'?'block':'none';})(this)">
             ${opts}
           </select>
         </div>`;
@@ -559,8 +560,9 @@ function openTemplate(templateKey) {
     const prefill = (f.id === 'tipoCondutor' && triageAnswers.condutor)
       ? (condutorTextoMap[triageAnswers.condutor] || 'policial militar')
       : '';
+    const depStyle = f.id.endsWith('Outros') ? 'display:none' : '';
     return `
-      <div class="modal-form-group">
+      <div class="modal-form-group" id="tmpl_dep_${f.id}" style="${depStyle}">
         <label>${f.label}</label>
         <input type="text" id="tmpl_${f.id}" placeholder="${f.placeholder || ''}" value="${prefill}" autocomplete="off" />
       </div>`;
