@@ -427,7 +427,8 @@ var TEMPLATES = {
       var cond = masc ? 'do conduzido' : 'da conduzida';
       function R(val) {
         var v = (val || '').trim();
-        return v ? v.toUpperCase() : '[...]';
+        if (!v || v === 'prejudicado' || v === 'PREJUDICADO') return '[...]';
+        return v.toUpperCase();
       }
       return 'Ap\u00f3s, em obedi\u00eancia ao art. 6\u00ba, IX, do C\u00f3digo de Processo Penal, passou a autoridade a consignar elementos sobre a VIDA PREGRESSA ' + cond + ', nos seguintes termos: ' +
         '\u00e9 filho leg\u00edtimo? ' + R(f.filhoLegitimo) + '; ' +
@@ -443,7 +444,7 @@ var TEMPLATES = {
         'quantos e idade? ' + R(f.quantosFilhos) + '; ' +
         'o(s) filho(s) possui(em) algum tipo de defici\u00eancia? ' + R(f.filhosDeficiencia) + '; ' +
         'quem \u00e9 o respons\u00e1vel pelo(s) filho(s)? ' + R(f.responsavelFilhos) + '; ' +
-        'onde reside? ' + R(f.ondeReside) + '; ' +
+        'onde reside? ' + (f.ondeReside === '__outros__' ? R(f.ondeResideOutros) : R(f.ondeReside)) + '; ' +
         'trata-se de habita\u00e7\u00e3o coletiva? ' + R(f.habitacaoColetiva) + '; ' +
         'onde trabalha? ' + R(f.ondeTrabalha) + '; ' +
         'qual a ocupa\u00e7\u00e3o que exerce? ' + R(f.ocupacao) + '; ' +
