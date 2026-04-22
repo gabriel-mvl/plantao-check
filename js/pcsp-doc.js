@@ -300,6 +300,7 @@ const PCDoc = (() => {
     }
 
     _unitList = _unitsFull.filter(u => u.dept_raw === deptRaw);
+    PCDoc._unitListRef = _unitList;
     _unitList.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
     unitSel.innerHTML = '<option value="">Selecione a unidade...</option>' +
@@ -478,6 +479,81 @@ const PCDoc = (() => {
       });
   }
 
+  // ── MODAL CUSTOMIZADO (alteração de plantão) ─────────────
+  function _renderModalCustom(doc) {
+    _loadUnits();
+    const el = document.getElementById('pcdocModalBody');
+    if (!el) return;
+    PCDoc._trocas = [];
+
+    const deptOpts = _deptList.map(d =>
+      `<option value="${_esc(d.raw)}">${_esc(d.label)}</option>`
+    ).join('');
+
+    el.innerHTML = `
+      <div class="modal-form-group">
+        <label>Departamento</label>
+        <select id="pcdocDept" onchange="PCDoc._onDeptChange()">
+          <option value="">Selecione o departamento...</option>
+          ${deptOpts}
+        </select>
+      </div>
+      <div class="modal-form-group">
+        <label>Unidade policial</label>
+        <select id="pcdocUnit" disabled onchange="PCDoc._unitListRef=PCDoc._unitListRef">
+          <option value="">Selecione o departamento primeiro</option>
+        </select>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:1rem 0 .75rem;padding-top:.75rem">
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-family:var(--font-display);margin-bottom:.6rem">Adicionar troca</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem">
+          <div class="modal-form-group" style="margin:0">
+            <label>Data</label>
+            <input type="date" id="alteracaoData" />
+          </div>
+          <div class="modal-form-group" style="margin:0">
+            <label>Turno</label>
+            <select id="alteracaoTurno">
+              <option value="diurno">Diurno</option>
+              <option value="noturno">Noturno</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-form-group" style="margin-bottom:.5rem">
+          <label class="pcdoc-toggle-label" style="font-size:.78rem;font-weight:600;color:var(--text-secondary)">
+            <input type="checkbox" id="alteracaoFeriado" />
+            <span>Feriado</span>
+          </label>
+        </div>
+        <div class="modal-form-group" style="margin-bottom:.5rem">
+          <label>Quem entra</label>
+          <input type="text" id="alteracaoNomeEntra" placeholder="Ex: Escrivão Gabriel Vital" autocomplete="off" />
+        </div>
+        <div class="modal-form-group" style="margin-bottom:.75rem">
+          <label>Quem sai</label>
+          <input type="text" id="alteracaoNomeSai" placeholder="Ex: Escrivão Álvaro Carbajo" autocomplete="off" />
+        </div>
+        <button class="btn-secondary" onclick="PCDoc._addTroca()" style="width:100%">+ Adicionar troca</button>
+      </div>
+
+      <div id="alteracaoTrocasList" style="margin-top:.5rem"></div>
+
+      <div id="pcdocOutput" class="hidden">
+        <div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>
+        <div id="pcdocPreview"
+             style="background:var(--bg-input);border:1px solid var(--border);
+                    border-radius:var(--radius);padding:.9rem;font-size:.8rem;
+                    max-height:280px;overflow-y:auto;line-height:1.7"></div>
+        <div style="display:flex;gap:.5rem;margin-top:.6rem">
+          <button class="btn-secondary" id="pcdocBtnCopy" onclick="PCDoc._copy()" style="flex:1">📋 Copiar</button>
+          <button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">🖨 Imprimir</button>
+        </div>
+      </div>`;
+
+    PCDoc._renderTrocas();
+  }
+
   // ── API PÚBLICA ───────────────────────────────────────────
   return {
     // Abre o modal para um documento registrado
@@ -502,7 +578,13 @@ const PCDoc = (() => {
       _currentDoc = null;
     },
 
-    gerar: _gerar,
+    gerar: function() {
+      if (_currentDoc && _currentDoc.customModal) {
+        PCDoc._gerarAlteracao();
+      } else {
+        _gerar();
+      }
+    },
 
     // Helpers expostos para uso nos templates de documentos
     helpers: { dataExtenso: _dataExtenso, fmtEndereco: _fmtEndereco },
@@ -727,4 +809,162 @@ PCSP_DOCS.autorizacaoEntrada = {
 
       ${campos.inclui_policial && campos.pol_nome ? '<div style="text-align:center;margin-top:2.5rem"><div style="border-top:1px solid #000;width:55%;margin:0 auto .4rem"></div><div>' + String(campos.pol_nome).toUpperCase() + '</div><div><strong>' + String(campos.pol_carreira || '') + '</strong></div></div>' : ''}`;
   },
+};
+
+// ── AUTORIZAÇÃO PARA ALTERAÇÃO DE PLANTÃO ─────────────────────
+PCSP_DOCS.alteracaoPlantao = {
+  id: 'alteracaoPlantao',
+  icone: '🔄',
+  titulo: 'Autorização para Alteração de Plantão',
+  subtitulo: 'Solicitação de troca de escala',
+  customModal: true,   // flag: PCDoc.open() usa modal customizado
+};
+
+// Estado interno das trocas
+PCDoc._trocas = [];
+
+PCDoc._feriados2026 = [
+  '2026-01-01','2026-04-21','2026-05-01','2026-09-07',
+  '2026-10-12','2026-11-02','2026-11-15','2026-12-25',
+];
+
+PCDoc._isFeriado = function(dateStr) {
+  return PCDoc._feriados2026.includes(dateStr) ||
+    (document.getElementById('alteracaoFeriado') &&
+     document.getElementById('alteracaoFeriado').checked);
+};
+
+PCDoc._diaSemana = function(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  return ['domingo','segunda','terça','quarta','quinta','sexta','sábado'][d.getDay()];
+};
+
+PCDoc._ehFimSemana = function(dateStr) {
+  if (!dateStr) return false;
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.getDay() === 0 || d.getDay() === 6;
+};
+
+PCDoc._horarios = function(dateStr, turno, feriado) {
+  const fds = PCDoc._ehFimSemana(dateStr) || feriado;
+  if (turno === 'diurno')  return fds ? 'das 08h00 às 20h00' : 'das 08h00 às 18h00';
+  if (turno === 'noturno') return fds ? 'das 20h00 às 08h00' : 'das 18h00 às 08h00';
+  return '';
+};
+
+PCDoc._renderTrocas = function() {
+  const cont = document.getElementById('alteracaoTrocasList');
+  if (!cont) return;
+  if (PCDoc._trocas.length === 0) {
+    cont.innerHTML = '<p style="color:var(--text-muted);font-size:.82rem;padding:.5rem 0">Nenhuma troca adicionada ainda.</p>';
+    return;
+  }
+  cont.innerHTML = PCDoc._trocas.map(function(t, i) {
+    const dia = PCDoc._diaSemana(t.data);
+    const hor = PCDoc._horarios(t.data, t.turno, t.feriado);
+    const dataFmt = t.data ? t.data.split('-').reverse().join('/') : '—';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.4rem;font-size:.82rem">' +
+      '<span><strong>' + dataFmt + '</strong> (' + dia + ' - ' + t.turno + ') ' + hor +
+      ' &mdash; <em>' + (t.nomeEntra || '?') + '</em> no lugar de <em>' + (t.nomeSai || '?') + '</em>' +
+      (t.feriado ? ' 🎉' : '') + '</span>' +
+      '<button onclick="PCDoc._removeTroca(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;flex-shrink:0" title="Remover">🗑</button>' +
+      '</div>';
+  }).join('');
+};
+
+PCDoc._removeTroca = function(i) {
+  PCDoc._trocas.splice(i, 1);
+  PCDoc._renderTrocas();
+};
+
+PCDoc._addTroca = function() {
+  const data   = document.getElementById('alteracaoData')?.value;
+  const turno  = document.getElementById('alteracaoTurno')?.value;
+  const nomeE  = document.getElementById('alteracaoNomeEntra')?.value?.trim();
+  const nomeS  = document.getElementById('alteracaoNomeSai')?.value?.trim();
+  const ferial = document.getElementById('alteracaoFeriado')?.checked || false;
+
+  if (!data || !turno || !nomeE || !nomeS) {
+    if (typeof showToast === 'function') showToast('Preencha todos os campos da troca.');
+    return;
+  }
+  PCDoc._trocas.push({ data, turno, nomeEntra: nomeE, nomeSai: nomeS, feriado: ferial });
+  // Clear entry fields
+  document.getElementById('alteracaoData').value = '';
+  document.getElementById('alteracaoNomeEntra').value = '';
+  document.getElementById('alteracaoNomeSai').value = '';
+  document.getElementById('alteracaoFeriado').checked = false;
+  PCDoc._renderTrocas();
+  document.getElementById('alteracaoData').focus();
+};
+
+PCDoc._gerarAlteracao = function() {
+  if (PCDoc._trocas.length === 0) {
+    if (typeof showToast === 'function') showToast('Adicione ao menos uma troca.');
+    return;
+  }
+
+  const unitIdx = document.getElementById('pcdocUnit')?.value;
+  if (!unitIdx) {
+    if (typeof showToast === 'function') showToast('Selecione a unidade policial.');
+    return;
+  }
+  const u = PCDoc._getUnit(unitIdx);
+  if (!u) return;
+
+  const cidade = u.mun || u.nome;
+
+  // Build trocas text
+  const linhasTrocas = PCDoc._trocas.map(function(t) {
+    const d    = new Date(t.data + 'T12:00:00');
+    const dia  = PCDoc._diaSemana(t.data);
+    const hor  = PCDoc._horarios(t.data, t.turno, t.feriado);
+    const fmt  = t.data.split('-').reverse().join('/');
+    const fdsOuFer = PCDoc._ehFimSemana(t.data) || t.feriado;
+    const iniFim = t.turno === 'noturno'
+      ? (fdsOuFer ? 'das 20:00 às 08:00 hs' : 'das 18:00 às 08:00 hs')
+      : (fdsOuFer ? 'das 08:00 às 20:00 hs' : 'das 08:00 às 18:00 hs');
+    return '<p style="margin-bottom:.6rem">' +
+      'Dia ' + fmt + ' (' + dia + ' - ' + t.turno + ') \u2013 ' + iniFim + '<br>' +
+      t.nomeEntra + ' no lugar de ' + t.nomeSai + '.' +
+      '</p>';
+  }).join('');
+
+  // Build unique names for signature lines
+  const nomes = [];
+  PCDoc._trocas.forEach(function(t) {
+    if (!nomes.includes(t.nomeEntra)) nomes.push(t.nomeEntra);
+    if (!nomes.includes(t.nomeSai))   nomes.push(t.nomeSai);
+  });
+  const assinaturas = nomes.map(function(n) {
+    return '<div style="text-align:left;margin-top:1.8rem">' +
+      '<div style="border-top:1px solid #000;width:55%;margin-bottom:.25rem"></div>' +
+      '<div>' + n + '</div>' +
+      '</div>';
+  }).join('');
+
+  const corpo =
+    '<p style="margin-bottom:1rem">Solicitamos autoriza\u00e7\u00e3o para altera\u00e7\u00e3o na escala de plant\u00e3o de ' +
+    cidade + ', ficando da seguinte forma:</p>' +
+    linhasTrocas +
+    assinaturas +
+    '<div style="margin-top:2.5rem">' +
+    '<p style="margin-bottom:.3rem">Nada a opor</p>' +
+    '<p style="margin-top:1.4rem;font-weight:bold">' + (u.delegado || '_______________________________') + '</p>' +
+    '<p>Delegado de Pol\u00edcia Titular ' + u.nome + '</p>' +
+    '</div>';
+
+  const html = PCDoc._docHtml(u, 'AUTORIZA\u00c7\u00c3O PARA ALTERA\u00c7\u00c3O DE PLANT\u00c3O', corpo);
+
+  const prev = document.getElementById('pcdocPreview');
+  const out  = document.getElementById('pcdocOutput');
+  if (prev) prev.innerHTML = html;
+  if (out)  out.classList.remove('hidden');
+  setTimeout(function() { out?.scrollIntoView({ behavior:'smooth' }); }, 100);
+};
+
+PCDoc._getUnit = function(idx) {
+  // _unitList is internal — expose via a helper called after _onDeptChange
+  return (typeof PCDoc._unitListRef !== 'undefined' ? PCDoc._unitListRef : [])[parseInt(idx)];
 };
