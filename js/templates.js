@@ -101,52 +101,53 @@ var EMAIL_TEMPLATES = [
 var TEMPLATES = {
 
   historicoCaptura: {
-    title: 'Historico do BO - Captura de Procurado',
+    title: 'Hist\u00f3rico do BO \u2014 Captura de Procurado',
     fields: [
-      { id: 'genero', label: 'Genero do(a) capturado(a)', type: 'select',
+      { id: 'genero', label: 'G\u00eanero do(a) capturado(a)', type: 'select',
         options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }] },
-      { id: 'nomeCompleto', label: 'Nome completo do(a) procurado(a)', placeholder: 'Ex: FULANO DE TAL' },
-      { id: 'tipoCondutor', label: 'Tipo de condutor', type: 'select', options: [
-        { value: 'policial militar', label: 'policial militar' },
-        { value: 'policial civil',   label: 'policial civil'   },
-        { value: 'guarda municipal', label: 'guarda municipal' },
-      ]},
-      { id: 'numMandado',    label: 'Numero do mandado',  placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'numProcesso',   label: 'Numero do processo', placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
-      { id: 'vara',          label: 'Vara / Juizo',       placeholder: 'Ex: 1a Vara Criminal da Comarca' },
-      { id: 'dataExpedicao', label: 'Data de expedicao',  placeholder: 'Ex: 10/01/2025' },
-      { id: 'validade',      label: 'Validade',           placeholder: 'Ex: indeterminada' },
-      { id: 'tipoPrisao',    label: 'Tipo de prisao',     placeholder: 'Ex: preventiva' },
-      { id: 'nomeContato',   label: 'Nome do familiar',   placeholder: 'Ex: Maria da Silva' },
-      { id: 'parentesco',    label: 'Parentesco',         placeholder: 'Ex: mae / esposa' },
-      { id: 'telContato',    label: 'Telefone',           placeholder: 'Ex: (11) 99999-9999' },
+      { id: 'nomeCompleto',  label: 'Nome completo do(a) procurado(a)', placeholder: 'Ex: FULANO DE TAL' },
+      { id: 'tipoCondutor',  label: 'Tipo de condutor', type: 'select', options: [
+          { value: 'policial militar', label: 'policial militar' },
+          { value: 'policial civil',   label: 'policial civil'   },
+          { value: 'guarda municipal', label: 'guarda municipal' },
+        ]},
+      { id: 'numMandado',    label: 'N\u00famero do mandado',   placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
+      { id: 'numProcesso',   label: 'N\u00famero do processo',  placeholder: 'Ex: 0000001-00.2024.8.26.0000' },
+      { id: 'vara',          label: 'Vara / Ju\u00edzo',        placeholder: 'Ex: 1\u00aa Vara Criminal da Comarca' },
+      { id: 'dataExpedicao', label: 'Data de expedi\u00e7\u00e3o', placeholder: 'Ex: 10/01/2025' },
+      { id: 'validade',      label: 'Validade do mandado',      placeholder: 'Ex: indeterminada' },
+      { id: 'tipoPrisao',    label: 'Tipo de pris\u00e3o',      placeholder: 'Ex: preventiva / tempor\u00e1ria / definitiva' },
+      { id: 'nomeContato',   label: 'Nome do familiar/contato', placeholder: 'Ex: Maria da Silva' },
+      { id: 'parentesco',    label: 'Parentesco',               placeholder: 'Ex: m\u00e3e / esposa / irm\u00e3o' },
+      { id: 'telContato',    label: 'Telefone do contato',      placeholder: 'Ex: (11) 99999-9999' },
     ],
     generate: function(f) {
-      var masc = (f.genero || 'M') === 'M';
-      var condutor  = f.tipoCondutor || 'policial militar';
-      var nome      = f.nomeCompleto || '[NOME]';
-      var pri       = nome.trim().split(' ')[0];
-      var o_a       = masc ? 'o' : 'a';
+      var masc     = (f.genero || 'M') === 'M';
+      var condutor = f.tipoCondutor || 'policial militar';
+      var nome     = f.nomeCompleto || '[NOME]';
+      var pri      = nome.trim().split(' ')[0];
+      var o_a      = masc ? 'o' : 'a';
+      var pessoa_o_a = masc ? 'o indiv\u00edduo' : 'a pessoa';
       var conduzido = masc ? 'conduzido' : 'conduzida';
       var capturado = masc ? 'capturado' : 'capturada';
       var encaminh  = masc ? 'encaminhado' : 'encaminhada';
       var apresent  = masc ? 'apresentado' : 'apresentada';
       var est_a     = masc ? 'este' : 'esta';
       var cientif   = masc ? 'cientificado' : 'cientificada';
-      return 'Comparece o condutor, ' + condutor + ' acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem d' + o_a + ' individu' + o_a + ' posteriormente identificad' + o_a + ' como ' + nome + '.\n\n' +
-        'Em consulta aos sistemas policiais, verificou-se que ' + pri + ' constava como procurad' + o_a + ' pela Justica. Em revista pessoal, nada de ilicito foi encontrado, nao sendo nenhum objeto exibido para apreensao.\n\n' +
-        'Diante dos fatos, ' + pri + ' foi ' + encaminh + ' a unidade de saude local para realizacao de avaliacao medica cautelar e, em seguida, ' + apresent + ' neste Plantao Policial para adocao das providencias de policia judiciaria.\n\n' +
-        'Ja em solo policial, em consulta detalhada aos sistemas Analitico, Prodesp, Muralha Paulista e Infoseg, bem como ao Banco Nacional de Mandados de Prisao (BNMP), confirmou-se o mandado de prisao em desfavor d' + o_a + ' ' + conduzido + ', conforme numero ' + f.numMandado + ', processo ' + f.numProcesso + ', expedido pela ' + f.vara + ' em ' + f.dataExpedicao + ', com validade ate ' + f.validade + ', na modalidade: prisao ' + f.tipoPrisao + '.\n\n' +
-        'Ressalte-se que foi feito contato com ' + f.nomeContato + ', ' + f.parentesco + ' d' + o_a + ' ' + capturado + ', pelo telefone ' + f.telContato + ', sendo ' + est_a + ' ' + cientif + ' de sua prisao, bem como do local onde se encontra.\n\n' +
-        'Por fim, a autoridade policial determinou a lavratura do presente registro, procedendo-se as comunicacoes de praxe. Nada mais.';
+      return 'Comparece o condutor, ' + condutor + ' acima qualificado, noticiando que estava em patrulhamento com sua equipe quando realizou a abordagem de ' + pessoa_o_a + ' posteriormente identificad' + o_a + ' como ' + nome + '.\n\n' +
+        'Em consulta aos sistemas policiais, verificou-se que ' + pri + ' constava como procurad' + o_a + ' pela Justi\u00e7a. Em revista pessoal, nada de il\u00edcito foi encontrado, n\u00e3o sendo nenhum objeto exibido para apreens\u00e3o.\n\n' +
+        'Diante dos fatos, ' + pri + ' foi ' + encaminh + ' \u00e0 unidade de sa\u00fade local para realiza\u00e7\u00e3o de avalia\u00e7\u00e3o m\u00e9dica cautelar e, em seguida, ' + apresent + ' neste Plant\u00e3o Policial para ado\u00e7\u00e3o das provid\u00eancias de pol\u00edcia judici\u00e1ria.\n\n' +
+        'J\u00e1 em solo policial, em consulta detalhada aos sistemas Anal\u00edtico, Prodesp, Muralha Paulista e Infoseg, bem como ao Banco Nacional de Mandados de Pris\u00e3o (BNMP), confirmou-se o mandado de pris\u00e3o em desfavor d' + o_a + ' ' + conduzido + ', conforme n\u00famero ' + f.numMandado + ', processo ' + f.numProcesso + ', expedido pela ' + f.vara + ' em ' + f.dataExpedicao + ', com validade at\u00e9 ' + f.validade + ', na modalidade: pris\u00e3o ' + f.tipoPrisao + '.\n\n' +
+        'Ressalte-se que foi feito contato com ' + f.nomeContato + ', ' + f.parentesco + ' d' + o_a + ' ' + capturado + ', pelo telefone ' + f.telContato + ', sendo ' + est_a + ' ' + cientif + ' de sua pris\u00e3o, bem como do local onde se encontra.\n\n' +
+        'Por fim, a autoridade policial determinou a lavratura do presente registro, procedendo-se \u00e0s comunica\u00e7\u00f5es de praxe. Nada mais.';
     }
   },
 
   autorizacaoContato: {
-    title: 'Autorizacao de Contato',
+    title: 'Autoriza\u00e7\u00e3o de Contato',
     fields: [
-      { id: 'whatsapp', label: 'WhatsApp', placeholder: 'Ex: (11) 99999-9999', required: false },
-      { id: 'email',    label: 'E-mail',   placeholder: 'Ex: nome@email.com',   required: false },
+      { id: 'whatsapp', label: 'N\u00famero de WhatsApp', placeholder: 'Ex: (11) 99999-9999', required: false },
+      { id: 'email',    label: 'E-mail',                  placeholder: 'Ex: nome@email.com',   required: false },
     ],
     generate: function(f) {
       var meios = [];
@@ -154,48 +155,48 @@ var TEMPLATES = {
       if (f.email)    meios.push('e-mail (' + f.email + ')');
       if (!meios.length) return '[Informe ao menos um meio de contato.]';
       var lista = meios.length === 2 ? meios[0] + ' e ' + meios[1] : meios[0];
-      return 'A declarante autoriza que a Autoridade Policial e os demais agentes responsaveis pelo procedimento realizem contato por meio de ' + lista + ', para comunicacao sobre eventuais movimentacoes, intimacoes ou providencias relacionadas ao presente registro.';
+      return 'A declarante autoriza que a Autoridade Policial e os demais agentes respons\u00e1veis pelo procedimento realizem contato por meio de ' + lista + ', para comunica\u00e7\u00e3o sobre eventuais movimenta\u00e7\u00f5es, intima\u00e7\u00f5es ou provid\u00eancias relacionadas ao presente registro.';
     }
   },
 
   autorizacaoFotografias: {
-    title: 'Autorizacao de Fotografias',
+    title: 'Autoriza\u00e7\u00e3o de Fotografias',
     fields: [],
     generate: function(f) {
-      return 'A vitima declara possuir lesoes aparentes decorrentes dos fatos narrados e, neste ato, autoriza expressamente a fotografacao das referidas lesoes pelos agentes policiais, bem como o anexo das imagens ao presente procedimento, para fins de instrucao probatoria.';
+      return 'A v\u00edtima declara possuir les\u00f5es aparentes decorrentes dos fatos narrados e, neste ato, autoriza expressamente a fotografa\u00e7\u00e3o das referidas les\u00f5es pelos agentes policiais, bem como o anexo das imagens ao presente procedimento, para fins de instru\u00e7\u00e3o probat\u00f3ria.';
     }
   },
 
   representacaoCriminal: {
-    title: 'Representacao Criminal',
+    title: 'Representa\u00e7\u00e3o Criminal',
     fields: [
-      { id: 'genero', label: 'Genero do(a) declarante', type: 'select',
+      { id: 'genero', label: 'G\u00eanero do(a) declarante', type: 'select',
         options: [{ value: 'F', label: 'Feminino' }, { value: 'M', label: 'Masculino' }] },
     ],
     generate: function(f) {
       var masc  = (f.genero || 'F') === 'M';
       var autor = masc ? 'o autor' : 'a autora';
-      return (masc ? 'O' : 'A') + ' declarante manifesta, neste ato, de forma expressa e inequivoca, o desejo de representar criminalmente contra ' + autor + ' dos fatos narrados no presente registro, requerendo a adocao de todas as providencias legais cabiveis e o prosseguimento das investigacoes.';
+      return (masc ? 'O' : 'A') + ' declarante manifesta, neste ato, de forma expressa e inequ\u00edvoca, o desejo de representar criminalmente contra ' + autor + ' dos fatos narrados no presente registro, requerendo a ado\u00e7\u00e3o de todas as provid\u00eancias legais cab\u00edveis e o prosseguimento das investiga\u00e7\u00f5es.';
     }
   },
 
   medidaProtetiva: {
-    title: 'Medida Protetiva - Lei Maria da Penha',
+    title: 'Medida Protetiva \u2014 Lei Maria da Penha',
     fields: [
       { id: 'medidas', label: 'Medidas requeridas (selecione uma ou mais)', type: 'multiselect',
         options: [
           { value: 'afastamento',    label: 'Afastamento do lar (art. 22, II)' },
-          { value: 'aproximacao',    label: 'Proibicao de aproximacao (art. 22, III, a)' },
-          { value: 'contato',        label: 'Proibicao de contato (art. 22, III, b)' },
-          { value: 'lugares',        label: 'Proibicao de frequentar lugares (art. 22, III, c)' },
-          { value: 'visitas',        label: 'Restricao de visitas (art. 22, IV)' },
-          { value: 'armas',          label: 'Suspensao do porte de armas (art. 22, I)' },
+          { value: 'aproximacao',    label: 'Proibi\u00e7\u00e3o de aproxima\u00e7\u00e3o (art. 22, III, a)' },
+          { value: 'contato',        label: 'Proibi\u00e7\u00e3o de contato (art. 22, III, b)' },
+          { value: 'lugares',        label: 'Proibi\u00e7\u00e3o de frequentar lugares (art. 22, III, c)' },
+          { value: 'visitas',        label: 'Restri\u00e7\u00e3o de visitas (art. 22, IV)' },
+          { value: 'armas',          label: 'Suspens\u00e3o do porte de armas (art. 22, I)' },
           { value: 'alimentos',      label: 'Alimentos provisionais (art. 22, V)' },
-          { value: 'reeducacao',     label: 'Programas de reeducacao (art. 22, VI)' },
-          { value: 'protecao',       label: 'Programa de protecao (art. 23, I)' },
-          { value: 'bens',           label: 'Restituicao de bens (art. 24, II)' },
-          { value: 'venda',          label: 'Proibicao de venda de bens (art. 24, III)' },
-          { value: 'acompanhamento', label: 'Acompanhamento para pertences (art. 23, III)' },
+          { value: 'reeducacao',     label: 'Programas de reeduca\u00e7\u00e3o (art. 22, VI)' },
+          { value: 'protecao',       label: 'Programa de prote\u00e7\u00e3o (art. 23, I)' },
+          { value: 'bens',           label: 'Restitui\u00e7\u00e3o de bens (art. 24, II)' },
+          { value: 'venda',          label: 'Proibi\u00e7\u00e3o de venda de bens (art. 24, III)' },
+          { value: 'acompanhamento', label: 'Acompanhamento para pertin\u00eances (art. 23, III)' },
         ]
       },
     ],
@@ -204,31 +205,31 @@ var TEMPLATES = {
       if (!medidas.length) return '[Selecione ao menos uma medida protetiva.]';
       var map = {
         afastamento:    'afastamento do agressor do lar (art. 22, inciso II)',
-        aproximacao:    'proibicao de se aproximar da vitima, de seus familiares e das testemunhas, com fixacao de limite minimo de distancia (art. 22, inciso III, alinea a)',
-        contato:        'proibicao de contato com a vitima, seus familiares e testemunhas por qualquer meio de comunicacao (art. 22, inciso III, alinea b)',
-        lugares:        'proibicao de frequentar determinados locais para preservar a integridade fisica e psicologica da vitima (art. 22, inciso III, alinea c)',
-        visitas:        'restricao ou suspensao de visitas aos dependentes menores (art. 22, inciso IV)',
-        armas:          'suspensao da posse ou restricao do porte de armas de fogo (art. 22, inciso I)',
-        alimentos:      'prestacao de alimentos provisionais a vitima e/ou aos filhos (art. 22, inciso V)',
-        reeducacao:     'comparecimento obrigatorio a programas de reeducacao e reabilitacao (art. 22, inciso VI)',
-        protecao:       'encaminhamento da vitima e de seus dependentes a programas oficiais de protecao (art. 23, inciso I)',
-        bens:           'determinacao de restituicao de documentos e bens indevidamente subtraidos (art. 24, inciso II)',
-        venda:          'proibicao de alienacao ou disposicao de bens e valores comuns do casal (art. 24, inciso III)',
-        acompanhamento: 'acompanhamento pela autoridade policial para retirada de pertences do lar (art. 23, inciso III)',
+        aproximacao:    'proibi\u00e7\u00e3o de se aproximar da v\u00edtima, de seus familiares e das testemunhas, com fixa\u00e7\u00e3o de limite m\u00ednimo de dist\u00e2ncia (art. 22, inciso III, al\u00ednea \u201ca\u201d)',
+        contato:        'proibi\u00e7\u00e3o de contato com a v\u00edtima, seus familiares e testemunhas por qualquer meio de comunica\u00e7\u00e3o (art. 22, inciso III, al\u00ednea \u201cb\u201d)',
+        lugares:        'proibi\u00e7\u00e3o de frequentar determinados locais para preservar a integridade f\u00edsica e psicol\u00f3gica da v\u00edtima (art. 22, inciso III, al\u00ednea \u201cc\u201d)',
+        visitas:        'restri\u00e7\u00e3o ou suspens\u00e3o de visitas aos dependentes menores (art. 22, inciso IV)',
+        armas:          'suspens\u00e3o da posse ou restri\u00e7\u00e3o do porte de armas de fogo (art. 22, inciso I)',
+        alimentos:      'presta\u00e7\u00e3o de alimentos provisionais \u00e0 v\u00edtima e/ou aos filhos (art. 22, inciso V)',
+        reeducacao:     'comparecimento obrigat\u00f3rio a programas de reeduca\u00e7\u00e3o e reabilita\u00e7\u00e3o (art. 22, inciso VI)',
+        protecao:       'encaminhamento da v\u00edtima e de seus dependentes a programas oficiais de prote\u00e7\u00e3o (art. 23, inciso I)',
+        bens:           'determina\u00e7\u00e3o de restitui\u00e7\u00e3o de documentos e bens indevidamente subtra\u00eddos (art. 24, inciso II)',
+        venda:          'proibi\u00e7\u00e3o de aliena\u00e7\u00e3o ou disposi\u00e7\u00e3o de bens e valores comuns do casal (art. 24, inciso III)',
+        acompanhamento: 'acompanhamento pela autoridade policial para retirada de pertin\u00eances do lar (art. 23, inciso III)',
       };
       var lista = medidas.map(function(m, i) {
         var t = map[m] || m;
         return i === 0 ? t.charAt(0).toUpperCase() + t.slice(1) : t;
       });
       var fmt = lista.length === 1 ? lista[0] : lista.slice(0,-1).join('; ') + '; e ' + lista[lista.length-1];
-      return 'A declarante requer, nos termos da Lei n. 11.340/2006 (Lei Maria da Penha), a concessao das seguintes medidas protetivas de urgencia: ' + fmt + '. Requer, ainda, que as presentes medidas sejam comunicadas ao Ministerio Publico e submetidas a apreciacao do Juizo competente com a maxima urgencia.';
+      return 'A declarante requer, nos termos da Lei n.\u00ba 11.340/2006 (Lei Maria da Penha), a concess\u00e3o das seguintes medidas protetivas de urg\u00eancia: ' + fmt + '. Requer, ainda, que as presentes medidas sejam comunicadas ao Minist\u00e9rio P\u00fablico e submetidas \u00e0 aprecia\u00e7\u00e3o do Ju\u00edzo competente com a m\u00e1xima urg\u00eancia.';
     }
   },
 
   lavraturaTermoCircunstanciado: {
     title: 'Lavratura de TCO',
     fields: [
-      { id: 'qtd', label: 'Quantas pessoas assinarao o termo?', type: 'select',
+      { id: 'qtd', label: 'Quantas pessoas assinar\u00e3o o termo?', type: 'select',
         options: [{ value: '1', label: '1 pessoa' }, { value: 'N', label: 'Mais de 1 pessoa' }]
       },
     ],
@@ -238,7 +239,7 @@ var TEMPLATES = {
       var assinou   = plural ? 'assinaram' : 'assinou';
       var intimados = plural ? 'intimados' : 'intimado(a)';
       var cientes   = plural ? 'cientes' : 'ciente';
-      return 'Diante dos fatos expostos, a Autoridade Policial, reconhecendo a natureza de menor potencial ofensivo da infracao penal narrada, nos termos do art. 61 da Lei n. 9.099/1995 e do art. 69 do mesmo diploma legal, determinou a lavratura do presente Termo Circunstanciado de Ocorrencia, com o imediato encaminhamento das partes ao Juizado Especial Criminal competente. ' + envolvido + ' ' + assinou + ' o Termo de Compromisso de comparecimento perante o Juizado, assumindo a obrigacao de comparecer quando regularmente ' + intimados + ', ' + cientes + ' de que o descumprimento podera ensejar as providencias previstas no art. 71 da Lei n. 9.099/1995.';
+      return 'Diante dos fatos expostos, a Autoridade Policial, reconhecendo a natureza de menor potencial ofensivo da infra\u00e7\u00e3o penal narrada, nos termos do art. 61 da Lei n.\u00ba 9.099/1995 e do art. 69 do mesmo diploma legal, determinou a lavratura do presente Termo Circunstanciado de Ocorr\u00eancia, com o imediato encaminhamento das partes ao Juizado Especial Criminal competente. ' + envolvido + ' ' + assinou + ' o Termo de Compromisso de comparecimento perante o Juizado, assumindo a obriga\u00e7\u00e3o de comparecer quando regularmente ' + intimados + ', ' + cientes + ' de que o descumprimento poder\u00e1 ensejar as provid\u00eancias previstas no art. 71 da Lei n.\u00ba 9.099/1995.';
     }
   },
 
@@ -371,82 +372,88 @@ var TEMPLATES = {
     }
   },
 
+
   vidaPregressa: {
-    title: 'Vida Pregressa — art. 6°, IX, CPP',
+    title: 'Vida Pregressa \u2014 art. 6\u00ba, IX, CPP',
     fields: [
-      { id: 'genero', label: 'Gênero do(a) conduzido(a)', type: 'select',
+      { id: 'genero', label: 'G\u00eanero do(a) conduzido(a)', type: 'select',
         options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }] },
-      { id: 'filhoLegitimo',    label: 'É filho legítimo?',           type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'teveTutores',      label: 'Teve tutores?',                  type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'viveuCompanhia',   label: 'Viveu em sua companhia?',        type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'escolas',          label: 'Frequentou escolas?',            placeholder: 'Ex: sim, quinta serie / nao / prej' },
-      { id: 'toxicos',          label: 'Dá-se ao uso de bebidas alcoólicas ou outros tóxicos?', placeholder: 'Ex: sim, crack / nao' },
-      { id: 'internado',        label: 'Já esteve internado em casa de tratamento de moléstias mentais?', type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'internacaoQuandoQual', label: 'Quais e quando? (internação)', placeholder: 'Ex: prej / Hospital X em 2020', required: false },
-      { id: 'estadoCivil',      label: 'É casado, divorciado, separado ou unido estávelmente?', type: 'select',
+      { id: 'filhoLegitimo',    label: '\u00c9 filho leg\u00edtimo?',                type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'teveTutores',      label: 'Teve tutores?',                         type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'viveuCompanhia',   label: 'Viveu em sua companhia?',               type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'escolas',          label: 'Frequentou escolas?',                   placeholder: 'Ex: sim, quinta s\u00e9rie / n\u00e3o / prejudicado' },
+      { id: 'toxicos',          label: 'D\u00e1-se ao uso de bebidas alco\u00f3licas ou outros t\u00f3xicos?', placeholder: 'Ex: sim, crack / n\u00e3o' },
+      { id: 'internado',        label: 'J\u00e1 esteve internado em casa de tratamento de mol\u00e9stias mentais?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'internacaoQuandoQual', label: 'Quais e quando? (interna\u00e7\u00e3o)', placeholder: 'Ex: prejudicado / Hospital X em 2020', required: false },
+      { id: 'estadoCivil',      label: 'Estado civil', type: 'select',
         options: [
-          { value: 'solteiro',              label: 'solteiro' },
-          { value: 'casado',                label: 'casado' },
-          { value: 'separado de fato',      label: 'separado de fato' },
-          { value: 'separado judicialmente',label: 'separado judicialmente' },
-          { value: 'divorciado',            label: 'divorciado' },
-          { value: 'unido estavelmente',    label: 'unido estávelmente' },
-          { value: 'viuvo',                 label: 'viúvo' },
-          { value: 'nao declarado',         label: 'não declarado' },
+          { value: 'solteiro',               label: 'solteiro'               },
+          { value: 'casado',                 label: 'casado'                 },
+          { value: 'separado de fato',       label: 'separado de fato'       },
+          { value: 'separado judicialmente', label: 'separado judicialmente' },
+          { value: 'divorciado',             label: 'divorciado'             },
+          { value: 'unido estavelmente',     label: 'unido est\u00e1velmente'},
+          { value: 'viuvo',                  label: 'vi\u00favo'             },
+          { value: 'nao declarado',          label: 'n\u00e3o declarado'    },
         ] },
-      { id: 'vidaConjugal',     label: 'É harmônica ou não a vida conjugal?', type: 'select',
-        options: [{ value: 'prej', label: 'prejudicado' }, { value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'temFilhos',        label: 'Tem filhos?',                    type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'quantosFilhos',    label: 'Quantos e idade?',               placeholder: 'Ex: prej / 2, sendo um de 3 e outro de 7 anos', required: false },
-      { id: 'filhosDeficiencia',label: 'O(s) filho(s) possui(em) algum tipo de deficiência?', type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }, { value: 'prej', label: 'prejudicado' }] },
-      { id: 'responsavelFilhos',label: 'Quem é o responsável pelo(s) filho(s)?', placeholder: 'Ex: prej / a mae / o pai', required: false },
+      { id: 'vidaConjugal',     label: '\u00c9 harm\u00f4nica ou n\u00e3o a vida conjugal?', type: 'radio',
+        options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }, { value: 'prejudicado', label: 'prejudicado' }] },
+      { id: 'temFilhos',        label: 'Tem filhos?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'quantosFilhos',    label: 'Quantos e idade?', placeholder: 'Ex: prejudicado / 2, sendo um de 3 e outro de 7 anos', required: false },
+      { id: 'filhosDeficiencia',label: 'O(s) filho(s) possui(em) algum tipo de defici\u00eancia?', type: 'radio',
+        options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }, { value: 'prejudicado', label: 'prejudicado' }] },
+      { id: 'responsavelFilhos',label: 'Quem \u00e9 o respons\u00e1vel pelo(s) filho(s)?', placeholder: 'Ex: prejudicado / a m\u00e3e / o pai', required: false },
       { id: 'ondeReside',       label: 'Onde reside?', type: 'select',
-        options: [{ value: 'casa propria', label: 'casa própria' }, { value: 'aluguel', label: 'aluguel' }, { value: 'com familiares', label: 'com familiares' }, { value: 'abrigo', label: 'abrigo' }, { value: 'situacao de rua', label: 'situação de rua' }] },
-      { id: 'habitacaoColetiva',label: 'Trata-se de habitação coletiva?', type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'ondeTrabalha',     label: 'Onde trabalha?',                 placeholder: 'Ex: prej / nome da empresa', required: false },
-      { id: 'ocupacao',         label: 'Qual a ocupação que exerce?', placeholder: 'Ex: desempregado / pedreiro / vendedor' },
-      { id: 'bensImoveis',      label: 'Possui bens imóveis?',       type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'bensImoveisQtd',   label: 'Quantos e qual o valor?',        placeholder: 'Ex: prej / 1, avaliado em R$ 200.000', required: false },
-      { id: 'depositos',        label: 'Possui depósito em bancos, caixas econômicas, apólices?', type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'salario',          label: 'Se trabalha, quanto ganha?',     placeholder: 'Ex: prej / R$ 1.500,00 mensais', required: false },
-      { id: 'desocupadoPorque', label: 'Se é desocupado, por quê?', placeholder: 'Ex: prej / foi demitido', required: false },
-      { id: 'recebeAjuda',      label: 'Recebe ajuda de parentes, particulares ou instituições beneficentes?', type: 'select', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'não' }] },
-      { id: 'socorreAlguem',    label: 'Socorre alguém?',           placeholder: 'Ex: nao / sim, dois filhos' },
+        options: [
+          { value: 'casa propria',   label: 'casa pr\u00f3pria'   },
+          { value: 'aluguel',        label: 'aluguel'             },
+          { value: 'com familiares', label: 'com familiares'      },
+          { value: 'abrigo',         label: 'abrigo'              },
+          { value: 'situacao de rua',label: 'situa\u00e7\u00e3o de rua' },
+        ] },
+      { id: 'habitacaoColetiva',label: 'Trata-se de habita\u00e7\u00e3o coletiva?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'ondeTrabalha',     label: 'Onde trabalha?', placeholder: 'Ex: prejudicado / nome da empresa', required: false },
+      { id: 'ocupacao',         label: 'Qual a ocupa\u00e7\u00e3o que exerce?', placeholder: 'Ex: desempregado / pedreiro / vendedor' },
+      { id: 'bensImoveis',      label: 'Possui bens im\u00f3veis?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'bensImoveisQtd',   label: 'Quantos e qual o valor?', placeholder: 'Ex: prejudicado / 1, avaliado em R$ 200.000', required: false },
+      { id: 'depositos',        label: 'Possui dep\u00f3sito em bancos, caixas econ\u00f4micas, ap\u00f3lices?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'salario',          label: 'Se trabalha, quanto ganha?', placeholder: 'Ex: prejudicado / R$ 1.500,00 mensais', required: false },
+      { id: 'desocupadoPorque', label: 'Se \u00e9 desocupado, por qu\u00ea?', placeholder: 'Ex: prejudicado / foi demitido', required: false },
+      { id: 'recebeAjuda',      label: 'Recebe ajuda de parentes, particulares ou institui\u00e7\u00f5es beneficentes?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'socorreAlguem',    label: 'Socorre algu\u00e9m?', placeholder: 'Ex: n\u00e3o / sim, dois filhos' },
     ],
     generate: function(f) {
       var masc = (f.genero || 'M') === 'M';
       var cond = masc ? 'do conduzido' : 'da conduzida';
-
       function R(val) {
         var v = (val || '').trim();
         return v ? v.toUpperCase() : '[...]';
       }
-
-      return 'Após, em obediência ao art. 6°, IX, do Código de Processo Penal, passou a autoridade a consignar elementos sobre a VIDA PREGRESSA ' + cond + ', nos seguintes termos: ' +
-        'é filho legítimo? ' + R(f.filhoLegitimo) + '; ' +
+      return 'Ap\u00f3s, em obedi\u00eancia ao art. 6\u00ba, IX, do C\u00f3digo de Processo Penal, passou a autoridade a consignar elementos sobre a VIDA PREGRESSA ' + cond + ', nos seguintes termos: ' +
+        '\u00e9 filho leg\u00edtimo? ' + R(f.filhoLegitimo) + '; ' +
         'teve tutores? ' + R(f.teveTutores) + '; ' +
         'viveu em sua companhia? ' + R(f.viveuCompanhia) + '; ' +
         'frequentou escolas? ' + R(f.escolas) + '; ' +
-        'dá-se ' + (masc ? 'o indiciado' : 'a indiciada') + ' ao uso de bebidas alcoólicas ou de outros tóxicos? ' + R(f.toxicos) + '; ' +
-        'já esteve internado em casa de tratamento de moléstias mentais ou congêneres? ' + R(f.internado) + '; ' +
+        'd\u00e1-se ' + (masc ? 'o indiciado' : 'a indiciada') + ' ao uso de bebidas alco\u00f3licas ou de outros t\u00f3xicos? ' + R(f.toxicos) + '; ' +
+        'j\u00e1 esteve internado em casa de tratamento de mol\u00e9stias mentais ou cong\u00eaneres? ' + R(f.internado) + '; ' +
         'quais e quando? ' + R(f.internacaoQuandoQual) + '; ' +
-        'é casado, divorciado, separado judicialmente ou unido estávelmente? ' + R(f.estadoCivil) + '; ' +
-        'é harmônica ou não a vida conjugal? ' + R(f.vidaConjugal) + '; ' +
+        '\u00e9 casado, divorciado, separado judicialmente ou unido est\u00e1velmente? ' + R(f.estadoCivil) + '; ' +
+        '\u00e9 harm\u00f4nica ou n\u00e3o a vida conjugal? ' + R(f.vidaConjugal) + '; ' +
         'tem filhos? ' + R(f.temFilhos) + '; ' +
         'quantos e idade? ' + R(f.quantosFilhos) + '; ' +
-        'o(s) filho(s) possui(em) algum tipo de deficiência? ' + R(f.filhosDeficiencia) + '; ' +
-        'quem é o responsável pelo(s) filho(s)? ' + R(f.responsavelFilhos) + '; ' +
+        'o(s) filho(s) possui(em) algum tipo de defici\u00eancia? ' + R(f.filhosDeficiencia) + '; ' +
+        'quem \u00e9 o respons\u00e1vel pelo(s) filho(s)? ' + R(f.responsavelFilhos) + '; ' +
         'onde reside? ' + R(f.ondeReside) + '; ' +
-        'trata-se de habitação coletiva? ' + R(f.habitacaoColetiva) + '; ' +
+        'trata-se de habita\u00e7\u00e3o coletiva? ' + R(f.habitacaoColetiva) + '; ' +
         'onde trabalha? ' + R(f.ondeTrabalha) + '; ' +
-        'qual a ocupação que exerce? ' + R(f.ocupacao) + '; ' +
-        'possui bens imóveis? ' + R(f.bensImoveis) + '; ' +
+        'qual a ocupa\u00e7\u00e3o que exerce? ' + R(f.ocupacao) + '; ' +
+        'possui bens im\u00f3veis? ' + R(f.bensImoveis) + '; ' +
         'quantos e qual o valor? ' + R(f.bensImoveisQtd) + '; ' +
-        'possui depósito em bancos, caixas econômicas, apólices? ' + R(f.depositos) + '; ' +
+        'possui dep\u00f3sito em bancos, caixas econ\u00f4micas, ap\u00f3lices? ' + R(f.depositos) + '; ' +
         'se trabalha, quanto ganha? ' + R(f.salario) + '; ' +
-        'se é desocupado, por quê? ' + R(f.desocupadoPorque) + '; ' +
-        'recebe ajuda de parentes, particulares ou de instituições beneficentes? ' + R(f.recebeAjuda) + '; ' +
-        'socorre alguém? ' + R(f.socorreAlguem);
+        'se \u00e9 desocupado, por qu\u00ea? ' + R(f.desocupadoPorque) + '; ' +
+        'recebe ajuda de parentes, particulares ou de institui\u00e7\u00f5es beneficentes? ' + R(f.recebeAjuda) + '; ' +
+        'socorre algu\u00e9m? ' + R(f.socorreAlguem);
     }
   },
 
