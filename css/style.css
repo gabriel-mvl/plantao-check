@@ -1512,3 +1512,34 @@ body[data-theme="light"] input[type="date"] {
 .link-item-desc {
   font-size: .76rem; color: var(--text-secondary); line-height: 1.4;
 }
+
+/* ── HOME LINKS GRID ── */
+.home-links-grid {
+  display: flex; flex-direction: column; gap: .4rem;
+}
+.home-link-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .65rem .9rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: border-color .15s, background .15s;
+}
+.home-link-item:hover {
+  border-color: rgba(59,125,255,.35);
+  background: var(--bg-hover);
+}
+.home-link-icon { font-size: 1rem; flex-shrink: 0; color: var(--accent); }
+.home-link-name {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: .86rem; color: var(--accent);
+  flex-shrink: 0; min-width: 130px;
+}
+.home-link-desc {
+  font-size: .74rem; color: var(--text-secondary); line-height: 1.3;
+}
+
+/* ── SIDEBAR LINKS EXTERNOS ── */
+.nav-link-ext { color: var(--accent) !important; }
+.nav-link-ext:hover { color: var(--accent-hover) !important; }
