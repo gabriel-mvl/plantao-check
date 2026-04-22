@@ -479,6 +479,7 @@ const PCDoc = (() => {
       });
   }
 
+
   // ── MODAL CUSTOMIZADO (alteração de plantão) ─────────────
   function _renderModalCustom(doc) {
     _loadUnits();
@@ -500,13 +501,14 @@ const PCDoc = (() => {
       </div>
       <div class="modal-form-group">
         <label>Unidade policial</label>
-        <select id="pcdocUnit" disabled onchange="PCDoc._unitListRef=PCDoc._unitListRef">
+        <select id="pcdocUnit" disabled>
           <option value="">Selecione o departamento primeiro</option>
         </select>
       </div>
 
       <div style="border-top:1px solid var(--border);margin:1rem 0 .75rem;padding-top:.75rem">
-        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-family:var(--font-display);margin-bottom:.6rem">Adicionar troca</div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-family:var(--font-display);margin-bottom:.75rem">Adicionar troca</div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem">
           <div class="modal-form-group" style="margin:0">
             <label>Data</label>
@@ -520,20 +522,50 @@ const PCDoc = (() => {
             </select>
           </div>
         </div>
-        <div class="modal-form-group" style="margin-bottom:.5rem">
+
+        <div class="modal-form-group" style="margin-bottom:.75rem">
           <label class="pcdoc-toggle-label" style="font-size:.78rem;font-weight:600;color:var(--text-secondary)">
             <input type="checkbox" id="alteracaoFeriado" />
             <span>Feriado</span>
           </label>
         </div>
-        <div class="modal-form-group" style="margin-bottom:.5rem">
-          <label>Quem entra</label>
-          <input type="text" id="alteracaoNomeEntra" placeholder="Ex: Escrivão Gabriel Vital" autocomplete="off" />
+
+        <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.3rem;font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Quem entra</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.65rem">
+          <div class="modal-form-group" style="margin:0">
+            <label>Carreira</label>
+            <select id="alteracaoCarreiraEntra">
+              <option value="">Selecione...</option>
+              <option value="Agente Policial">Agente Policial</option>
+              <option value="Delegado de Polícia">Delegado de Polícia</option>
+              <option value="Escrivão de Polícia">Escrivão de Polícia</option>
+              <option value="Investigador de Polícia">Investigador de Polícia</option>
+            </select>
+          </div>
+          <div class="modal-form-group" style="margin:0">
+            <label>Nome</label>
+            <input type="text" id="alteracaoNomeEntra" placeholder="Nome completo" autocomplete="off" />
+          </div>
         </div>
-        <div class="modal-form-group" style="margin-bottom:.75rem">
-          <label>Quem sai</label>
-          <input type="text" id="alteracaoNomeSai" placeholder="Ex: Escrivão Álvaro Carbajo" autocomplete="off" />
+
+        <div style="font-size:.72rem;color:var(--text-muted);margin-bottom:.3rem;font-family:var(--font-display);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Quem sai</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.75rem">
+          <div class="modal-form-group" style="margin:0">
+            <label>Carreira</label>
+            <select id="alteracaoCarreiraSai">
+              <option value="">Selecione...</option>
+              <option value="Agente Policial">Agente Policial</option>
+              <option value="Delegado de Polícia">Delegado de Polícia</option>
+              <option value="Escrivão de Polícia">Escrivão de Polícia</option>
+              <option value="Investigador de Polícia">Investigador de Polícia</option>
+            </select>
+          </div>
+          <div class="modal-form-group" style="margin:0">
+            <label>Nome</label>
+            <input type="text" id="alteracaoNomeSai" placeholder="Nome completo" autocomplete="off" />
+          </div>
         </div>
+
         <button class="btn-secondary" onclick="PCDoc._addTroca()" style="width:100%">+ Adicionar troca</button>
       </div>
 
@@ -566,11 +598,7 @@ const PCDoc = (() => {
       if (title) title.textContent = doc.titulo;
       const sub = document.getElementById('pcdocModalSub');
       if (sub) sub.textContent = doc.subtitulo || '';
-      if (doc.customModal) {
-        _renderModalCustom(doc);
-      } else {
-        _renderModal(doc);
-      }
+      if (doc.customModal) { _renderModalCustom(doc); } else { _renderModal(doc); }
       document.getElementById('pcdocBackdrop')?.classList.remove('hidden');
       document.getElementById('pcdocModal')?.classList.remove('hidden');
       if (typeof toggleSidebar === 'function' && window.innerWidth <= 768) toggleSidebar();
@@ -627,13 +655,14 @@ PCSP_DOCS.autorizacaoSangue = {
     return `
       <p style="text-align:justify;margin-bottom:1.2rem">
         Eu, <strong>${campos.nome}</strong>, RG <strong>${campos.rg}</strong>, AUTORIZO, nos termos da
-        Resolução Contran nº 432/2013, a coleta de amostra de sangue para fins de exame de dosagem
+        Resolução Contran nº 432/2013, a coleta de amostra de sangue para fins de dosagem
         alcoólica e/ou identificação de substâncias psicoativas.
       </p>
       <p style="text-align:justify;margin-bottom:2rem">
-        Declaro que fui informado(a) de que os resultados poderão ser utilizados
+        Declaro que fui informado(a) de que a recusa em submeter-se ao exame acarreta a
+        penalidade prevista no art. 306, § 2º do CTB; que os resultados poderão ser utilizados
         como prova em processo administrativo e judicial; que a coleta será realizada por
-        profissional habilitado em unidade de saúde; e que a amostra será enviada ao Instituto
+        profissional habilitado em unidade de saúde; e que o exame será enviado ao Instituto
         Médico Legal (IML) para análise.
       </p>
       <p style="text-align:center;margin-bottom:3rem">
@@ -821,22 +850,10 @@ PCSP_DOCS.alteracaoPlantao = {
   icone: '🔄',
   titulo: 'Autorização para Alteração de Plantão',
   subtitulo: 'Solicitação de troca de escala',
-  customModal: true,   // flag: PCDoc.open() usa modal customizado
+  customModal: true,
 };
 
-// Estado interno das trocas
 PCDoc._trocas = [];
-
-PCDoc._feriados2026 = [
-  '2026-01-01','2026-04-21','2026-05-01','2026-09-07',
-  '2026-10-12','2026-11-02','2026-11-15','2026-12-25',
-];
-
-PCDoc._isFeriado = function(dateStr) {
-  return PCDoc._feriados2026.includes(dateStr) ||
-    (document.getElementById('alteracaoFeriado') &&
-     document.getElementById('alteracaoFeriado').checked);
-};
 
 PCDoc._diaSemana = function(dateStr) {
   if (!dateStr) return '';
@@ -868,9 +885,9 @@ PCDoc._renderTrocas = function() {
     const dia = PCDoc._diaSemana(t.data);
     const hor = PCDoc._horarios(t.data, t.turno, t.feriado);
     const dataFmt = t.data ? t.data.split('-').reverse().join('/') : '—';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.4rem;font-size:.82rem">' +
-      '<span><strong>' + dataFmt + '</strong> (' + dia + ' - ' + t.turno + ') ' + hor +
-      ' &mdash; <em>' + (t.nomeEntra || '?') + '</em> no lugar de <em>' + (t.nomeSai || '?') + '</em>' +
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.4rem;gap:.5rem">' +
+      '<span style="font-size:.8rem;flex:1"><strong>' + dataFmt + '</strong> (' + dia + ' – ' + t.turno + ') ' + hor +
+      ' — <em>' + t.nomeEntra + '</em> no lugar de <em>' + t.nomeSai + '</em>' +
       (t.feriado ? ' 🎉' : '') + '</span>' +
       '<button onclick="PCDoc._removeTroca(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;flex-shrink:0" title="Remover">🗑</button>' +
       '</div>';
@@ -883,21 +900,27 @@ PCDoc._removeTroca = function(i) {
 };
 
 PCDoc._addTroca = function() {
-  const data   = document.getElementById('alteracaoData')?.value;
-  const turno  = document.getElementById('alteracaoTurno')?.value;
-  const nomeE  = document.getElementById('alteracaoNomeEntra')?.value?.trim();
-  const nomeS  = document.getElementById('alteracaoNomeSai')?.value?.trim();
-  const ferial = document.getElementById('alteracaoFeriado')?.checked || false;
+  const data       = document.getElementById('alteracaoData')?.value;
+  const turno      = document.getElementById('alteracaoTurno')?.value;
+  const carreiraE  = document.getElementById('alteracaoCarreiraEntra')?.value?.trim();
+  const nomeERaw   = document.getElementById('alteracaoNomeEntra')?.value?.trim();
+  const carreiraS  = document.getElementById('alteracaoCarreiraSai')?.value?.trim();
+  const nomeSRaw   = document.getElementById('alteracaoNomeSai')?.value?.trim();
+  const ferial     = document.getElementById('alteracaoFeriado')?.checked || false;
 
-  if (!data || !turno || !nomeE || !nomeS) {
-    if (typeof showToast === 'function') showToast('Preencha todos os campos da troca.');
+  const nomeE = carreiraE ? carreiraE + ' ' + nomeERaw : nomeERaw;
+  const nomeS = carreiraS ? carreiraS + ' ' + nomeSRaw : nomeSRaw;
+
+  if (!data || !turno || !nomeERaw || !nomeSRaw) {
+    if (typeof showToast === 'function') showToast('Preencha data, turno e os dois nomes.');
     return;
   }
   PCDoc._trocas.push({ data, turno, nomeEntra: nomeE, nomeSai: nomeS, feriado: ferial });
-  // Clear entry fields
   document.getElementById('alteracaoData').value = '';
   document.getElementById('alteracaoNomeEntra').value = '';
   document.getElementById('alteracaoNomeSai').value = '';
+  if (document.getElementById('alteracaoCarreiraEntra')) document.getElementById('alteracaoCarreiraEntra').value = '';
+  if (document.getElementById('alteracaoCarreiraSai'))  document.getElementById('alteracaoCarreiraSai').value = '';
   document.getElementById('alteracaoFeriado').checked = false;
   PCDoc._renderTrocas();
   document.getElementById('alteracaoData').focus();
@@ -908,55 +931,50 @@ PCDoc._gerarAlteracao = function() {
     if (typeof showToast === 'function') showToast('Adicione ao menos uma troca.');
     return;
   }
-
   const unitIdx = document.getElementById('pcdocUnit')?.value;
-  if (!unitIdx) {
+  if (unitIdx === '' || unitIdx === undefined || unitIdx === null) {
     if (typeof showToast === 'function') showToast('Selecione a unidade policial.');
     return;
   }
-  const u = PCDoc._getUnit(unitIdx);
-  if (!u) return;
+  const u = (PCDoc._unitListRef || [])[parseInt(unitIdx)];
+  if (!u) { if (typeof showToast === 'function') showToast('Selecione a unidade policial.'); return; }
 
   const cidade = u.mun || u.nome;
 
-  // Build trocas text
   const linhasTrocas = PCDoc._trocas.map(function(t) {
-    const d    = new Date(t.data + 'T12:00:00');
-    const dia  = PCDoc._diaSemana(t.data);
-    const hor  = PCDoc._horarios(t.data, t.turno, t.feriado);
-    const fmt  = t.data.split('-').reverse().join('/');
+    const dia      = PCDoc._diaSemana(t.data);
+    const fmt      = t.data.split('-').reverse().join('/');
     const fdsOuFer = PCDoc._ehFimSemana(t.data) || t.feriado;
-    const iniFim = t.turno === 'noturno'
+    const iniFim   = t.turno === 'noturno'
       ? (fdsOuFer ? 'das 20:00 às 08:00 hs' : 'das 18:00 às 08:00 hs')
       : (fdsOuFer ? 'das 08:00 às 20:00 hs' : 'das 08:00 às 18:00 hs');
-    return '<p style="margin-bottom:.6rem">' +
-      'Dia ' + fmt + ' (' + dia + ' - ' + t.turno + ') \u2013 ' + iniFim + '<br>' +
-      t.nomeEntra + ' no lugar de ' + t.nomeSai + '.' +
+    return '<p style="margin-bottom:.75rem">' +
+      'Dia ' + fmt + ' (' + dia + ' \u2013 ' + t.turno + ') \u2013 ' + iniFim + '<br>' +
+      t.nomeEntra + ' no lugar ' + (t.nomeSai.match(/^(Delegad)/i) ? 'da ' : 'do ') + t.nomeSai + '.' +
       '</p>';
   }).join('');
 
-  // Build unique names for signature lines
-  const nomes = [];
+  // Unique names for signature lines (preserve insertion order)
+  const nomesVistos = [];
   PCDoc._trocas.forEach(function(t) {
-    if (!nomes.includes(t.nomeEntra)) nomes.push(t.nomeEntra);
-    if (!nomes.includes(t.nomeSai))   nomes.push(t.nomeSai);
+    if (!nomesVistos.includes(t.nomeEntra)) nomesVistos.push(t.nomeEntra);
+    if (!nomesVistos.includes(t.nomeSai))   nomesVistos.push(t.nomeSai);
   });
-  const assinaturas = nomes.map(function(n) {
-    return '<div style="text-align:left;margin-top:1.8rem">' +
-      '<div style="border-top:1px solid #000;width:55%;margin-bottom:.25rem"></div>' +
+  const assinaturas = nomesVistos.map(function(n) {
+    return '<div style="margin-top:2rem">' +
+      '<div style="border-top:1px solid #000;width:55%;margin-bottom:.3rem"></div>' +
       '<div>' + n + '</div>' +
       '</div>';
   }).join('');
 
   const corpo =
-    '<p style="margin-bottom:1rem">Solicitamos autoriza\u00e7\u00e3o para altera\u00e7\u00e3o na escala de plant\u00e3o de ' +
-    cidade + ', ficando da seguinte forma:</p>' +
+    '<p style="margin-bottom:1.1rem">Solicitamos autoriza\u00e7\u00e3o para altera\u00e7\u00e3o na escala de plant\u00e3o de <strong>' + cidade + '</strong>, ficando da seguinte forma:</p>' +
     linhasTrocas +
     assinaturas +
-    '<div style="margin-top:2.5rem">' +
-    '<p style="margin-bottom:.3rem">Nada a opor</p>' +
-    '<p style="margin-top:1.4rem;font-weight:bold">' + (u.delegado || '_______________________________') + '</p>' +
-    '<p>Delegado de Pol\u00edcia Titular ' + u.nome + '</p>' +
+    '<div style="margin-top:3rem">' +
+    '<p>Nada a opor</p>' +
+    '<p style="margin-top:2rem;font-weight:bold">' + u.nome + '</p>' +
+    '<p>Delegado de Pol\u00edcia Titular \u2014 ' + u.nome + '</p>' +
     '</div>';
 
   const html = PCDoc._docHtml(u, 'AUTORIZA\u00c7\u00c3O PARA ALTERA\u00c7\u00c3O DE PLANT\u00c3O', corpo);
@@ -965,10 +983,5 @@ PCDoc._gerarAlteracao = function() {
   const out  = document.getElementById('pcdocOutput');
   if (prev) prev.innerHTML = html;
   if (out)  out.classList.remove('hidden');
-  setTimeout(function() { out?.scrollIntoView({ behavior:'smooth' }); }, 100);
-};
-
-PCDoc._getUnit = function(idx) {
-  // _unitList is internal — expose via a helper called after _onDeptChange
-  return (typeof PCDoc._unitListRef !== 'undefined' ? PCDoc._unitListRef : [])[parseInt(idx)];
+  setTimeout(function() { if (out) out.scrollIntoView({ behavior:'smooth' }); }, 100);
 };
