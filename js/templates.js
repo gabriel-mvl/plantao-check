@@ -160,10 +160,19 @@ var TEMPLATES = {
   },
 
   autorizacaoFotografias: {
-    title: 'Autoriza\u00e7\u00e3o de Fotografias',
-    fields: [],
+    title: 'Fotografias de Les\u00f5es',
+    fields: [
+      { id: 'situacao', label: 'Situa\u00e7\u00e3o das les\u00f5es', type: 'radio',
+        options: [
+          { value: 'aparentes', label: 'Les\u00f5es aparentes' },
+          { value: 'sem', label: 'Sem les\u00f5es aparentes' },
+        ] },
+    ],
     generate: function(f) {
-      return 'A v\u00edtima declara possuir les\u00f5es aparentes decorrentes dos fatos narrados e, neste ato, autoriza expressamente a fotografa\u00e7\u00e3o das referidas les\u00f5es pelos agentes policiais, bem como o anexo das imagens ao presente procedimento, para fins de instru\u00e7\u00e3o probat\u00f3ria.';
+      if ((f.situacao || 'aparentes') === 'aparentes') {
+        return 'A v\u00edtima declara possuir les\u00f5es aparentes decorrentes dos fatos narrados e, neste ato, autoriza expressamente a fotografa\u00e7\u00e3o das referidas les\u00f5es pelos agentes policiais, bem como o anexo das imagens ao presente procedimento, para fins de instru\u00e7\u00e3o probat\u00f3ria.';
+      }
+      return 'A v\u00edtima declara n\u00e3o apresentar les\u00f5es aparentes no momento deste registro, raz\u00e3o pela qual a fotografa\u00e7\u00e3o restou prejudicada. Foi devidamente orientada a comparecer ao Instituto M\u00e9dico Legal (IML) para realiza\u00e7\u00e3o de exame de corpo de delito por profissional especializado, visando atestar a exist\u00eancia de poss\u00edveis les\u00f5es internas ou de surgimento posterior.';
     }
   },
 
@@ -172,29 +181,11 @@ var TEMPLATES = {
     fields: [
       { id: 'genero', label: 'G\u00eanero do(a) declarante', type: 'select',
         options: [{ value: 'F', label: 'Feminino' }, { value: 'M', label: 'Masculino' }] },
-      { id: 'representa', label: 'A v\u00edtima vai representar agora?', type: 'radio',
-        options: [{ value: 'sim', label: 'Sim' }, { value: 'nao', label: 'N\u00e3o' }] },
-      { id: 'autoriaConhecida', label: 'A autoria \u00e9 conhecida?', type: 'radio',
-        options: [{ value: 'sim', label: 'Sim' }, { value: 'nao', label: 'N\u00e3o' }],
-        showIf: { field: 'representa', value: 'nao' } },
     ],
     generate: function(f) {
-      var masc = (f.genero || 'F') === 'M';
-      var autor_a = masc ? 'o autor' : 'a autora';
-      var responsavel = masc ? 'o respons\u00e1vel pelos fatos' : 'a respons\u00e1vel pelos fatos';
-
-      // Caminho 1: representa agora
-      if ((f.representa || 'nao') === 'sim') {
-        return 'A v\u00edtima manifestou expressamente o desejo de representar criminalmente contra ' + autor_a + ' dos fatos narrados no presente registro, requerendo o regular prosseguimento do feito e a ado\u00e7\u00e3o de todas as provid\u00eancias legais cab\u00edveis.';
-      }
-
-      // Caminho 2: n\u00e3o representa + autoria conhecida
-      if ((f.autoriaConhecida || 'sim') === 'sim') {
-        return 'A v\u00edtima foi devidamente cientificada de que o crime narrado \u00e9 de a\u00e7\u00e3o penal p\u00fablica condicionada \u00e0 representa\u00e7\u00e3o, devendo manifestar expressamente sua vontade de ver ' + autor_a + ' dos fatos processado' + (masc ? '' : 'a') + ' no prazo legal de 6 (seis) meses contados desta data, sob pena de dec\u00ead\u00eancia, nos termos do art. 38 do C\u00f3digo de Processo Penal.';
-      }
-
-      // Caminho 3: n\u00e3o representa + autoria desconhecida
-      return 'A v\u00edtima foi devidamente cientificada de que o crime narrado \u00e9 de a\u00e7\u00e3o penal p\u00fablica condicionada \u00e0 representa\u00e7\u00e3o. Em raz\u00e3o de a autoria permanecer desconhecida, foi orientada de que o prazo de 6 (seis) meses para representa\u00e7\u00e3o somente ter\u00e1 in\u00edcio a partir da data em que vier a tomar conhecimento de quem seja ' + autor_a + ' dos fatos, nos termos do art. 38 do C\u00f3digo de Processo Penal.';
+      var masc  = (f.genero || 'F') === 'M';
+      var autor = masc ? 'o autor' : 'a autora';
+      return (masc ? 'O' : 'A') + ' declarante manifesta, neste ato, de forma expressa e inequ\u00edvoca, o desejo de representar criminalmente contra ' + autor + ' dos fatos narrados no presente registro, requerendo a ado\u00e7\u00e3o de todas as provid\u00eancias legais cab\u00edveis e o prosseguimento das investiga\u00e7\u00f5es.';
     }
   },
 
@@ -292,7 +283,7 @@ var TEMPLATES = {
         ]
       },
       { id: 'transtornoMental', label: 'Historico de transtorno mental ou uso de substancias', type: 'select', options: [
-          { value: 'nao apresenta historico conhecido de transtorno mental ou uso de substancias psicoativas', label: 'N\u00e3o' },
+          { value: 'nao apresenta historico conhecido de transtorno mental ou uso de substancias psicoativas', label: 'Nao' },
           { value: 'possui historico de transtorno mental',                                              label: 'Transtorno mental' },
           { value: 'possui historico de uso de substancias psicoativas',                                label: 'Uso de substancias' },
           { value: 'possui historico de transtorno mental e uso de substancias psicoativas',            label: 'Ambos' },
@@ -300,13 +291,13 @@ var TEMPLATES = {
         ]
       },
       { id: 'desapareceuAntes', label: 'Ja desapareceu anteriormente?', type: 'select', options: [
-          { value: 'nao', label: 'N\u00e3o' },
+          { value: 'nao', label: 'Nao' },
           { value: 'sim, tendo retornado voluntariamente',   label: 'Sim, retornou voluntariamente' },
           { value: 'sim, sendo localizado por terceiros',    label: 'Sim, localizado por terceiros' },
         ]
       },
       { id: 'conflitos', label: 'Conflitos recentes', type: 'select', options: [
-          { value: 'nao havia conflitos conhecidos',                    label: 'N\u00e3o' },
+          { value: 'nao havia conflitos conhecidos',                    label: 'Nao' },
           { value: 'havia conflitos familiares recentes',               label: 'Conflitos familiares' },
           { value: 'havia conflitos conjugais recentes',                label: 'Conflitos conjugais' },
           { value: 'havia dificuldades financeiras recentes',           label: 'Dificuldades financeiras' },
@@ -314,13 +305,13 @@ var TEMPLATES = {
         ]
       },
       { id: 'intencaoSuicida', label: 'Declaracao previa de intencao de se machucar ou sumir', type: 'select', options: [
-          { value: 'nao', label: 'N\u00e3o' },
+          { value: 'nao', label: 'Nao' },
           { value: 'sim, tendo manifestado intencao de se machucar',   label: 'Sim - intencao de se machucar' },
           { value: 'sim, tendo manifestado intencao de desaparecer',   label: 'Sim - intencao de desaparecer' },
         ]
       },
       { id: 'ameacas', label: 'Ameacas ou violencia domestica', type: 'select', options: [
-          { value: 'nao havia relatos de ameacas ou violencia domestica', label: 'N\u00e3o' },
+          { value: 'nao havia relatos de ameacas ou violencia domestica', label: 'Nao' },
           { value: 'havia relatos de ameacas por parte de terceiro',       label: 'Ameacas por terceiro' },
           { value: 'era vitima de violencia domestica',                    label: 'Violencia domestica' },
         ]
@@ -396,12 +387,12 @@ var TEMPLATES = {
     fields: [
       { id: 'genero', label: 'G\u00eanero do(a) conduzido(a)', type: 'select',
         options: [{ value: 'M', label: 'Masculino' }, { value: 'F', label: 'Feminino' }] },
-      { id: 'filhoLegitimo',    label: '\u00c9 filho leg\u00edtimo?',                type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
-      { id: 'teveTutores',      label: 'Teve tutores?',                         type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
-      { id: 'viveuCompanhia',   label: 'Viveu em sua companhia?',               type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+      { id: 'filhoLegitimo',    label: '\u00c9 filho leg\u00edtimo?',                type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'teveTutores',      label: 'Teve tutores?',                         type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
+      { id: 'viveuCompanhia',   label: 'Viveu em sua companhia?',               type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'escolas',          label: 'Frequentou escolas?',                   placeholder: 'Ex: sim, quinta s\u00e9rie / n\u00e3o / prejudicado' },
       { id: 'toxicos',          label: 'D\u00e1-se ao uso de bebidas alco\u00f3licas ou outros t\u00f3xicos?', placeholder: 'Ex: sim, crack / n\u00e3o' },
-      { id: 'internado',        label: 'J\u00e1 esteve internado em casa de tratamento de mol\u00e9stias mentais?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+      { id: 'internado',        label: 'J\u00e1 esteve internado em casa de tratamento de mol\u00e9stias mentais?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'internacaoQuandoQual', label: 'Quais e quando? (interna\u00e7\u00e3o)', placeholder: 'Ex: prejudicado / Hospital X em 2020', required: false },
       { id: 'estadoCivil',      label: 'Estado civil', type: 'select',
         options: [
@@ -415,11 +406,11 @@ var TEMPLATES = {
           { value: 'nao declarado',          label: 'n\u00e3o declarado'    },
         ] },
       { id: 'vidaConjugal',     label: '\u00c9 harm\u00f4nica ou n\u00e3o a vida conjugal?', type: 'radio',
-        options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }, { value: 'prejudicado', label: 'prejudicado' }] },
-      { id: 'temFilhos',        label: 'Tem filhos?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+        options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }, { value: 'prejudicado', label: 'prejudicado' }] },
+      { id: 'temFilhos',        label: 'Tem filhos?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'quantosFilhos',    label: 'Quantos e idade?', placeholder: 'Ex: prejudicado / 2, sendo um de 3 e outro de 7 anos', required: false },
       { id: 'filhosDeficiencia',label: 'O(s) filho(s) possui(em) algum tipo de defici\u00eancia?', type: 'radio',
-        options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }, { value: 'prejudicado', label: 'prejudicado' }] },
+        options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }, { value: 'prejudicado', label: 'prejudicado' }] },
       { id: 'responsavelFilhos',label: 'Quem \u00e9 o respons\u00e1vel pelo(s) filho(s)?', placeholder: 'Ex: prejudicado / a m\u00e3e / o pai', required: false },
       { id: 'ondeReside',       label: 'Onde reside?', type: 'select',
         options: [
@@ -429,15 +420,15 @@ var TEMPLATES = {
           { value: 'abrigo',         label: 'abrigo'              },
           { value: 'situacao de rua',label: 'situa\u00e7\u00e3o de rua' },
         ] },
-      { id: 'habitacaoColetiva',label: 'Trata-se de habita\u00e7\u00e3o coletiva?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+      { id: 'habitacaoColetiva',label: 'Trata-se de habita\u00e7\u00e3o coletiva?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'ondeTrabalha',     label: 'Onde trabalha?', placeholder: 'Ex: prejudicado / nome da empresa', required: false },
       { id: 'ocupacao',         label: 'Qual a ocupa\u00e7\u00e3o que exerce?', placeholder: 'Ex: desempregado / pedreiro / vendedor' },
-      { id: 'bensImoveis',      label: 'Possui bens im\u00f3veis?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+      { id: 'bensImoveis',      label: 'Possui bens im\u00f3veis?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'bensImoveisQtd',   label: 'Quantos e qual o valor?', placeholder: 'Ex: prejudicado / 1, avaliado em R$ 200.000', required: false },
-      { id: 'depositos',        label: 'Possui dep\u00f3sito em bancos, caixas econ\u00f4micas, ap\u00f3lices?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+      { id: 'depositos',        label: 'Possui dep\u00f3sito em bancos, caixas econ\u00f4micas, ap\u00f3lices?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'salario',          label: 'Se trabalha, quanto ganha?', placeholder: 'Ex: prejudicado / R$ 1.500,00 mensais', required: false },
       { id: 'desocupadoPorque', label: 'Se \u00e9 desocupado, por qu\u00ea?', placeholder: 'Ex: prejudicado / foi demitido', required: false },
-      { id: 'recebeAjuda',      label: 'Recebe ajuda de parentes, particulares ou institui\u00e7\u00f5es beneficentes?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'n\u00e3o', label: 'n\u00e3o' }] },
+      { id: 'recebeAjuda',      label: 'Recebe ajuda de parentes, particulares ou institui\u00e7\u00f5es beneficentes?', type: 'radio', options: [{ value: 'sim', label: 'sim' }, { value: 'nao', label: 'n\u00e3o' }] },
       { id: 'socorreAlguem',    label: 'Socorre algu\u00e9m?', placeholder: 'Ex: n\u00e3o / sim, dois filhos' },
     ],
     generate: function(f) {
