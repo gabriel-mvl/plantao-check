@@ -518,14 +518,19 @@ function openTemplate(templateKey) {
   const condutorTextoMap = { pm:'policial militar', gcm:'guarda municipal', pc:'policial civil', parte:'parte interessada' };
   body.innerHTML = tmpl.fields.map(f => {
     if (f.type === 'radio') {
+      const onchg = `document.querySelectorAll('[data-show-if-field]').forEach(function(el){var cond=el.dataset.showIfField+':'+el.dataset.showIfValue;var inp=document.querySelector('input[name="tmpl_radio_'+el.dataset.showIfField+'"]:checked');el.style.display=(inp&&inp.value===el.dataset.showIfValue)?'':'none';});`;
       const btns = (f.options || []).map(o =>
         `<label class="tmpl-radio-label">
-           <input type="radio" name="tmpl_radio_${f.id}" value="${o.value}" />
+           <input type="radio" name="tmpl_radio_${f.id}" value="${o.value}" onchange="${onchg}" />
            <span>${o.label}</span>
          </label>`
       ).join('');
+      // showIf: hide this group if a condition on another field isn't met
+      const showIfAttr = f.showIf
+        ? `data-show-if-field="${f.showIf.field}" data-show-if-value="${f.showIf.value}" style="display:none"`
+        : '';
       return `
-        <div class="modal-form-group">
+        <div class="modal-form-group" ${showIfAttr}>
           <label>${f.label}</label>
           <div class="tmpl-radio-group" id="tmpl_radio_${f.id}">${btns}</div>
           <input type="hidden" id="tmpl_${f.id}" />
