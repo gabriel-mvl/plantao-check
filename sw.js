@@ -3,8 +3,8 @@
    Cache estratégico para funcionamento offline
    ============================================================ */
 
-const CACHE_NAME   = 'plantaocheck-v1';
-const CACHE_STATIC = 'plantaocheck-static-v1';
+const CACHE_NAME   = 'plantaocheck-v3';
+const CACHE_STATIC = 'plantaocheck-static-v3';
 
 // Arquivos essenciais para funcionamento offline
 // Derive base path from sw.js location (works on GitHub Pages subdirs)
@@ -55,28 +55,21 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Supabase e EmailJS: sempre tentar network, sem cache
+  // Supabase, EmailJS e CDNs de scripts: não interceptar, deixar o browser lidar
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('emailjs.com') ||
-    url.hostname.includes('api.emailjs.com')
+    url.hostname.includes('api.emailjs.com') ||
+    url.hostname.includes('cdn.jsdelivr.net')
   ) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(
-          JSON.stringify({ error: 'offline' }),
-          { headers: { 'Content-Type': 'application/json' }, status: 503 }
-        );
-      })
-    );
+    // Passa direto sem interferência do SW
     return;
   }
 
-  // Fontes e CDNs externos: cache-first com fallback
+  // Fontes externas: cache-first com fallback
   if (
     url.hostname.includes('fonts.googleapis.com') ||
-    url.hostname.includes('fonts.gstatic.com') ||
-    url.hostname.includes('cdn.jsdelivr.net')
+    url.hostname.includes('fonts.gstatic.com')
   ) {
     event.respondWith(
       caches.match(event.request).then(cached => {
