@@ -2,7 +2,7 @@
   "name": "PlantãoCheck",
   "short_name": "PlantãoCheck",
   "description": "Sistema de checklist do plantão policial",
-  "start_url": "/app.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f1623",
   "theme_color": "#0f1623",
@@ -22,12 +22,17 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "utilities"],
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "shortcuts": [
     {
       "name": "Abrir plantão",
       "url": "/app.html",
       "description": "Acessar o app"
     }
-  ]
+  ],
+  "scope": "./",
+  "id": "./"
 }
