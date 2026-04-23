@@ -110,6 +110,14 @@
 
     <div class="app-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
 
+    <!-- PWA INSTALL BANNER — mobile only -->
+    <div class="install-banner hidden" id="installBanner">
+      <span class="install-icon">&#128241;</span>
+      <span>Instale o app para acesso r&#225;pido e sess&#227;o de 15 dias</span>
+      <button onclick="installPWA()">Instalar</button>
+      <button class="install-close" onclick="document.getElementById('installBanner').classList.add('hidden')">&#215;</button>
+    </div>
+
 
 
   </div>
@@ -119,12 +127,36 @@
     // ── SERVICE WORKER ─────────────────────────────────────
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        // Use relative path to work on any subdirectory (e.g. GitHub Pages)
         navigator.serviceWorker.register('./sw.js')
           .then(reg => console.log('[SW] Registrado:', reg.scope))
           .catch(err => console.warn('[SW] Erro (não crítico):', err));
       });
     }
+
+    // ── PWA INSTALL PROMPT — mobile only ───────────────────
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Only show on mobile/tablet
+      if (window.innerWidth <= 768) {
+        const banner = document.getElementById('installBanner');
+        if (banner) banner.classList.remove('hidden');
+      }
+    });
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('installBanner')?.classList.add('hidden');
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBanner')?.classList.add('hidden');
+    });
 
 
   </script>
