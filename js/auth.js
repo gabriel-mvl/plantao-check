@@ -139,15 +139,27 @@ let _emailjsReady = false;
 
 async function loadAndInitEmailJS() {
   if (_emailjsReady) return;
+  if (window.emailjs) {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    _emailjsReady = true;
+    return;
+  }
+  const CDNS = [
+    'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
+    'https://unpkg.com/@emailjs/browser@4/dist/email.min.js',
+  ];
   await new Promise((resolve, reject) => {
-    if (window.emailjs) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-    script.onload = resolve;
-    script.onerror = () => reject(new Error('Falha ao carregar SDK EmailJS'));
-    document.head.appendChild(script);
+    let tried = 0;
+    function tryNext() {
+      if (tried >= CDNS.length) { reject(new Error('Falha ao carregar SDK EmailJS')); return; }
+      const script = document.createElement('script');
+      script.src = CDNS[tried++];
+      script.onload = resolve;
+      script.onerror = tryNext;
+      document.head.appendChild(script);
+    }
+    tryNext();
   });
-  // Init only once
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
   _emailjsReady = true;
 }
