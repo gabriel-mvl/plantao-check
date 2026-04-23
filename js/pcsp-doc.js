@@ -852,8 +852,8 @@ PCSP_DOCS.autorizacaoEntrada = {
 PCSP_DOCS.alteracaoPlantao = {
   id: 'alteracaoPlantao',
   icone: '🔄',
-  titulo: 'Autorização para Alteração de Plantão',
-  subtitulo: 'Solicitação de troca de escala',
+  titulo: 'Troca de Plantão',
+  subtitulo: 'Autorização para alteração de escala',
   customModal: true,
 };
 
@@ -979,7 +979,7 @@ PCDoc._gerarAlteracao = function() {
 
   // Each signature: line + NOME EM CAIXA ALTA sem negrito + Carreira em negrito
   const assinaturas = pessoasVistas.map(function(p) {
-    return '<div style="margin-top:4rem">' +
+    return '<div style="margin-top:6rem">' +
       '<div style="border-top:1px solid #000;width:40%;margin-bottom:.5rem"></div>' +
       '<div style="text-transform:uppercase;letter-spacing:.02em">' + p.nome + '</div>' +
       (p.carreira ? '<div><strong>' + p.carreira + '</strong></div>' : '') +
@@ -990,7 +990,7 @@ PCDoc._gerarAlteracao = function() {
   const delNome     = delegado || '_______________________________';
   const delCarreira = 'Delegado(a) de Polícia Titular — ' + u.nome;
   const delBlock =
-    '<div style="margin-top:4rem;text-align:center">' +
+    '<div style="margin-top:6rem;text-align:center">' +
     '<div style="border-top:1px solid #000;width:40%;margin:0 auto .5rem"></div>' +
     '<div style="text-transform:uppercase;letter-spacing:.02em">' + delNome + '</div>' +
     '<div><strong>' + delCarreira + '</strong></div>' +
