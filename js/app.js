@@ -518,19 +518,14 @@ function openTemplate(templateKey) {
   const condutorTextoMap = { pm:'policial militar', gcm:'guarda municipal', pc:'policial civil', parte:'parte interessada' };
   body.innerHTML = tmpl.fields.map(f => {
     if (f.type === 'radio') {
-      const onchg = `document.querySelectorAll('[data-show-if-field]').forEach(function(el){var cond=el.dataset.showIfField+':'+el.dataset.showIfValue;var inp=document.querySelector('input[name="tmpl_radio_'+el.dataset.showIfField+'"]:checked');el.style.display=(inp&&inp.value===el.dataset.showIfValue)?'':'none';});`;
       const btns = (f.options || []).map(o =>
         `<label class="tmpl-radio-label">
-           <input type="radio" name="tmpl_radio_${f.id}" value="${o.value}" onchange="${onchg}" />
+           <input type="radio" name="tmpl_radio_${f.id}" value="${o.value}" />
            <span>${o.label}</span>
          </label>`
       ).join('');
-      // showIf: hide this group if a condition on another field isn't met
-      const showIfAttr = f.showIf
-        ? `data-show-if-field="${f.showIf.field}" data-show-if-value="${f.showIf.value}" style="display:none"`
-        : '';
       return `
-        <div class="modal-form-group" ${showIfAttr}>
+        <div class="modal-form-group">
           <label>${f.label}</label>
           <div class="tmpl-radio-group" id="tmpl_radio_${f.id}">${btns}</div>
           <input type="hidden" id="tmpl_${f.id}" />
@@ -576,6 +571,7 @@ function openTemplate(templateKey) {
       <div class="generated-text-box" id="generatedText"></div>
       <div class="copy-bar">
         <button class="btn-copy" id="copyBtn" onclick="copyGenerated()">📋 Copiar texto</button>
+        ${currentTemplate === 'vidaPregressa' ? '<button class="btn-copy" id="whatsappBtn" onclick="shareWhatsApp()" style="background:var(--bg-card);border-color:#25D366;color:#25D366">💬 WhatsApp</button>' : ''}
       </div>
     </div>`;
 
@@ -633,6 +629,12 @@ function copyGenerated() {
     btn.className   = 'btn-copy copied';
     setTimeout(() => { btn.textContent = '📋 Copiar texto'; btn.className = 'btn-copy'; }, 2500);
   });
+}
+
+function shareWhatsApp() {
+  const gtEl = document.getElementById('generatedText');
+  const text = gtEl.innerText || gtEl.textContent;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
 // ── OBSERVATIONS ─────────────────────────────────────────────
