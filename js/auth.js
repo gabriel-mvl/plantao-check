@@ -24,7 +24,10 @@ const EMAILJS_CONFIGURED = (
 );
 
 // Sessão expira em 8 horas
-const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
+// Session: 15 days if installed as PWA, 8 hours otherwise
+const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+              window.navigator.standalone === true;
+const SESSION_DURATION_MS = isPWA ? 15 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000;
 
 // ── STORAGE ──────────────────────────────────────────────────
 const DB = {
