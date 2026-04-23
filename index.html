@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <script>var b=window.location.pathname.replace(/\/index\.html$|\/$/, "");window.location.replace(b+"/app.html");</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plantão Check — Acesso</title>
+  <meta name="theme-color" content="#0f1623" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PlantãoCheck" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-page">
+
+  <div class="auth-bg">
+    <div class="auth-grid"></div>
+    <div class="auth-glow"></div>
+  </div>
+
+  <div class="auth-container">
+
+    <div class="auth-brand">
+      <div class="brand-badge">
+        <span class="badge-icon">&#9878;</span>
+      </div>
+      <h1 class="brand-title">Plant&#227;o<span class="brand-accent">Check</span></h1>
+      <p class="brand-sub">Sistema de Checklist do Plant&#227;o Policial</p>
+    </div>
+
+    <!-- STEP 1: E-MAIL -->
+    <div class="auth-card" id="emailPanel">
+      <div class="card-header">
+        <h2>Acesso</h2>
+        <p>Informe seu e-mail institucional para receber o c&#243;digo de acesso</p>
+      </div>
+
+      <div class="form-group">
+        <label>E-mail institucional</label>
+        <div class="email-split-wrap">
+          <input type="text" id="loginUser" placeholder="nome.sobrenome"
+                 autocomplete="username" autofocus
+                 oninput="syncLoginEmail()" onkeydown="if(event.key==='Tab'){event.preventDefault();document.getElementById('loginSuffix').focus()}" />
+          <select id="loginSuffix" onchange="syncLoginEmail()">
+            <option value="@policiacivil.sp.gov.br">@policiacivil.sp.gov.br</option>
+            <option value="outro">Outro sufixo...</option>
+          </select>
+        </div>
+        <input type="text" id="loginSuffixCustom" class="hidden"
+               placeholder="@orgao.gov.br"
+               style="margin-top:.4rem"
+               oninput="syncLoginEmail()" />
+        <input type="hidden" id="loginEmail" />
+      </div>
+
+      <div id="emailMsg" class="auth-msg hidden"></div>
+
+      <button class="btn-primary" id="btnRequestCode" onclick="handleRequestCode()">
+        Receber c&#243;digo por e-mail
+      </button>
+
+      <p class="auth-hint">Apenas e-mails <strong>.gov.br</strong> s&#227;o aceitos</p>
+    </div>
+
+    <!-- STEP 2: VERIFICATION CODE -->
+    <div class="auth-card hidden" id="verifyPanel">
+      <div class="card-header">
+        <h2>Verificar c&#243;digo</h2>
+        <p>C&#243;digo enviado para <strong id="verifyEmailDisplay"></strong></p>
+      </div>
+
+      <div class="form-group code-group">
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d1" oninput="digitNext(this, 'd2')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d2" oninput="digitNext(this, 'd3')" onkeydown="digitBack(event, this, 'd1')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d3" oninput="digitNext(this, 'd4')" onkeydown="digitBack(event, this, 'd2')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d4" oninput="digitNext(this, 'd5')" onkeydown="digitBack(event, this, 'd3')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d5" oninput="digitNext(this, 'd6')" onkeydown="digitBack(event, this, 'd4')" />
+        <input type="text" inputmode="numeric" maxlength="1" class="code-digit" id="d6" oninput="digitNext(this, null)" onkeydown="digitBack(event, this, 'd5')" />
+      </div>
+
+      <div id="verifyMsg" class="auth-msg hidden"></div>
+
+      <button class="btn-primary" onclick="handleVerify()">Entrar</button>
+
+      <div class="resend-area">
+        <div class="resend-countdown hidden" id="resendCountdown">
+          <span class="resend-wait-icon">&#8987;</span>
+          Aguarde <strong id="resendTimer">1:30</strong> para solicitar um novo c&#243;digo
+        </div>
+        <button class="btn-resend hidden" id="btnResend" onclick="resendCode()">
+          &#8635; Reenviar c&#243;digo
+        </button>
+        <a href="#" class="auth-link" onclick="switchPanel('emailPanel')">Usar outro e-mail</a>
+      </div>
+    </div>
+
+    <!-- AVISO LEGAL -->
+    <div class="legal-notice">
+      <span class="legal-icon">&#9888;</span>
+      <span>
+        Este aplicativo &#233; uma ferramenta de apoio operacional desenvolvida de forma independente.
+        <strong>N&#227;o possui qualquer v&#237;nculo institucional</strong> com a Pol&#237;cia Civil do
+        Estado de S&#227;o Paulo ou com qualquer &#243;rg&#227;o p&#250;blico.
+        <strong>Nenhum dado inserido &#233; armazenado em servidores externos.</strong>
+        O uso &#233; de responsabilidade exclusiva do usu&#225;rio.
+      </span>
+    </div>
+
+    <div class="app-credit">Desenvolvido com &#10024; por Gabriel Vital</div>
+
+    <!-- PWA INSTALL BANNER — mobile only -->
+    <div class="install-banner hidden" id="installBanner">
+      <span class="install-icon">&#128241;</span>
+      <span>Instale o app para acesso r&#225;pido e sess&#227;o de 15 dias</span>
+      <button onclick="installPWA()">Instalar</button>
+      <button class="install-close" onclick="document.getElementById('installBanner').classList.add('hidden')">&#215;</button>
+    </div>
+
+
+
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    // ── SERVICE WORKER ─────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('[SW] Registrado:', reg.scope))
+          .catch(err => console.warn('[SW] Erro (não crítico):', err));
+      });
+    }
+
+    // ── PWA INSTALL PROMPT — mobile only ───────────────────
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Only show on mobile/tablet
+      if (window.innerWidth <= 768) {
+        const banner = document.getElementById('installBanner');
+        if (banner) banner.classList.remove('hidden');
+      }
+    });
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('installBanner')?.classList.add('hidden');
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      document.getElementById('installBanner')?.classList.add('hidden');
+    });
+
+
+  </script>
+</body>
+</html>
