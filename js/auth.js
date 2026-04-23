@@ -23,17 +23,7 @@ const EMAILJS_CONFIGURED = (
   EMAILJS_PUBLIC_KEY  !== 'SUA_PUBLIC_KEY'
 );
 
-// Sessão: 15 dias se PWA instalado, 8 horas se browser normal
-function _getSessionDuration() {
-  try {
-    const isPWA = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-                  window.navigator.standalone === true;
-    return isPWA ? 15 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000;
-  } catch(e) {
-    return 8 * 60 * 60 * 1000;
-  }
-}
-const SESSION_DURATION_MS = _getSessionDuration();
+const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
 
 // ── STORAGE ──────────────────────────────────────────────────
 const DB = {
@@ -139,26 +129,13 @@ let _emailjsReady = false;
 
 async function loadAndInitEmailJS() {
   if (_emailjsReady) return;
-  if (window.emailjs) {
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-    _emailjsReady = true;
-    return;
-  }
-  const CDNS = [
-    'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js',
-    'https://unpkg.com/@emailjs/browser@4/dist/email.min.js',
-  ];
   await new Promise((resolve, reject) => {
-    let tried = 0;
-    function tryNext() {
-      if (tried >= CDNS.length) { reject(new Error('Falha ao carregar SDK EmailJS')); return; }
-      const script = document.createElement('script');
-      script.src = CDNS[tried++];
-      script.onload = resolve;
-      script.onerror = tryNext;
-      document.head.appendChild(script);
-    }
-    tryNext();
+    if (window.emailjs) { resolve(); return; }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    script.onload = resolve;
+    script.onerror = () => reject(new Error('Falha ao carregar SDK EmailJS'));
+    document.head.appendChild(script);
   });
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
   _emailjsReady = true;
