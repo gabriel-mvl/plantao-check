@@ -55,14 +55,23 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Supabase, EmailJS e CDNs de scripts: não interceptar, deixar o browser lidar
+  // Requisições externas: não interceptar, deixar o browser lidar diretamente
+  if (!url.hostname.includes(self.location.hostname) &&
+      !url.pathname.endsWith('.html') &&
+      !url.pathname.endsWith('.css') &&
+      !url.pathname.endsWith('.js') &&
+      !url.pathname.match(/\.png|\.jpg|\.svg|\.ico/)) {
+    return;
+  }
+  // Domínios externos específicos: sempre passar direto
   if (
     url.hostname.includes('supabase.co') ||
     url.hostname.includes('emailjs.com') ||
-    url.hostname.includes('api.emailjs.com') ||
-    url.hostname.includes('cdn.jsdelivr.net')
+    url.hostname.includes('unpkg.com') ||
+    url.hostname.includes('cdn.jsdelivr.net') ||
+    url.hostname.includes('viacep.com.br') ||
+    url.hostname.includes('wikimedia.org')
   ) {
-    // Passa direto sem interferência do SW
     return;
   }
 
