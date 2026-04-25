@@ -3,8 +3,8 @@
    Cache estratégico para funcionamento offline
    ============================================================ */
 
-const CACHE_NAME   = 'plantaocheck-v9';
-const CACHE_STATIC = 'plantaocheck-static-v9';
+const CACHE_NAME   = 'plantaocheck-v10';
+const CACHE_STATIC = 'plantaocheck-static-v10';
 
 // Arquivos essenciais para funcionamento offline
 // Derive base path from sw.js location (works on GitHub Pages subdirs)
