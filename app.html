@@ -30,6 +30,8 @@
         <li><a href="#" class="nav-link" onclick="openRelatorio()"><span class="nav-icon">&#128196;</span> Relat&#243;rio do Plant&#227;o</a></li>
         <li><a href="#" class="nav-link" onclick="openChecklistModal(); if(window.innerWidth<=768) toggleSidebar();"><span class="nav-icon">&#9989;</span> Checklists de Ocorr&#234;ncia</a></li>
         <li><a href="#" class="nav-link" onclick="openPlantaoDiario(); if(window.innerWidth<=768) toggleSidebar();"><span class="nav-icon">&#9200;</span> Rotina do Plant&#227;o</a></li>
+        <li><a href="#" class="nav-link" onclick="openRef('orientacoes')"><span class="nav-icon">&#128204;</span> Orienta&#231;&#245;es Gerais</a></li>
+        <li><a href="#" class="nav-link" onclick="openRef('requisicoes')"><span class="nav-icon">&#128203;</span> Tabela IC / IML</a></li>
       </ul>
 
       <p class="nav-label" style="margin-top:1.1rem">Ferramentas</p>
@@ -127,6 +129,20 @@
               <div class="home-card-body">
                 <div class="home-card-title">Rotina do Plant&#227;o</div>
                 <div class="home-card-sub">Procedimentos obrigat&#243;rios do turno</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openRef('orientacoes')">
+              <div class="home-card-icon">&#128204;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Orienta&#231;&#245;es Gerais</div>
+                <div class="home-card-sub">Procedimentos e regras do plant&#227;o</div>
+              </div>
+            </div>
+            <div class="home-card" onclick="openRef('requisicoes')">
+              <div class="home-card-icon">&#128203;</div>
+              <div class="home-card-body">
+                <div class="home-card-title">Tabela IC / IML</div>
+                <div class="home-card-sub">Natureza e objetivo das requisi&#231;&#245;es periciais</div>
               </div>
             </div>
           </div>
