@@ -615,9 +615,7 @@ const PCDoc = (() => {
     },
 
     gerar: function() {
-      if (_currentDoc && _currentDoc.id === 'fonar') {
-        PCDoc._gerarFonar();
-      } else if (_currentDoc && _currentDoc.customModal) {
+      if (_currentDoc && _currentDoc.customModal) {
         PCDoc._gerarAlteracao();
       } else {
         _gerar();
