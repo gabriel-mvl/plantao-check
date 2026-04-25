@@ -125,13 +125,9 @@
   </div>
 
   <script>
-    // Limpa sessão corrompida antes de qualquer coisa
-    try {
-      var _s = JSON.parse(localStorage.getItem('pc_session') || 'null');
-      if (_s && (!_s.expiresAt || !_s.email || Date.now() > _s.expiresAt)) {
-        localStorage.removeItem('pc_session');
-      }
-    } catch(e) { localStorage.removeItem('pc_session'); }
+    // Limpa toda sessão ao chegar na tela de login
+    localStorage.removeItem('pc_session');
+    localStorage.removeItem('pc_pending');
   </script>
   <script src="js/auth.js"></script>
   <script>
