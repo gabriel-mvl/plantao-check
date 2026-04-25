@@ -4,8 +4,7 @@
    Envio via Brevo (API REST — sem restrição de CORS)
    ============================================================ */
 
-const BREVO_API_KEY = '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';
-const BREVO_SENDER  = { name: 'Plantão Check', email: 'plantaocheck@gmail.com' };
+const WORKER_URL = 'https://plantaocheck-email.plantaocheck.workers.dev';
 
 const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
 
@@ -108,58 +107,20 @@ function clearCodeInputs() {
   document.getElementById('d1')?.focus();
 }
 
-// ── EMAIL SEND (Brevo) ───────────────────────────────────────
+// ── EMAIL SEND (via Cloudflare Worker) ────────────────────────────
 async function sendCodeEmail(toEmail, code) {
-  const emailHtml =
-    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"></head>' +
-    '<body style="margin:0;padding:0;background:#f4f6fb;font-family:Arial,sans-serif">' +
-    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:2rem 1rem">' +
-    '<tr><td align="center">' +
-    '<table width="100%" style="max-width:480px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)">' +
-
-    '<tr><td style="background:#0f1623;padding:1.5rem 2rem;text-align:center">' +
-    '<div style="font-size:1.5rem;margin-bottom:.3rem">&#9878;</div>' +
-    '<div style="font-size:1.4rem;font-weight:800;color:#ffffff;letter-spacing:-.03em">Plant&#227;o<span style="color:#3b7dff">Check</span></div>' +
-    '<div style="color:#8899bb;font-size:.75rem;margin-top:.2rem">Sistema de Checklist do Plant&#227;o Policial</div>' +
-    '</td></tr>' +
-
-    '<tr><td style="padding:2rem 2rem 1.5rem">' +
-    '<p style="color:#333;font-size:.95rem;margin:0 0 1.25rem">Seu c&#243;digo de acesso ao <strong>Plant&#227;oCheck</strong> &#233;:</p>' +
-    '<div style="background:#f0f4ff;border:2px solid #3b7dff;border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1.5rem">' +
-    '<span style="font-size:2.4rem;font-weight:800;letter-spacing:.6rem;color:#1a3a6e">' + code + '</span>' +
-    '</div>' +
-    '<p style="color:#555;font-size:.83rem;margin:0 0 .4rem">&#9200; V&#225;lido por <strong>15 minutos</strong>.</p>' +
-    '<p style="color:#555;font-size:.83rem;margin:0">&#128274; N&#227;o compartilhe este c&#243;digo com ningu&#233;m.</p>' +
-    '</td></tr>' +
-
-    '<tr><td style="background:#f8f9fb;padding:1rem 2rem;border-top:1px solid #e8edf5;text-align:center">' +
-    '<p style="color:#aaa;font-size:.72rem;margin:0">Este e-mail foi enviado automaticamente. N&#227;o responda a esta mensagem.</p>' +
-    '<p style="color:#aaa;font-size:.72rem;margin:.3rem 0 0">Plant&#227;oCheck &#8212; Pol&#237;cia Civil do Estado de S&#227;o Paulo</p>' +
-    '</td></tr>' +
-
-    '</table></td></tr></table></body></html>';
-
   try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: {
-        'api-key': BREVO_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: BREVO_SENDER,
-        to: [{ email: toEmail }],
-        subject: '[Plant\u00e3o Check] C\u00f3digo de acesso: ' + code,
-        htmlContent: emailHtml,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: toEmail, code }),
     });
-    if (res.ok) return { ok: true };
-    const err = await res.json().catch(() => ({}));
-    console.error('[Brevo] Erro:', err);
-    return { ok: false, error: err.message || res.status };
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.ok) return { ok: true };
+    console.error('[Worker] Erro:', data);
+    return { ok: false, error: data.error || res.status };
   } catch (err) {
-    console.error('[Brevo] Erro de rede:', err);
+    console.error('[Worker] Erro de rede:', err);
     return { ok: false, error: err.message };
   }
 }
