@@ -1305,7 +1305,7 @@ PCSP_DOCS.fonar = {
       // Rodapé institucional
       '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:8px">' +
         '<div style="margin-top:12px;border:1px solid #000;padding:7px 10px;' + J + S + 'font-size:10pt">' +
-          'O Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco (FONAR) \u00e9 um instrumento destinado a identificar fatores de risco de a mulher vir a sofrer qualquer forma de viol\u00eancia no \u00e2mbito das rela\u00e7\u00f5es dom\u00e9sticas e familiares (art. 7\u00ba da Lei Maria da Penha), bem como sua gravidade. Foi institu\u00eddo pela Resolu\u00e7\u00e3o Conjunta CNJ/CNMP n\u00ba 5/2020, que definiu sua finalidade, forma de aplica\u00e7\u00e3o e destina\u00e7\u00e3o, como parte da Pol\u00edtica Judici\u00e1ria Nacional de Enfrentamento \u00e0 Viol\u00eancia contra as Mulheres e das pol\u00edticas p\u00fablicas implementadas pelo CNMP.' +
+          'O Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco foi institu\u00eddo pela Resolu\u00e7\u00e3o Conjunta CNJ/CNMP n\u00ba 5/2020 e \u00e9 um instrumento destinado a identificar fatores de risco de a mulher vir a sofrer qualquer forma de viol\u00eancia no \u00e2mbito das rela\u00e7\u00f5es dom\u00e9sticas e familiares.' +
         '</div>' +
       '</div>';
 
