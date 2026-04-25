@@ -183,25 +183,6 @@ Cada modelo é definido em `TEMPLATES.nomeTemplate` com:
 - Todo campo de radio usa `value` com acentuação correta para saída no texto gerado
 - Campos opcionais marcados com `required: false`
 
----
-
-## Pendências e Próximos Passos
-
-- [ ] Remetente de e-mail com domínio próprio (`noreply@brasilemregra.com.br`) para melhor entregabilidade
-- [ ] Sessão de 15 dias para usuários com PWA instalado
-- [ ] Auto de Exibição e Apreensão (documento PCDoc)
-- [ ] Requisição de Corpo de Delito (documento PCDoc)
-- [ ] Declaração de Ausência de Lesões (documento PCDoc)
-- [ ] Termo de Entrega de Menor (documento PCDoc)
-- [ ] Autorização de Busca Pessoal (documento PCDoc)
-- [ ] Autorização de Busca em Veículo (documento PCDoc)
-- [ ] Histórico de desaparecimento — melhorias no template
-- [ ] Busca global no app
-- [ ] Histórico de documentos gerados (localStorage)
-- [ ] Restrição de acesso apenas a `@policiacivil.sp.gov.br` no Worker
-
----
-
 ## Desenvolvido por
 
 Gabriel Vital — [brasilemregra.com.br](https://brasilemregra.com.br)
