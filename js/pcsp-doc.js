@@ -1044,7 +1044,7 @@ PCSP_DOCS.fonar = {
     var J = S + 'text-align:justify;';
 
     function linhaFull(label, key) {
-      return '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;margin-bottom:5px;width:100%">' +
+      return '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;margin-bottom:3px;width:100%">' +
         '<span style="white-space:nowrap"><strong>' + label + ':</strong></span>' +
         (v[key]
           ? '<span>&nbsp;' + v[key] + '</span>'
@@ -1052,7 +1052,7 @@ PCSP_DOCS.fonar = {
         '</div>';
     }
     function linhaDouble(l1, k1, l2, k2) {
-      return '<div style="display:flex;gap:1rem;margin-bottom:5px;width:100%">' +
+      return '<div style="display:flex;gap:1rem;margin-bottom:3px;width:100%">' +
         '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;flex:3">' +
           '<span style="white-space:nowrap"><strong>' + l1 + ':</strong></span>' +
           (v[k1]
@@ -1070,20 +1070,20 @@ PCSP_DOCS.fonar = {
 
     // Seção com caixa de texto e bordas
     function secao(titulo) {
-      return '<div style="border:1.5px solid #000;padding:5px 10px;margin:16px 0 8px;font-weight:bold;' + S + 'text-align:center;font-size:11pt">' +
+      return '<div style="border:1.5px solid #000;padding:3px 8px;margin:10px 0 4px;font-weight:bold;' + S + 'text-align:center;font-size:11pt">' +
         titulo + '</div>';
     }
 
     function cb(label) {
-      return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:1px;' + S + '">' +
+      return '<div style="display:flex;align-items:center;gap:4px;margin-bottom:0;' + S + '">' +
         '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;flex-shrink:0"></span>' +
         '<span>' + label + '</span>' +
         '</div>';
     }
 
     function pergunta(num, texto, opcoes) {
-      return '<div style="margin-bottom:10px">' +
-        '<div style="' + J + S + 'margin-bottom:5px"><strong>' + num + '.</strong> ' + texto + '</div>' +
+      return '<div style="margin-bottom:6px">' +
+        '<div style="' + J + S + 'margin-bottom:2px"><strong>' + num + '.</strong> ' + texto + '</div>' +
         '<div style="padding-left:10px">' + opcoes + '</div>' +
         '</div>';
     }
@@ -1101,7 +1101,7 @@ PCSP_DOCS.fonar = {
       linhaFull('Escolaridade', 'escAgressor') +
       linhaFull('Nacionalidade', 'nacAgressor') +
       linhaFull('V\u00ednculo entre a v\u00edtima e o(a) agressor(a)', 'vinculo') +
-      '<div style="' + J + S + 'margin-bottom:14px">Data: ' + dataImpressao + '</div>' +
+      '<div style="' + J + S + 'margin-bottom:8px">Data: ' + dataImpressao + '</div>' +
 
       // BLOCO I
       secao('Bloco I \u2014 Sobre o hist\u00f3rico de viol\u00eancia') +
@@ -1286,7 +1286,7 @@ PCSP_DOCS.fonar = {
         cb('N\u00e3o')) +
 
       // Declaração
-      '<div style="margin-top:16px;' + J + S + '">' +
+      '<div style="margin-top:10px;' + J + S + '">' +
         'Declaro, para os fins de direito, que as informa\u00e7\u00f5es supra s\u00e3o ver\u00eddicas e foram prestadas por mim.' +
       '</div>' +
       '<div style="' + S + 'display:flex;align-items:baseline;gap:4px;margin:10px 0 16px">' +
@@ -1303,8 +1303,8 @@ PCSP_DOCS.fonar = {
       cb('Terceiro comunicante respondeu a este formul\u00e1rio') +
 
       // Rodapé institucional
-      '<div style="page-break-inside:avoid;break-inside:avoid">' +
-        '<div style="margin-top:24px;border:1px solid #000;padding:10px 12px;' + J + S + 'font-size:10pt">' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:8px">' +
+        '<div style="margin-top:12px;border:1px solid #000;padding:7px 10px;' + J + S + 'font-size:10pt">' +
           'O Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco foi institu\u00eddo pela Resolu\u00e7\u00e3o Conjunta CNJ/CNMP n\u00ba 5/2020 e \u00e9 um instrumento destinado a identificar fatores de risco de a mulher vir a sofrer qualquer forma de viol\u00eancia no \u00e2mbito das rela\u00e7\u00f5es dom\u00e9sticas e familiares.' +
         '</div>' +
       '</div>';
