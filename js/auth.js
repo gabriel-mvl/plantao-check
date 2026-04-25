@@ -1,27 +1,11 @@
 /* ============================================================
-   PLANTÃO CHECK — Auth Module v2
+   PLANTÃO CHECK — Auth Module v3
    Acesso por e-mail + código de verificação (sem cadastro)
-   ============================================================
-
-   CONFIGURAÇÃO (fazer uma única vez):
-   1. Acesse https://www.emailjs.com
-   2. Crie ou reutilize seu Email Service — anote o Service ID
-   3. Edite seu Email Template — variáveis: {{to_email}}, {{code}}
-      Sugestão de assunto: [Plantão Check] Código: {{code}}
-      Corpo: Seu código de acesso é {{code}}. Expira em 15 minutos.
-   4. Substitua os três valores abaixo com suas credenciais
-
+   Envio via Brevo (API REST — sem restrição de CORS)
    ============================================================ */
 
-const EMAILJS_SERVICE_ID  = 'service_f8ahxdk';
-const EMAILJS_TEMPLATE_ID = 'template_xqp8nw7';
-const EMAILJS_PUBLIC_KEY  = '4ENO39pWC7a7b_oOB';
-
-const EMAILJS_CONFIGURED = (
-  EMAILJS_SERVICE_ID  !== 'SEU_SERVICE_ID' &&
-  EMAILJS_TEMPLATE_ID !== 'SEU_TEMPLATE_ID' &&
-  EMAILJS_PUBLIC_KEY  !== 'SUA_PUBLIC_KEY'
-);
+const BREVO_API_KEY = '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';
+const BREVO_SENDER  = { name: 'Plantão Check', email: 'plantaocheck@gmail.com' };
 
 const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
 
@@ -52,10 +36,10 @@ function validateEmail(email) {
 }
 
 function syncLoginEmail() {
-  const user    = (document.getElementById('loginUser')?.value || '').trim();
-  const sel     = document.getElementById('loginSuffix');
-  const custom  = document.getElementById('loginSuffixCustom');
-  const hidden  = document.getElementById('loginEmail');
+  const user   = (document.getElementById('loginUser')?.value || '').trim();
+  const sel    = document.getElementById('loginSuffix');
+  const custom = document.getElementById('loginSuffixCustom');
+  const hidden = document.getElementById('loginEmail');
 
   if (sel?.value === 'outro') {
     custom?.classList.remove('hidden');
@@ -89,7 +73,7 @@ function togglePw(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
   input.type = input.type === 'password' ? 'text' : 'password';
-  btn.textContent = input.type === 'password' ? '👁' : '🙈';
+  btn.textContent = input.type === 'password' ? '\u{1F441}' : '\u{1F648}';
 }
 
 function switchPanel(panelId) {
@@ -124,38 +108,59 @@ function clearCodeInputs() {
   document.getElementById('d1')?.focus();
 }
 
-// ── EMAIL SEND ───────────────────────────────────────────────
-let _emailjsReady = false;
-
-async function loadAndInitEmailJS() {
-  if (_emailjsReady) return;
-  await new Promise((resolve, reject) => {
-    if (window.emailjs) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-    script.onload = resolve;
-    script.onerror = () => reject(new Error('Falha ao carregar SDK EmailJS'));
-    document.head.appendChild(script);
-  });
-  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-  _emailjsReady = true;
-}
-
+// ── EMAIL SEND (Brevo) ───────────────────────────────────────
 async function sendCodeEmail(toEmail, code) {
-  if (!EMAILJS_CONFIGURED) {
-    return { ok: false, error: 'EmailJS não configurado' };
-  }
+  const emailHtml =
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"></head>' +
+    '<body style="margin:0;padding:0;background:#f4f6fb;font-family:Arial,sans-serif">' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:2rem 1rem">' +
+    '<tr><td align="center">' +
+    '<table width="100%" style="max-width:480px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)">' +
+
+    '<tr><td style="background:#0f1623;padding:1.5rem 2rem;text-align:center">' +
+    '<div style="font-size:1.5rem;margin-bottom:.3rem">&#9878;</div>' +
+    '<div style="font-size:1.4rem;font-weight:800;color:#ffffff;letter-spacing:-.03em">Plant&#227;o<span style="color:#3b7dff">Check</span></div>' +
+    '<div style="color:#8899bb;font-size:.75rem;margin-top:.2rem">Sistema de Checklist do Plant&#227;o Policial</div>' +
+    '</td></tr>' +
+
+    '<tr><td style="padding:2rem 2rem 1.5rem">' +
+    '<p style="color:#333;font-size:.95rem;margin:0 0 1.25rem">Seu c&#243;digo de acesso ao <strong>Plant&#227;oCheck</strong> &#233;:</p>' +
+    '<div style="background:#f0f4ff;border:2px solid #3b7dff;border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1.5rem">' +
+    '<span style="font-size:2.4rem;font-weight:800;letter-spacing:.6rem;color:#1a3a6e">' + code + '</span>' +
+    '</div>' +
+    '<p style="color:#555;font-size:.83rem;margin:0 0 .4rem">&#9200; V&#225;lido por <strong>15 minutos</strong>.</p>' +
+    '<p style="color:#555;font-size:.83rem;margin:0">&#128274; N&#227;o compartilhe este c&#243;digo com ningu&#233;m.</p>' +
+    '</td></tr>' +
+
+    '<tr><td style="background:#f8f9fb;padding:1rem 2rem;border-top:1px solid #e8edf5;text-align:center">' +
+    '<p style="color:#aaa;font-size:.72rem;margin:0">Este e-mail foi enviado automaticamente. N&#227;o responda a esta mensagem.</p>' +
+    '<p style="color:#aaa;font-size:.72rem;margin:.3rem 0 0">Plant&#227;oCheck &#8212; Pol&#237;cia Civil do Estado de S&#227;o Paulo</p>' +
+    '</td></tr>' +
+
+    '</table></td></tr></table></body></html>';
+
   try {
-    await loadAndInitEmailJS();
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      { to_email: toEmail, code }
-    );
-    return response.status === 200 ? { ok: true } : { ok: false, error: response.text };
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': BREVO_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: BREVO_SENDER,
+        to: [{ email: toEmail }],
+        subject: '[Plant\u00e3o Check] C\u00f3digo de acesso: ' + code,
+        htmlContent: emailHtml,
+      }),
+    });
+    if (res.ok) return { ok: true };
+    const err = await res.json().catch(() => ({}));
+    console.error('[Brevo] Erro:', err);
+    return { ok: false, error: err.message || res.status };
   } catch (err) {
-    console.error('[EmailJS] Erro:', err);
-    return { ok: false, error: String(err?.text || err?.message || err) };
+    console.error('[Brevo] Erro de rede:', err);
+    return { ok: false, error: err.message };
   }
 }
 
@@ -165,7 +170,7 @@ async function handleRequestCode() {
   const email = (document.getElementById('loginEmail')?.value || '').trim().toLowerCase();
 
   if (!validateEmail(email)) {
-    return showMsg('emailMsg', 'Informe um e-mail institucional válido (.gov.br).');
+    return showMsg('emailMsg', 'Informe um e-mail institucional v\u00e1lido (.gov.br).');
   }
 
   const btn = document.getElementById('btnRequestCode');
@@ -181,18 +186,18 @@ async function handleRequestCode() {
 
   const result = await sendCodeEmail(email, code);
 
-  btn.textContent = 'Receber código por e-mail';
+  btn.textContent = 'Receber c\u00f3digo por e-mail';
   btn.disabled = false;
 
   if (!result.ok) {
     const detail = typeof result.error === 'string' ? ` (${result.error})` : '';
     console.error('[Auth] Falha no envio:', result.error);
-    return showMsg('emailMsg', `Não foi possível enviar o código. Tente novamente ou contate o administrador.${detail}`);
+    return showMsg('emailMsg', `N\u00e3o foi poss\u00edvel enviar o c\u00f3digo. Tente novamente ou contate o administrador.${detail}`);
   }
 
   document.getElementById('verifyEmailDisplay').textContent = email;
   switchPanel('verifyPanel');
-  showMsg('verifyMsg', `Código enviado para ${email}. Verifique sua caixa de entrada.`, 'info');
+  showMsg('verifyMsg', `C\u00f3digo enviado para ${email}. Verifique sua caixa de entrada.`, 'info');
   document.getElementById('d1')?.focus();
   startResendCountdown();
 }
@@ -200,25 +205,24 @@ async function handleRequestCode() {
 // ── VERIFY CODE (step 2) ──────────────────────────────────────
 function handleVerify() {
   hideMsg('verifyMsg');
-  const code  = getCodeFromInputs();
-  if (code.length < 6) return showMsg('verifyMsg', 'Digite os 6 dígitos do código.');
+  const code = getCodeFromInputs();
+  if (code.length < 6) return showMsg('verifyMsg', 'Digite os 6 d\u00edgitos do c\u00f3digo.');
 
   const email   = document.getElementById('verifyEmailDisplay')?.textContent || '';
   const pending = DB.getPending();
   const entry   = pending[email];
 
-  if (!entry) return showMsg('verifyMsg', 'Código não encontrado. Solicite um novo.');
+  if (!entry) return showMsg('verifyMsg', 'C\u00f3digo n\u00e3o encontrado. Solicite um novo.');
   if (Date.now() > entry.expires) {
     delete pending[email];
     DB.savePending(pending);
-    return showMsg('verifyMsg', 'Código expirado. Solicite um novo.');
+    return showMsg('verifyMsg', 'C\u00f3digo expirado. Solicite um novo.');
   }
-  if (entry.code !== code) return showMsg('verifyMsg', 'Código incorreto. Tente novamente.');
+  if (entry.code !== code) return showMsg('verifyMsg', 'C\u00f3digo incorreto. Tente novamente.');
 
   delete pending[email];
   DB.savePending(pending);
 
-  // Derive display name from email (part before @)
   const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   DB.setSession({ email, name });
   window.location.href = 'app.html';
@@ -244,17 +248,17 @@ async function resendCode() {
   const result = await sendCodeEmail(email, code);
 
   if (!result.ok) {
-    if (btn) { btn.disabled = false; btn.textContent = '↺ Reenviar código'; }
+    if (btn) { btn.disabled = false; btn.textContent = '\u21ba Reenviar c\u00f3digo'; }
     return showMsg('verifyMsg', 'Erro ao reenviar. Tente novamente.');
   }
 
-  showMsg('verifyMsg', 'Novo código enviado! Verifique sua caixa de entrada.', 'success');
+  showMsg('verifyMsg', 'Novo c\u00f3digo enviado! Verifique sua caixa de entrada.', 'success');
   startResendCountdown();
 }
 
 // ── COUNTDOWN ─────────────────────────────────────────────────
 let _countdownTimer = null;
-const RESEND_WAIT_S  = 90; // 1 minuto e 30 segundos
+const RESEND_WAIT_S  = 90;
 
 function startResendCountdown() {
   clearInterval(_countdownTimer);
@@ -265,11 +269,10 @@ function startResendCountdown() {
 
   if (!countdown || !timerEl || !btn) return;
 
-  // Show countdown, hide button
   countdown.classList.remove('hidden');
   btn.classList.add('hidden');
   btn.disabled = false;
-  btn.textContent = '↺ Reenviar código';
+  btn.textContent = '\u21ba Reenviar c\u00f3digo';
 
   let remaining = RESEND_WAIT_S;
 
