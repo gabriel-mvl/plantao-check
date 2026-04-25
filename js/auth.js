@@ -24,6 +24,17 @@ const DB = {
 
 // ── GUARD ────────────────────────────────────────────────────
 (function () {
+  // Limpa qualquer sessão corrompida
+  try {
+    const raw = localStorage.getItem('pc_session');
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (!s || !s.expiresAt || !s.email) localStorage.removeItem('pc_session');
+    }
+  } catch(e) {
+    localStorage.removeItem('pc_session');
+  }
+  // Só redireciona para app se sessão for válida
   if (DB.getSession() && window.location.pathname.includes('index')) {
     window.location.href = 'app.html';
   }
