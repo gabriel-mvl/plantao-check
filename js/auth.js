@@ -22,7 +22,20 @@ const DB = {
   clearSession: () => localStorage.removeItem('pc_session'),
 };
 
-// ── GUARD (redirect handled by index.html inline script) ─────
+// ── GUARD ────────────────────────────────────────────────────
+(function () {
+  try {
+    var s = JSON.parse(localStorage.getItem('pc_session') || 'null');
+    if (s && s.email && s.expiresAt && Date.now() < s.expiresAt) {
+      window.location.replace('app.html');
+    } else {
+      localStorage.removeItem('pc_session');
+      localStorage.removeItem('pc_pending');
+    }
+  } catch(e) {
+    localStorage.removeItem('pc_session');
+  }
+})();
 
 // ── UTILITIES ────────────────────────────────────────────────
 function validateEmail(email) {
