@@ -1022,39 +1022,32 @@ PCDoc._gerarAlteracao = function() {
 // ══════════════════════════════════════════════════════════════
 PCSP_DOCS.fonar = {
   id: 'fonar',
-  icone: '\u26a0\ufe0f',
+  icone: '\U0001F6BA',
   titulo: 'FONAR \u2014 Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco',
   subtitulo: 'Viol\u00eancia Dom\u00e9stica e Familiar contra a Mulher',
   campos: [
-    { id: 'boletim',        label: 'N\u00famero do BO',                              placeholder: 'Ex: 000001/2026',   required: false },
-    { id: 'nomeVitima',     label: 'Nome da v\u00edtima',                             placeholder: 'Nome completo',      required: false },
-    { id: 'idadeVitima',    label: 'Idade da v\u00edtima',                            placeholder: '',                   required: false },
-    { id: 'escVitima',      label: 'Escolaridade da v\u00edtima',                     placeholder: '',                   required: false },
-    { id: 'nacVitima',      label: 'Nacionalidade da v\u00edtima',                    placeholder: '',                   required: false },
-    { id: 'nomeAgressor',   label: 'Nome do(a) agressor(a)',                          placeholder: 'Nome completo',      required: false },
-    { id: 'idadeAgressor',  label: 'Idade do(a) agressor(a)',                         placeholder: '',                   required: false },
-    { id: 'escAgressor',    label: 'Escolaridade do(a) agressor(a)',                  placeholder: '',                   required: false },
-    { id: 'nacAgressor',    label: 'Nacionalidade do(a) agressor(a)',                 placeholder: '',                   required: false },
-    { id: 'vinculo',        label: 'V\u00ednculo entre v\u00edtima e agressor(a)',    placeholder: 'Ex: c\u00f4njuge',   required: false },
+    { id: 'boletim',       label: 'N\u00famero do BO',                              placeholder: 'Ex: 000001/2026',   required: false },
+    { id: 'nomeVitima',    label: 'Nome da v\u00edtima',                             placeholder: 'Nome completo',      required: false },
+    { id: 'idadeVitima',   label: 'Idade da v\u00edtima',                            placeholder: '',                   required: false },
+    { id: 'escVitima',     label: 'Escolaridade da v\u00edtima',                     placeholder: '',                   required: false },
+    { id: 'nacVitima',     label: 'Nacionalidade da v\u00edtima',                    placeholder: '',                   required: false },
+    { id: 'nomeAgressor',  label: 'Nome do(a) agressor(a)',                           placeholder: 'Nome completo',      required: false },
+    { id: 'idadeAgressor', label: 'Idade do(a) agressor(a)',                          placeholder: '',                   required: false },
+    { id: 'escAgressor',   label: 'Escolaridade do(a) agressor(a)',                   placeholder: '',                   required: false },
+    { id: 'nacAgressor',   label: 'Nacionalidade do(a) agressor(a)',                  placeholder: '',                   required: false },
+    { id: 'vinculo',       label: 'V\u00ednculo entre v\u00edtima e agressor(a)',     placeholder: 'Ex: c\u00f4njuge',   required: false },
   ],
   gerar: function(campos, u) {
     var v = campos;
     var S = 'font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;';
     var J = S + 'text-align:justify;';
 
-    function blank(w) {
-      return '<span style="display:inline-block;border-bottom:1px solid #000;min-width:' + (w||'120px') + '">&nbsp;</span>';
-    }
-    function val(k, w) {
-      return v[k] ? ('<strong>' + v[k] + '</strong>') : blank(w || '120px');
-    }
     function linhaFull(label, key) {
       return '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;margin-bottom:5px;width:100%">' +
         '<span style="white-space:nowrap"><strong>' + label + ':</strong></span>' +
         (v[key]
           ? '<span>&nbsp;' + v[key] + '</span><div style="border-bottom:1px solid #000;flex:1">&nbsp;</div>'
-          : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>'
-        ) +
+          : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
         '</div>';
     }
     function linhaDouble(l1, k1, l2, k2) {
@@ -1063,189 +1056,233 @@ PCSP_DOCS.fonar = {
           '<span style="white-space:nowrap"><strong>' + l1 + ':</strong></span>' +
           (v[k1]
             ? '<span>&nbsp;' + v[k1] + '</span><div style="border-bottom:1px solid #000;flex:1">&nbsp;</div>'
-            : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>'
-          ) +
+            : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
         '</div>' +
         '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;flex:1">' +
           '<span style="white-space:nowrap"><strong>' + l2 + ':</strong></span>' +
           (v[k2]
             ? '<span>&nbsp;' + v[k2] + '</span><div style="border-bottom:1px solid #000;flex:1">&nbsp;</div>'
-            : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>'
-          ) +
+            : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
         '</div>' +
       '</div>';
     }
-    function bloco(titulo) {
-      return '<div style="background:#e8e8e8;font-weight:bold;padding:4px 8px;margin:14px 0 6px;font-size:11pt;' + S + '">' + titulo + '</div>';
+
+    // Seção com caixa de texto e bordas
+    function secao(titulo) {
+      return '<div style="border:1.5px solid #000;padding:5px 10px;margin:16px 0 8px;font-weight:bold;' + S + 'text-align:center;font-size:11pt">' +
+        titulo + '</div>';
     }
+
     function cb(label) {
-      return '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:10px;white-space:nowrap">' +
-        '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;flex-shrink:0;vertical-align:middle"></span>' +
-        '<span style="' + S + '">' + label + '</span></span>';
+      return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:1px;' + S + '">' +
+        '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;flex-shrink:0"></span>' +
+        '<span>' + label + '</span>' +
+        '</div>';
     }
+
     function pergunta(num, texto, opcoes) {
       return '<div style="margin-bottom:10px">' +
-        '<div style="' + J + S + 'margin-bottom:4px"><strong>' + num + '.</strong> ' + texto + '</div>' +
-        '<div style="padding-left:8px;' + S + 'line-height:2">' + opcoes + '</div>' +
+        '<div style="' + J + S + 'margin-bottom:5px"><strong>' + num + '.</strong> ' + texto + '</div>' +
+        '<div style="padding-left:10px">' + opcoes + '</div>' +
         '</div>';
     }
 
     var dataImpressao = new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
 
     var corpo =
-      // Título do bloco de identificação
-      '<div style="font-weight:bold;' + S + 'margin-bottom:8px">Identifica\u00e7\u00e3o das Partes</div>' +
-
-      // BO
+      // Identificação — caixa de borda
+      secao('Identifica\u00e7\u00e3o das Partes') +
       linhaFull('N\u00famero do BO', 'boletim') +
-
-      // Vítima
       linhaDouble('Nome da v\u00edtima', 'nomeVitima', 'Idade', 'idadeVitima') +
       linhaFull('Escolaridade', 'escVitima') +
       linhaFull('Nacionalidade', 'nacVitima') +
-
-      // Agressor
       linhaDouble('Nome do(a) agressor(a)', 'nomeAgressor', 'Idade', 'idadeAgressor') +
       linhaFull('Escolaridade', 'escAgressor') +
       linhaFull('Nacionalidade', 'nacAgressor') +
-
-      // Vínculo e data
       linhaFull('V\u00ednculo entre a v\u00edtima e o(a) agressor(a)', 'vinculo') +
       '<div style="' + J + S + 'margin-bottom:14px">Data: ' + dataImpressao + '</div>' +
 
       // BLOCO I
-      bloco('Bloco I \u2014 Sobre o hist\u00f3rico de viol\u00eancia') +
+      secao('Bloco I \u2014 Sobre o hist\u00f3rico de viol\u00eancia') +
 
       pergunta(1,
         'O(A) agressor(a) j\u00e1 amea\u00e7ou voc\u00ea ou algum familiar com a finalidade de atingi-la?',
-        cb('Sim, utilizando arma de fogo') + cb('Sim, utilizando faca') +
-        cb('Sim, de outra forma') + cb('N\u00e3o')) +
+        cb('Sim, utilizando arma de fogo') +
+        cb('Sim, utilizando faca') +
+        cb('Sim, de outra forma') +
+        cb('N\u00e3o')) +
 
       pergunta(2,
         'O(A) agressor(a) j\u00e1 praticou alguma(s) destas agress\u00f5es f\u00edsicas contra voc\u00ea?',
-        cb('Queimadura') + cb('Enforcamento') + cb('Sufocamento') + cb('Tiro') +
-        cb('Afogamento') + cb('Facada') + cb('Paulada') + '<br>' +
+        cb('Queimadura') +
+        cb('Enforcamento') +
+        cb('Sufocamento') +
+        cb('Tiro') +
+        cb('Afogamento') +
+        cb('Facada') +
+        cb('Paulada') +
         cb('Nenhuma das agress\u00f5es acima')) +
 
       pergunta(3,
         'O(A) agressor(a) j\u00e1 praticou alguma(s) destas outras agress\u00f5es f\u00edsicas contra voc\u00ea?',
-        cb('Socos') + cb('Chutes') + cb('Tapas') + cb('Empur\u00f5es') +
-        cb('Pux\u00f5es de Cabelo') + cb('Nenhuma das agress\u00f5es acima')) +
+        cb('Socos') +
+        cb('Chutes') +
+        cb('Tapas') +
+        cb('Empur\u00f5es') +
+        cb('Pux\u00f5es de Cabelo') +
+        cb('Nenhuma das agress\u00f5es acima')) +
 
       pergunta(4,
         'O(A) agressor(a) j\u00e1 obrigou voc\u00ea a fazer sexo ou a praticar atos sexuais contra sua vontade?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(5,
         'O(A) agressor(a) j\u00e1 teve algum destes comportamentos?',
-        cb('disse algo parecido com a frase: \u201cse n\u00e3o for minha, n\u00e3o ser\u00e1 de mais ningu\u00e9m\u201d') + '<br>' +
-        cb('perturbou, perseguiu ou vigiou voc\u00ea nos locais em que frequenta') + '<br>' +
-        cb('proibiu voc\u00ea de visitar familiares ou amigos') + '<br>' +
-        cb('proibiu voc\u00ea de trabalhar ou estudar') + '<br>' +
-        cb('fez telefonemas, enviou mensagens pelo celular ou e-mails de forma insistente') + '<br>' +
-        cb('impediu voc\u00ea de ter acesso a dinheiro, conta banc\u00e1ria ou outros bens (como documentos pessoais, carro)') + '<br>' +
-        cb('teve outros comportamentos de ci\u00fames excessivo e de controle sobre voc\u00ea') + '<br>' +
+        cb('disse algo parecido com a frase: \u201cse n\u00e3o for minha, n\u00e3o ser\u00e1 de mais ningu\u00e9m\u201d') +
+        cb('perturbou, perseguiu ou vigiou voc\u00ea nos locais em que frequenta') +
+        cb('proibiu voc\u00ea de visitar familiares ou amigos') +
+        cb('proibiu voc\u00ea de trabalhar ou estudar') +
+        cb('fez telefonemas, enviou mensagens pelo celular ou e-mails de forma insistente') +
+        cb('impediu voc\u00ea de ter acesso a dinheiro, conta banc\u00e1ria ou outros bens (como documentos pessoais, carro)') +
+        cb('teve outros comportamentos de ci\u00fames excessivo e de controle sobre voc\u00ea') +
         cb('nenhum dos comportamentos acima listados')) +
 
       pergunta(6,
         'Voc\u00ea j\u00e1 registrou ocorr\u00eancia policial ou formulou pedido de medida protetiva de urg\u00eancia envolvendo essa mesma pessoa?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(7,
         'As amea\u00e7as ou agress\u00f5es f\u00edsicas do(a) agressor(a) contra voc\u00ea se tornaram mais frequentes ou mais graves nos \u00faltimos meses?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       // BLOCO II
-      bloco('Bloco II \u2014 Sobre o(a) agressor(a)') +
+      secao('Bloco II \u2014 Sobre o(a) agressor(a)') +
 
       pergunta(8,
         'O(A) agressor(a) faz uso abusivo de \u00e1lcool ou de drogas?',
-        cb('Sim, de \u00e1lcool') + cb('Sim, de drogas') + cb('N\u00e3o') + cb('N\u00e3o sei')) +
+        cb('Sim, de \u00e1lcool') +
+        cb('Sim, de drogas') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
 
       pergunta(9,
         'O(A) agressor(a) tem alguma doen\u00e7a mental comprovada por avalia\u00e7\u00e3o m\u00e9dica?',
-        cb('Sim e faz uso de medica\u00e7\u00e3o') + cb('Sim e n\u00e3o faz uso de medica\u00e7\u00e3o') + '<br>' +
-        cb('N\u00e3o') + cb('N\u00e3o sei')) +
+        cb('Sim e faz uso de medica\u00e7\u00e3o') +
+        cb('Sim e n\u00e3o faz uso de medica\u00e7\u00e3o') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
 
       pergunta(10,
         'O(A) agressor(a) j\u00e1 descumpriu medida protetiva anteriormente?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(11,
         'O(A) agressor(a) j\u00e1 tentou suic\u00eddio ou falou em suicidar-se?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(12,
         'O(A) agressor(a) est\u00e1 desempregado ou tem dificuldades financeiras?',
-        cb('Sim') + cb('N\u00e3o') + cb('N\u00e3o sei')) +
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
 
       pergunta(13,
         'O(A) agressor(a) tem acesso a armas de fogo?',
-        cb('Sim') + cb('N\u00e3o') + cb('N\u00e3o sei')) +
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
 
       pergunta(14,
         'O(A) agressor(a) j\u00e1 amea\u00e7ou ou agrediu seus filhos, outros familiares, amigos, colegas de trabalho, pessoas desconhecidas ou animais de estima\u00e7\u00e3o?',
-        cb('Sim. Especifique:') + cb('filhos') + cb('outros familiares') + cb('outras pessoas') + cb('animais') + '<br>' +
-        cb('N\u00e3o') + cb('N\u00e3o sei')) +
+        cb('Sim. Especifique:') +
+        '<div style="padding-left:20px">' +
+          cb('filhos') + cb('outros familiares') + cb('outras pessoas') + cb('animais') +
+        '</div>' +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
 
       // BLOCO III
-      bloco('Bloco III \u2014 Sobre voc\u00ea') +
+      secao('Bloco III \u2014 Sobre voc\u00ea') +
 
       pergunta(15,
         'Voc\u00ea se separou recentemente do(a) agressor(a) ou tentou se separar?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(16,
         'Voc\u00ea tem filhos?',
-        cb('Sim, com o agressor. Quantos? ___') + '<br>' +
-        cb('Sim, de outro relacionamento. Quantos? ___') + '<br>' +
+        cb('Sim, com o agressor. Quantos? ______') +
+        cb('Sim, de outro relacionamento. Quantos? ______') +
         cb('N\u00e3o')) +
 
-      '<div style="padding-left:16px;margin-bottom:10px">' +
-        '<div style="' + J + S + 'margin-bottom:4px"><strong>16.1.</strong> Se sim, assinale a faixa et\u00e1ria de seus filhos. Se tiver mais de um filho, pode assinalar mais de uma op\u00e7\u00e3o:</div>' +
-        '<div style="padding-left:8px;' + S + 'line-height:2">' + cb('0 a 11 anos') + cb('12 a 17 anos') + cb('A partir de 18 anos') + '</div>' +
-        '<div style="' + J + S + 'margin:4px 0"><strong>16.2.</strong> Algum de seus filhos \u00e9 pessoa portadora de defici\u00eancia?</div>' +
-        '<div style="padding-left:8px;' + S + 'line-height:2">' + cb('Sim, Quantos? ___') + cb('N\u00e3o') + '</div>' +
-      '</div>' +
-
       pergunta(17,
-        'Voc\u00ea est\u00e1 vivendo algum conflito com o(a) agressor(a) em rela\u00e7\u00e3o \u00e0 guarda do(s) filho(s), visitas ou pagamento de pens\u00e3o?',
-        cb('Sim') + cb('N\u00e3o') + cb('N\u00e3o tenho filhos com o(a) agressor(a)')) +
+        'Se sim, assinale a faixa et\u00e1ria de seus filhos. Se tiver mais de um filho, pode assinalar mais de uma op\u00e7\u00e3o:',
+        cb('0 a 11 anos') +
+        cb('12 a 17 anos') +
+        cb('A partir de 18 anos')) +
 
       pergunta(18,
-        'Seu(s) filho(s) j\u00e1 presenciaram ato(s) de viol\u00eancia do(a) agressor(a) contra voc\u00ea?',
-        cb('Sim') + cb('N\u00e3o')) +
+        'Algum de seus filhos \u00e9 pessoa portadora de defici\u00eancia?',
+        cb('Sim, Quantos? ______') +
+        cb('N\u00e3o')) +
 
       pergunta(19,
-        'Voc\u00ea sofreu algum tipo de viol\u00eancia durante a gravidez ou nos tr\u00eas meses posteriores ao parto?',
-        cb('Sim') + cb('N\u00e3o')) +
+        'Voc\u00ea est\u00e1 vivendo algum conflito com o(a) agressor(a) em rela\u00e7\u00e3o \u00e0 guarda do(s) filho(s), visitas ou pagamento de pens\u00e3o?',
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o tenho filhos com o(a) agressor(a)')) +
 
       pergunta(20,
-        'Se voc\u00ea est\u00e1 em um novo relacionamento, percebeu que as amea\u00e7as ou as agress\u00f5es f\u00edsicas aumentaram em raz\u00e3o disso?',
-        cb('Sim') + cb('N\u00e3o')) +
+        'Seu(s) filho(s) j\u00e1 presenciaram ato(s) de viol\u00eancia do(a) agressor(a) contra voc\u00ea?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(21,
-        'Voc\u00ea possui alguma defici\u00eancia ou \u00e9 portadora de doen\u00e7as degenerativas que acarretam condi\u00e7\u00e3o limitante ou de vulnerabilidade f\u00edsica ou mental?',
-        cb('Sim. Qual(is)? ___________________________________________') + '<br>' + cb('N\u00e3o')) +
+        'Voc\u00ea sofreu algum tipo de viol\u00eancia durante a gravidez ou nos tr\u00eas meses posteriores ao parto?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(22,
-        'Com qual cor/ra\u00e7a voc\u00ea se identifica:',
-        cb('branca') + cb('preta') + cb('parda') + cb('amarela/oriental') + cb('ind\u00edgena')) +
-
-      // BLOCO IV
-      bloco('Bloco IV \u2014 Outras Informa\u00e7\u00f5es Importantes') +
+        'Se voc\u00ea est\u00e1 em um novo relacionamento, percebeu que as amea\u00e7as ou as agress\u00f5es f\u00edsicas aumentaram em raz\u00e3o disso?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       pergunta(23,
-        'Voc\u00ea considera que mora em bairro, comunidade, \u00e1rea rural ou local de risco de viol\u00eancia?',
-        cb('Sim') + cb('N\u00e3o') + cb('N\u00e3o sei')) +
+        'Voc\u00ea possui alguma defici\u00eancia ou \u00e9 portadora de doen\u00e7as degenerativas que acarretam condi\u00e7\u00e3o limitante ou de vulnerabilidade f\u00edsica ou mental?',
+        cb('Sim. Qual(is)? _________________________________________') +
+        cb('N\u00e3o')) +
 
       pergunta(24,
-        'Voc\u00ea se considera dependente financeiramente do(a) agressor(a)?',
-        cb('Sim') + cb('N\u00e3o')) +
+        'Com qual cor/ra\u00e7a voc\u00ea se identifica:',
+        cb('branca') +
+        cb('preta') +
+        cb('parda') +
+        cb('amarela/oriental') +
+        cb('ind\u00edgena')) +
+
+      // BLOCO IV
+      secao('Bloco IV \u2014 Outras Informa\u00e7\u00f5es Importantes') +
 
       pergunta(25,
+        'Voc\u00ea considera que mora em bairro, comunidade, \u00e1rea rural ou local de risco de viol\u00eancia?',
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      pergunta(26,
+        'Voc\u00ea se considera dependente financeiramente do(a) agressor(a)?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(27,
         'Voc\u00ea quer e aceita abrigamento tempor\u00e1rio?',
-        cb('Sim') + cb('N\u00e3o')) +
+        cb('Sim') +
+        cb('N\u00e3o')) +
 
       // Declaração
       '<div style="margin-top:16px;' + J + S + '">' +
@@ -1258,14 +1295,12 @@ PCSP_DOCS.fonar = {
       '</div>' +
 
       // Profissional
-      '<div style="font-weight:bold;' + S + 'margin-bottom:6px">PARA PREENCHIMENTO PELO PROFISSIONAL:</div>' +
-      '<div style="' + S + 'line-height:2.2">' +
-        cb('V\u00edtima respondeu a este formul\u00e1rio sem ajuda profissional') + '<br>' +
-        cb('V\u00edtima respondeu a este formul\u00e1rio com aux\u00edlio profissional') + '<br>' +
-        cb('V\u00edtima n\u00e3o teve condi\u00e7\u00f5es de responder a este formul\u00e1rio') + '<br>' +
-        cb('V\u00edtima recusou-se a preencher o formul\u00e1rio') + '<br>' +
-        cb('Terceiro comunicante respondeu a este formul\u00e1rio') +
-      '</div>' +
+      secao('Para Preenchimento pelo Profissional') +
+      cb('V\u00edtima respondeu a este formul\u00e1rio sem ajuda profissional') +
+      cb('V\u00edtima respondeu a este formul\u00e1rio com aux\u00edlio profissional') +
+      cb('V\u00edtima n\u00e3o teve condi\u00e7\u00f5es de responder a este formul\u00e1rio') +
+      cb('V\u00edtima recusou-se a preencher o formul\u00e1rio') +
+      cb('Terceiro comunicante respondeu a este formul\u00e1rio') +
 
       // Rodapé institucional
       '<div style="margin-top:24px;border:1px solid #000;padding:10px 12px;' + J + S + 'font-size:10pt">' +
