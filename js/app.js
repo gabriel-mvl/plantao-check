@@ -3,12 +3,13 @@
    ============================================================ */
 
 // ── SESSION GUARD ────────────────────────────────────────────
-// AUTH TEMPORARIAMENTE DESATIVADA
-const session = JSON.parse(localStorage.getItem('pc_session') || 'null') || {
-  name: 'Usuário',
-  email: 'usuario@policiacivil.sp.gov.br',
-  expiresAt: Date.now() + 999 * 24 * 60 * 60 * 1000,
-};
+const session = (() => {
+  const s = JSON.parse(localStorage.getItem('pc_session') || 'null');
+  if (!s) return null;
+  if (Date.now() > s.expiresAt) { localStorage.removeItem('pc_session'); return null; }
+  return s;
+})();
+if (!session) window.location.href = 'index.html';
 
 // Plantão ativo
 let plantaoAtivo = null;
