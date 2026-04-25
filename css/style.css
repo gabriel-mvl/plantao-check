@@ -194,6 +194,7 @@ input,textarea{font-family:var(--font-body)}
 .legal-notice strong{color:var(--text-secondary)}
 .legal-icon{font-size:.85rem;flex-shrink:0;margin-top:1px}
 .app-credit{text-align:center;margin-top:.7rem;font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono)}
+.spam-notice{font-size:.76rem;color:var(--text-muted);margin-top:.75rem;text-align:center;line-height:1.5;padding:.5rem .75rem;background:var(--accent-glow);border-radius:var(--radius);border:1px solid rgba(59,125,255,.18)}
 
 /* ============================================================
    APP LAYOUT
