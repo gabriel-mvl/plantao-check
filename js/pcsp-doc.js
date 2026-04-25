@@ -1082,7 +1082,7 @@ PCSP_DOCS.fonar = {
     }
 
     function pergunta(num, texto, opcoes) {
-      return '<div style="margin-bottom:6px">' +
+      return '<div style="margin-bottom:6px;page-break-inside:avoid;break-inside:avoid">' +
         '<div style="' + J + S + 'margin-bottom:2px"><strong>' + num + '.</strong> ' + texto + '</div>' +
         '<div style="padding-left:10px">' + opcoes + '</div>' +
         '</div>';
