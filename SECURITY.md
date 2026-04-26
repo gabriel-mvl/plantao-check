@@ -17,7 +17,7 @@ Se você identificou uma vulnerabilidade de segurança no PlantãoCheck, **não 
 
 ### Como reportar
 
-Envie um e-mail para **gabriel@brasilemregra.com.br** com o assunto `[SEGURANÇA] PlantãoCheck` e inclua:
+Envie um e-mail para **plantaocheck@gmail.com** com o assunto `[SEGURANÇA] PlantãoCheck` e inclua:
 
 - Descrição clara da vulnerabilidade
 - Passos para reproduzir o problema
