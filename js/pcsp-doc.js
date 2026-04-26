@@ -614,6 +614,9 @@ const PCDoc = (() => {
     close() {
       document.getElementById('pcdocBackdrop')?.classList.add('hidden');
       document.getElementById('pcdocModal')?.classList.add('hidden');
+      // Restore footer button visibility
+      var footer = document.querySelector('#pcdocModal .modal-footer');
+      if (footer) { var btn = footer.querySelector('button.btn-primary'); if (btn) btn.style.display = ''; }
       _currentDoc = null;
     },
 
@@ -1203,34 +1206,53 @@ PCSP_DOCS.fonar = {
 PCDoc._fonarModo  = null;
 PCDoc._fonarStep  = 1;
 
+PCDoc._fonarSetFooter = function(show) {
+  var footer = document.querySelector('#pcdocModal .modal-footer');
+  if (!footer) return;
+  var btn = footer.querySelector('button.btn-primary');
+  if (btn) btn.style.display = show ? '' : 'none';
+};
+
 PCDoc._fonarRenderStep1 = function() {
+  PCDoc._fonarSetFooter(false);
   var el = document.getElementById('pcdocModalBody');
   if (!el) return;
   var sub = document.getElementById('pcdocModalSub');
   if (sub) sub.textContent = 'Como deseja prosseguir?';
+
+  var opt = function(id, modo, icon, title, desc) {
+    return '<div id="fonar_opt_' + modo + '" style="display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1rem;' +
+      'background:var(--bg-surface);border:2px solid var(--border);border-radius:var(--radius);' +
+      'cursor:pointer;transition:border-color .15s,background .15s" ' +
+      'onclick="PCDoc._fonarSelecionaModo(\'' + modo + '\')">' +
+      '<div style="width:38px;height:38px;border-radius:8px;background:var(--accent-dim);display:flex;' +
+        'align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">' + icon + '</div>' +
+      '<div style="flex:1">' +
+        '<div style="font-weight:700;font-family:var(--font-display);font-size:.87rem;margin-bottom:.2rem;color:var(--text-primary)">' + title + '</div>' +
+        '<div style="font-size:.76rem;color:var(--text-secondary);line-height:1.45">' + desc + '</div>' +
+      '</div></div>';
+  };
+
   el.innerHTML =
     '<div style="display:flex;flex-direction:column;gap:.75rem;margin-top:.25rem">' +
-      '<label id="fonar_opt_vitima" style="display:flex;align-items:flex-start;gap:.75rem;padding:1rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer" onclick="PCDoc._fonarSelecionaModo(\'vitima\')">' +
-        '<span style="font-size:1.3rem;flex-shrink:0">&#128424;</span>' +
-        '<div><div style="font-weight:700;font-family:var(--font-display);font-size:.9rem;margin-bottom:.2rem">Imprimir para a v\u00edtima preencher</div>' +
-        '<div style="font-size:.78rem;color:var(--text-secondary)">Gera o formul\u00e1rio em branco com caixas e linhas para preenchimento manuscrito</div></div>' +
-      '</label>' +
-      '<label id="fonar_opt_prof" style="display:flex;align-items:flex-start;gap:.75rem;padding:1rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer" onclick="PCDoc._fonarSelecionaModo(\'profissional\')">' +
-        '<span style="font-size:1.3rem;flex-shrink:0">&#128101;</span>' +
-        '<div><div style="font-weight:700;font-family:var(--font-display);font-size:.9rem;margin-bottom:.2rem">Preenchimento pelo profissional</div>' +
-        '<div style="font-size:.78rem;color:var(--text-secondary)">Registra as respostas no sistema e gera o formul\u00e1rio com os dados marcados</div></div>' +
-      '</label>' +
+    opt('vitima',       'vitima',       '&#128424;', 'Imprimir para a vítima preencher',
+      'Gera o formulário em branco com caixas e linhas para preenchimento manuscrito') +
+    opt('profissional', 'profissional', '&#128101;', 'Preenchimento pelo profissional',
+      'Registra as respostas no sistema e gera o formulário com as alternativas marcadas') +
     '</div>' +
     '<div style="margin-top:1rem;text-align:right">' +
-      '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._fonarAvancarStep1()">Avan\u00e7ar \u2192</button>' +
+    '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._fonarAvancarStep1()">Avançar →</button>' +
     '</div>';
 };
+
 
 PCDoc._fonarSelecionaModo = function(modo) {
   PCDoc._fonarModo = modo;
   ['vitima','profissional'].forEach(function(m) {
     var el = document.getElementById('fonar_opt_' + m);
-    if (el) el.style.borderColor = m === modo ? 'var(--accent)' : 'var(--border)';
+    if (!el) return;
+    el.style.borderColor = m === modo ? 'var(--accent)' : 'var(--border)';
+    el.style.background  = m === modo ? 'var(--accent-glow)' : 'var(--bg-surface)';
   });
 };
 
@@ -1290,6 +1312,7 @@ PCDoc._fonarAvancarStep2 = function() {
 };
 
 PCDoc._fonarRenderStep3 = function() {
+  PCDoc._fonarSetFooter(false);
   var el = document.getElementById('pcdocModalBody');
   if (!el) return;
   var sub = document.getElementById('pcdocModalSub');
