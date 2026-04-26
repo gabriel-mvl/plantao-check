@@ -72,6 +72,7 @@ const PCDoc = (() => {
       }
     });
     _deptList.sort((a, b) => a.raw.localeCompare(b.raw, 'pt-BR'));
+    PCDoc._deptListRef = _deptList;
   }
 
   // ── CABEÇALHO HTML (reutilizável em qualquer documento) ────
@@ -640,6 +641,7 @@ const PCDoc = (() => {
     _print,
     _docHtml,
     _loadUnits,
+    getDeptList: function() { _loadUnits(); return _deptList; },
     _docHtml,
     _lastHtml: null,
     _lastUnit: null,
@@ -1272,8 +1274,7 @@ PCDoc._fonarRenderStep2 = function() {
   var sub = document.getElementById('pcdocModalSub');
   if (sub) sub.textContent = 'Identifica\u00e7\u00e3o das partes';
 
-  PCDoc._loadUnits();
-  var deptOpts = (PCDoc._deptListRef || []).map(function(d) {
+  var deptOpts = PCDoc.getDeptList().map(function(d) {
     return '<option value="' + d.raw + '">' + d.label + '</option>';
   }).join('');
 
