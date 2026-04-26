@@ -467,4 +467,106 @@ var TEMPLATES = {
     }
   },
 
+  deliberacaoAP: {
+    title: 'Deliberação da Autoridade Policial',
+    fields: [
+      { id: 'deliberacoes', label: 'Deliberações (selecione uma ou mais)', type: 'multiselect',
+        options: [
+          { value: 'registro',       label: 'Lavratura do presente registro' },
+          { value: 'flagrante',      label: 'Lavratura de auto de prisão em flagrante' },
+          { value: 'tco',            label: 'Lavratura de Termo Circunstanciado de Ocorrência' },
+          { value: 'veiculo',        label: 'Apreensão de veículo' },
+          { value: 'objeto',         label: 'Apreensão de objeto/bem' },
+          { value: 'cd',             label: 'Expedição de requisição de exame de corpo de delito' },
+          { value: 'necroscopico',   label: 'Expedição de requisição de exame necroscópico' },
+          { value: 'ic',             label: 'Expedição de requisição de perícia ao Instituto de Criminalística' },
+          { value: 'alcool',         label: 'Expedição de requisição de exame de dosagem alcoólica' },
+          { value: 'mp',             label: 'Comunicação ao Ministério Público' },
+          { value: 'judicial',       label: 'Comunicação à autoridade judicial' },
+          { value: 'constutelar',    label: 'Comunicação ao Conselho Tutelar' },
+          { value: 'transito',       label: 'Comunicação ao órgão de trânsito competente' },
+          { value: 'oitiva',         label: 'Oitiva do condutor/declarante' },
+          { value: 'diligencias',    label: 'Realização de diligências para apurar a autoria' },
+          { value: 'providencias',   label: 'Adoção das demais providências legais cabíveis' },
+        ]
+      },
+      { id: 'veiculoPlaca', label: 'Placa do veículo', placeholder: 'Ex: ABC-1234', required: false },
+      { id: 'veiculoLacre', label: 'Lacre do veículo', placeholder: 'Ex: 000001', required: false },
+      { id: 'objetoDesc',   label: 'Descrição do objeto/bem apreendido', placeholder: 'Ex: aparelho celular marca Samsung', required: false },
+      { id: 'alcoolNome',   label: 'Nome do(a) investigado(a) — dosagem alcoólica', placeholder: 'Nome completo', required: false },
+      { id: 'alcoolLacre',  label: 'Lacre da amostra — dosagem alcoólica', placeholder: 'Ex: 000002', required: false },
+    ],
+    generate: function(f) {
+      var d = f.deliberacoes || [];
+      if (!d.length) return '[Selecione ao menos uma deliberação.]';
+
+      var itens = [];
+
+      d.forEach(function(item) {
+        switch(item) {
+          case 'registro':
+            itens.push('a lavratura do presente registro'); break;
+          case 'flagrante':
+            itens.push('a lavratura do competente auto de prisão em flagrante delito'); break;
+          case 'tco':
+            itens.push('a lavratura de Termo Circunstanciado de Ocorrência, nos termos do art. 69 da Lei n.º 9.099/1995'); break;
+          case 'veiculo': {
+            var txt = 'a apreensão do veículo';
+            if (f.veiculoPlaca) txt += ' de placas ' + f.veiculoPlaca.toUpperCase();
+            if (f.veiculoLacre) txt += ', acondicionado sob lacre n.º ' + f.veiculoLacre;
+            itens.push(txt); break;
+          }
+          case 'objeto': {
+            var txt2 = 'a apreensão';
+            if (f.objetoDesc) txt2 += ' de ' + f.objetoDesc;
+            else txt2 += ' do(s) objeto(s)/bem(ns) relacionado(s)';
+            itens.push(txt2); break;
+          }
+          case 'cd':
+            itens.push('a expedição de requisição de exame de corpo de delito na vítima, a ser realizado pelo Instituto Médico Legal'); break;
+          case 'necroscopico':
+            itens.push('a expedição de requisição de exame necroscópico, a ser realizado pelo Instituto Médico Legal, para determinação da causa da morte'); break;
+          case 'ic':
+            itens.push('a expedição de requisição de perícia ao Instituto de Criminalística'); break;
+          case 'alcool': {
+            var txt3 = 'a expedição de requisição de exame de dosagem alcoólica';
+            if (f.alcoolNome) txt3 += ', certificando-se que o(a) investigado(a) ' + f.alcoolNome + ' assinou o Termo de Autorização de Coleta de Sangue';
+            else txt3 += ', certificando-se que o(a) investigado(a) assinou o Termo de Autorização de Coleta de Sangue';
+            txt3 += ', sendo a amostra devidamente acondicionada';
+            if (f.alcoolLacre) txt3 += ' sob lacre n.º ' + f.alcoolLacre;
+            txt3 += ' e encaminhada ao Instituto Médico Legal (IML) para análise';
+            itens.push(txt3); break;
+          }
+          case 'mp':
+            itens.push('a comunicação ao Ministério Público, nos termos do art. 40 do Código de Processo Penal'); break;
+          case 'judicial':
+            itens.push('a comunicação à autoridade judicial competente'); break;
+          case 'constutelar':
+            itens.push('a comunicação ao Conselho Tutelar'); break;
+          case 'transito':
+            itens.push('a comunicação ao órgão de trânsito competente'); break;
+          case 'oitiva':
+            itens.push('a oitiva do condutor/declarante para fins de elaboração do presente registro'); break;
+          case 'diligencias':
+            itens.push('a realização de diligências para apuração da autoria e materialidade do fato'); break;
+          case 'providencias':
+            itens.push('a adoção das demais providências legais cabíveis'); break;
+        }
+      });
+
+      if (!itens.length) return '[Nenhuma deliberação válida selecionada.]';
+
+      var lista;
+      if (itens.length === 1) {
+        lista = itens[0];
+      } else {
+        // Capitalize first item, join with commas, last with "e"
+        var ultimo = itens.pop();
+        lista = itens.join(', ') + ' e ' + ultimo;
+      }
+
+      return 'Diante do exposto, a Autoridade Policial determinou ' + lista + '.';
+    }
+  },
+
 };
