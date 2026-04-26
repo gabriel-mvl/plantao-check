@@ -1268,71 +1268,54 @@ PCDoc._fonarAvancarStep1 = function() {
 };
 
 PCDoc._fonarRenderStep2 = function() {
+  PCDoc._fonarSetFooter(false);
   var doc = PCSP_DOCS.fonar;
   var el  = document.getElementById('pcdocModalBody');
   if (!el) return;
   var sub = document.getElementById('pcdocModalSub');
-  if (sub) sub.textContent = 'Identifica\u00e7\u00e3o das partes';
 
   var deptOpts = PCDoc.getDeptList().map(function(d) {
     return '<option value="' + d.raw + '">' + d.label + '</option>';
   }).join('');
 
   var camposHtml = (doc.campos || []).map(function(f) {
-    return '<div class="modal-form-group">' +
+    return '<div class="modal-form-group" style="margin-bottom:.5rem">' +
       '<label>' + f.label + '</label>' +
       '<input type="text" id="pcdoc_' + f.id + '" placeholder="' + (f.placeholder || '') + '" autocomplete="off" />' +
       '</div>';
   }).join('');
 
-  var btnLabel  = PCDoc._fonarModo === 'profissional' ? 'Avan\u00e7ar \u2192' : 'Gerar documento';
-  var btnAction = PCDoc._fonarModo === 'profissional' ? 'PCDoc._fonarAvancarStep2()' : 'PCDoc.gerar()';
+  if (PCDoc._fonarModo === 'vitima') {
+    // Simple form — just unit + fields + gerar
+    if (sub) sub.textContent = 'Identificação das partes';
+    el.innerHTML =
+      '<div class="modal-form-group"><label>Departamento</label>' +
+      '<select id="pcdocDept" onchange="PCDoc._onDeptChange()">' +
+      '<option value="">Selecione o departamento...</option>' + deptOpts +
+      '</select></div>' +
+      '<div class="modal-form-group"><label>Unidade policial</label>' +
+      '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>' +
+      camposHtml +
+      '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
+      '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
+      '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
+      '</div>';
+    return;
+  }
 
-  el.innerHTML =
-    '<div class="modal-form-group"><label>Departamento</label>' +
-    '<select id="pcdocDept" onchange="PCDoc._onDeptChange()">' +
-    '<option value="">Selecione o departamento...</option>' + deptOpts +
-    '</select></div>' +
-    '<div class="modal-form-group"><label>Unidade policial</label>' +
-    '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>' +
-    camposHtml +
-    '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
-    '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
-    '<button class="btn-primary" style="width:auto;margin:0" onclick="' + btnAction + '">' + btnLabel + '</button>' +
-    '</div>';
-};
-
-PCDoc._fonarVoltarStep1 = function() {
-  PCDoc._fonarStep = 1;
-  PCDoc._fonarRenderStep1();
-};
-
-PCDoc._fonarAvancarStep2 = function() {
-  PCDoc._fonarStep = 3;
-  PCDoc._fonarRenderStep3();
-};
-
-PCDoc._fonarRenderStep3 = function() {
-  PCDoc._fonarSetFooter(false);
-  var el = document.getElementById('pcdocModalBody');
-  if (!el) return;
-  var sub = document.getElementById('pcdocModalSub');
-  if (sub) sub.textContent = 'Respostas da v\u00edtima';
+  // ── PROFISSIONAL: unified single-scroll modal ──
+  if (sub) sub.textContent = 'Preencha os dados e as respostas';
 
   var S = 'font-family:var(--font-body);font-size:.84rem;';
-
-  function cbGroup(qid, opcoes) {
-    return opcoes.map(function(op, i) {
-      return '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;margin-bottom:2px;' + S + '">' +
-        '<input type="checkbox" id="fcb_' + qid + '_' + i + '" value="' + op + '" style="width:13px;height:13px;accent-color:var(--accent)" />' +
-        '<span>' + op + '</span></label>';
-    }).join('');
-  }
 
   function pCb(num, qid, texto, opcoes) {
     return '<div style="margin-bottom:.9rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)">' +
       '<div style="font-weight:600;' + S + 'margin-bottom:.35rem">' + num + '. ' + texto + '</div>' +
-      '<div style="padding-left:.5rem">' + cbGroup(qid, opcoes) + '</div></div>';
+      '<div style="padding-left:.5rem">' + opcoes.map(function(op, i) {
+        return '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;margin-bottom:2px;' + S + '">' +
+          '<input type="checkbox" id="fcb_' + qid + '_' + i + '" value="' + op + '" style="width:13px;height:13px;accent-color:var(--accent)" />' +
+          '<span>' + op + '</span></label>';
+      }).join('') + '</div></div>';
   }
 
   function pTxt(num, qid, texto) {
@@ -1341,82 +1324,99 @@ PCDoc._fonarRenderStep3 = function() {
       '<textarea id="ftxt_' + qid + '" rows="2" style="width:100%;padding:.4rem .5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.82rem;resize:vertical"></textarea></div>';
   }
 
-  function blLabel(txt) {
-    return '<div style="font-weight:700;font-family:var(--font-display);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:.6rem 0 .5rem">' + txt + '</div>';
+  function bl(txt) {
+    return '<div style="font-weight:700;font-family:var(--font-display);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:.8rem 0 .5rem;padding-top:.5rem;border-top:2px solid var(--accent-dim)">' + txt + '</div>';
   }
 
   el.innerHTML =
-    '<div style="max-height:52vh;overflow-y:auto;padding-right:.2rem">' +
-    blLabel('Bloco I \u2014 Hist\u00f3rico de viol\u00eancia') +
-    pCb(1,'q1','O(A) agressor(a) j\u00e1 amea\u00e7ou voc\u00ea ou algum familiar?',
-      ['Sim, utilizando arma de fogo','Sim, utilizando faca','Sim, de outra forma','N\u00e3o']) +
-    pCb(2,'q2','Agress\u00f5es f\u00edsicas graves:',
-      ['Queimadura','Enforcamento','Sufocamento','Tiro','Afogamento','Facada','Paulada','Nenhuma das agress\u00f5es acima']) +
-    pCb(3,'q3','Outras agress\u00f5es f\u00edsicas:',
-      ['Socos','Chutes','Tapas','Empur\u00f5es','Pux\u00f5es de Cabelo','Nenhuma das agress\u00f5es acima']) +
-    pCb(4,'q4','J\u00e1 obrigou a fazer sexo ou atos sexuais contra a vontade?',['Sim','N\u00e3o']) +
+    '<div style="max-height:60vh;overflow-y:auto;padding-right:.2rem">' +
+
+    // Unit selection
+    bl('Unidade policial') +
+    '<div class="modal-form-group" style="margin-bottom:.5rem"><label>Departamento</label>' +
+    '<select id="pcdocDept" onchange="PCDoc._onDeptChange()">' +
+    '<option value="">Selecione o departamento...</option>' + deptOpts +
+    '</select></div>' +
+    '<div class="modal-form-group" style="margin-bottom:.5rem"><label>Unidade policial</label>' +
+    '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>' +
+
+    // Identification fields
+    bl('Identificação das Partes') +
+    camposHtml +
+
+    // Bloco I
+    bl('Bloco I — Histórico de violência') +
+    pCb(1,'q1','O(A) agressor(a) já ameaçou você ou algum familiar?',
+      ['Sim, utilizando arma de fogo','Sim, utilizando faca','Sim, de outra forma','Não']) +
+    pCb(2,'q2','Agressões físicas graves:',
+      ['Queimadura','Enforcamento','Sufocamento','Tiro','Afogamento','Facada','Paulada','Nenhuma das agressões acima']) +
+    pCb(3,'q3','Outras agressões físicas:',
+      ['Socos','Chutes','Tapas','Empurões','Puxões de Cabelo','Nenhuma das agressões acima']) +
+    pCb(4,'q4','Já obrigou a fazer sexo ou atos sexuais contra a vontade?',['Sim','Não']) +
     pCb(5,'q5','Comportamentos do(a) agressor(a):',
-      ['\u201cSe n\u00e3o for minha, n\u00e3o ser\u00e1 de mais ningu\u00e9m\u201d','Perturbou, perseguiu ou vigiou voc\u00ea','Proibiu de visitar familiares ou amigos','Proibiu de trabalhar ou estudar','Telefonemas ou mensagens insistentes','Impediu acesso a dinheiro ou bens','Ci\u00fames excessivo e controle','Nenhum dos comportamentos acima']) +
-    pCb(6,'q6','J\u00e1 registrou ocorr\u00eancia ou pedido de medida protetiva contra essa mesma pessoa?',['Sim','N\u00e3o']) +
-    pCb(7,'q7','As amea\u00e7as ou agress\u00f5es se tornaram mais frequentes ou graves nos \u00faltimos meses?',['Sim','N\u00e3o']) +
+      ['“Se não for minha, não será de mais ninguém”','Perturbou, perseguiu ou vigiou você','Proibiu de visitar familiares ou amigos','Proibiu de trabalhar ou estudar','Telefonemas ou mensagens insistentes','Impediu acesso a dinheiro ou bens','Ciúmes excessivo e controle','Nenhum dos comportamentos acima']) +
+    pCb(6,'q6','Já registrou ocorrência ou pedido de medida protetiva contra essa mesma pessoa?',['Sim','Não']) +
+    pCb(7,'q7','As ameaças ou agressões se tornaram mais frequentes ou graves nos últimos meses?',['Sim','Não']) +
 
-    blLabel('Bloco II \u2014 Sobre o(a) agressor(a)') +
-    pCb(8,'q8','Uso abusivo de \u00e1lcool ou drogas?',['Sim, de \u00e1lcool','Sim, de drogas','N\u00e3o','N\u00e3o sei']) +
-    pCb(9,'q9','Doen\u00e7a mental comprovada?',['Sim e faz uso de medica\u00e7\u00e3o','Sim e n\u00e3o faz uso de medica\u00e7\u00e3o','N\u00e3o','N\u00e3o sei']) +
-    pCb(10,'q10','J\u00e1 descumpriu medida protetiva?',['Sim','N\u00e3o']) +
-    pCb(11,'q11','J\u00e1 tentou suic\u00eddio ou falou em se matar?',['Sim','N\u00e3o']) +
-    pCb(12,'q12','Desempregado ou com dificuldades financeiras?',['Sim','N\u00e3o','N\u00e3o sei']) +
-    pCb(13,'q13','Tem acesso a armas de fogo?',['Sim','N\u00e3o','N\u00e3o sei']) +
-    pCb(14,'q14','J\u00e1 ameacou ou agrediu filhos, familiares, outras pessoas ou animais?',
-      ['Sim \u2014 filhos','Sim \u2014 outros familiares','Sim \u2014 outras pessoas','Sim \u2014 animais','N\u00e3o','N\u00e3o sei']) +
+    bl('Bloco II — Sobre o(a) agressor(a)') +
+    pCb(8,'q8','Uso abusivo de álcool ou drogas?',['Sim, de álcool','Sim, de drogas','Não','Não sei']) +
+    pCb(9,'q9','Doença mental comprovada?',['Sim e faz uso de medicação','Sim e não faz uso de medicação','Não','Não sei']) +
+    pCb(10,'q10','Já descumpriu medida protetiva?',['Sim','Não']) +
+    pCb(11,'q11','Já tentou suicídio ou falou em se matar?',['Sim','Não']) +
+    pCb(12,'q12','Desempregado ou com dificuldades financeiras?',['Sim','Não','Não sei']) +
+    pCb(13,'q13','Tem acesso a armas de fogo?',['Sim','Não','Não sei']) +
+    pCb(14,'q14','Já ameacou ou agrediu filhos, familiares, outras pessoas ou animais?',
+      ['Sim — filhos','Sim — outros familiares','Sim — outras pessoas','Sim — animais','Não','Não sei']) +
 
-    blLabel('Bloco III \u2014 Sobre voc\u00ea') +
-    pCb(15,'q15','Se separou recentemente ou tentou se separar?',['Sim','N\u00e3o']) +
-    pCb(16,'q16','Tem filhos?',['Sim, com o agressor','Sim, de outro relacionamento','N\u00e3o']) +
-    pCb(17,'q17','Faixa et\u00e1ria dos filhos:',['0 a 11 anos','12 a 17 anos','A partir de 18 anos']) +
-    pCb(18,'q18','Algum filho \u00e9 pessoa com defici\u00eancia?',['Sim','N\u00e3o']) +
-    pCb(19,'q19','Conflito sobre guarda, visitas ou pens\u00e3o?',['Sim','N\u00e3o','N\u00e3o tenho filhos com o(a) agressor(a)']) +
-    pCb(20,'q20','Filhos presenciaram atos de viol\u00eancia contra voc\u00ea?',['Sim','N\u00e3o']) +
-    pCb(21,'q21','Sofreu viol\u00eancia durante a gravidez ou 3 meses ap\u00f3s o parto?',['Sim','N\u00e3o']) +
-    pCb(22,'q22','Novo relacionamento aumentou amea\u00e7as ou agress\u00f5es?',['Sim','N\u00e3o']) +
-    pCb(23,'q23','Possui defici\u00eancia ou doen\u00e7a degenerativa limitante?',['Sim','N\u00e3o']) +
-    pCb(24,'q24','Cor/ra\u00e7a:',['Branca','Preta','Parda','Amarela/Oriental','Ind\u00edgena']) +
+    bl('Bloco III — Sobre você') +
+    pCb(15,'q15','Se separou recentemente ou tentou se separar?',['Sim','Não']) +
+    pCb(16,'q16','Tem filhos?',['Sim, com o agressor','Sim, de outro relacionamento','Não']) +
+    pCb(17,'q17','Faixa etária dos filhos:',['0 a 11 anos','12 a 17 anos','A partir de 18 anos']) +
+    pCb(18,'q18','Algum filho é pessoa com deficiência?',['Sim','Não']) +
+    pCb(19,'q19','Conflito sobre guarda, visitas ou pensão?',['Sim','Não','Não tenho filhos com o(a) agressor(a)']) +
+    pCb(20,'q20','Filhos presenciaram atos de violência contra você?',['Sim','Não']) +
+    pCb(21,'q21','Sofreu violência durante a gravidez ou 3 meses após o parto?',['Sim','Não']) +
+    pCb(22,'q22','Novo relacionamento aumentou ameaças ou agressões?',['Sim','Não']) +
+    pCb(23,'q23','Possui deficiência ou doença degenerativa limitante?',['Sim','Não']) +
+    pCb(24,'q24','Cor/raça:',['Branca','Preta','Parda','Amarela/Oriental','Indígena']) +
 
-    blLabel('Bloco IV \u2014 Outras informa\u00e7\u00f5es') +
-    pCb(25,'q25','Mora em \u00e1rea de risco?',['Sim','N\u00e3o','N\u00e3o sei']) +
-    pCb(26,'q26','Dependente financeiramente do(a) agressor(a)?',['Sim','N\u00e3o']) +
-    pCb(27,'q27','Aceita abrigamento tempor\u00e1rio?',['Sim','N\u00e3o']) +
+    bl('Bloco IV — Outras informações') +
+    pCb(25,'q25','Mora em área de risco?',['Sim','Não','Não sei']) +
+    pCb(26,'q26','Dependente financeiramente do(a) agressor(a)?',['Sim','Não']) +
+    pCb(27,'q27','Aceita abrigamento temporário?',['Sim','Não']) +
 
-    blLabel('Preenchimento pelo profissional') +
-    pCb('P','qp0','Como o formul\u00e1rio foi respondido?',
-      ['V\u00edtima respondeu sem ajuda profissional','V\u00edtima respondeu com aux\u00edlio profissional','V\u00edtima n\u00e3o teve condi\u00e7\u00f5es de responder','V\u00edtima recusou-se a preencher','Terceiro comunicante respondeu']) +
+    bl('Preenchimento pelo profissional') +
+    pCb('P','qp0','Como o formulário foi respondido?',
+      ['Vítima respondeu sem ajuda profissional','Vítima respondeu com auxílio profissional','Vítima não teve condições de responder','Vítima recusou-se a preencher','Terceiro comunicante respondeu']) +
 
-    blLabel('Parte II \u2014 Avalia\u00e7\u00e3o do profissional') +
-    pTxt(1,'p1','A v\u00edtima demonstra percep\u00e7\u00e3o de risco? Qual? Anote e explique.') +
-    pTxt(2,'p2','Outras informa\u00e7\u00f5es que indicam risco de novas agress\u00f5es? Anote e explique.') +
-    pTxt(3,'p3','Como a v\u00edtima se apresenta f\u00edsica e emocionalmente? Descreva.') +
-    pTxt(4,'p4','Existe risco de a v\u00edtima tentar suic\u00eddio?') +
-    pTxt(5,'p5','A v\u00edtima ainda reside com o(a) agressor(a) ou ele tem acesso f\u00e1cil \u00e0 sua resid\u00eancia? Explique.') +
-    pTxt(6,'p6','Outras circunst\u00e2ncias relevantes que chamaram sua aten\u00e7\u00e3o:') +
-    pTxt(7,'p7','Quais s\u00e3o os encaminhamentos sugeridos?') +
+    bl('Parte II — Avaliação do profissional') +
+    pTxt(1,'p1','A vítima demonstra percepção de risco? Qual? Anote e explique.') +
+    pTxt(2,'p2','Outras informações que indicam risco de novas agressões? Anote e explique.') +
+    pTxt(3,'p3','Como a vítima se apresenta física e emocionalmente? Descreva.') +
+    pTxt(4,'p4','Existe risco de a vítima tentar suicídio?') +
+    pTxt(5,'p5','A vítima ainda reside com o(a) agressor(a) ou ele tem acesso fácil à sua residência? Explique.') +
+    pTxt(6,'p6','Outras circunstâncias relevantes que chamaram sua atenção:') +
+    pTxt(7,'p7','Quais são os encaminhamentos sugeridos?') +
     '<div style="margin-bottom:.9rem">' +
-      '<div style="font-weight:600;' + S + 'margin-bottom:.35rem">8. A v\u00edtima concordou com os encaminhamentos?</div>' +
+      '<div style="font-weight:600;' + S + 'margin-bottom:.35rem">8. A vítima concordou com os encaminhamentos?</div>' +
       '<div style="display:flex;gap:1.5rem;margin-bottom:.4rem">' +
         '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Sim" style="accent-color:var(--accent)" /> Sim</label>' +
-        '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Não" style="accent-color:var(--accent)" /> N\u00e3o</label>' +
+        '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Não" style="accent-color:var(--accent)" /> Não</label>' +
       '</div>' +
-      '<textarea id="ftxt_p8" rows="2" placeholder="Por qu\u00ea?" style="width:100%;padding:.4rem .5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.82rem;resize:vertical"></textarea>' +
+      '<textarea id="ftxt_p8" rows="2" placeholder="Por quê?" style="width:100%;padding:.4rem .5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.82rem;resize:vertical"></textarea>' +
     '</div>' +
+
     '</div>' +
     '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
-    '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep2()">&#8592; Voltar</button>' +
-    '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc.gerar()">Gerar documento</button>' +
+    '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
+    '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
     '</div>';
 };
 
-PCDoc._fonarVoltarStep2 = function() {
-  PCDoc._fonarStep = 2;
-  PCDoc._fonarRenderStep2();
+
+PCDoc._fonarVoltarStep1 = function() {
+  PCDoc._fonarStep = 1;
+  PCDoc._fonarRenderStep1();
 };
 
 PCDoc._gerarFonarFinal = function() {
