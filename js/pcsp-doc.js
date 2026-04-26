@@ -1296,6 +1296,13 @@ PCDoc._fonarRenderStep2 = function() {
       '<div class="modal-form-group"><label>Unidade policial</label>' +
       '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>' +
       camposHtml +
+      '<div id="pcdocOutput" class="hidden">' +
+        '<div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>' +
+        '<div id="pcdocPreview" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;font-size:.8rem;max-height:220px;overflow-y:auto;line-height:1.7"></div>' +
+        '<div style="display:flex;gap:.5rem;margin-top:.6rem">' +
+          '<button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">&#128424; Imprimir / PDF</button>' +
+        '</div>' +
+      '</div>' +
       '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
       '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
       '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
@@ -1407,6 +1414,13 @@ PCDoc._fonarRenderStep2 = function() {
     '</div>' +
 
     '</div>' +
+    '<div id="pcdocOutput" class="hidden">' +
+      '<div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>' +
+      '<div id="pcdocPreview" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;font-size:.8rem;max-height:220px;overflow-y:auto;line-height:1.7"></div>' +
+      '<div style="display:flex;gap:.5rem;margin-top:.6rem">' +
+        '<button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">&#128424; Imprimir / PDF</button>' +
+      '</div>' +
+    '</div>' +
     '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
     '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
     '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
@@ -1420,9 +1434,16 @@ PCDoc._fonarVoltarStep1 = function() {
 };
 
 PCDoc._gerarFonarFinal = function() {
-  var unitIdx = document.getElementById('pcdocUnit') && document.getElementById('pcdocUnit').value;
-  var u = (PCDoc._unitListRef || [])[parseInt(unitIdx)];
-  if (!u) { if (typeof showToast === 'function') showToast('Selecione a unidade policial.'); return; }
+  var unitSel = document.getElementById('pcdocUnit');
+  var unitIdx = unitSel ? unitSel.value : '';
+  if (unitIdx === '' || unitIdx === null || unitIdx === undefined) {
+    if (typeof showToast === 'function') showToast('Selecione a unidade policial.');
+    return;
+  }
+  // _unitListRef is set by _onDeptChange; also try _unitList via the exposed ref
+  var unitList = PCDoc._unitListRef || [];
+  var u = unitList[parseInt(unitIdx, 10)];
+  if (!u) { if (typeof showToast === 'function') showToast('Unidade não encontrada. Selecione novamente.'); return; }
 
   var campos = {};
   (PCSP_DOCS.fonar.campos || []).forEach(function(f) {
