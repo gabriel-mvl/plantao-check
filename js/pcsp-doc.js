@@ -1302,6 +1302,58 @@ PCSP_DOCS.fonar = {
       cb('V\u00edtima recusou-se a preencher o formul\u00e1rio') +
       cb('Terceiro comunicante respondeu a este formul\u00e1rio') +
 
+      // Parte II
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:16px">' +
+      '<div style="border:1.5px solid #000;padding:3px 8px;margin:0 0 6px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;font-size:11pt;text-align:center">PARTE II &mdash; PREENCHIMENTO EXCLUSIVO POR PROFISSIONAL CAPACITADO</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>1.</strong> Durante o atendimento, a vítima demonstra percepção de risco sobre sua situação? A percepção é de existência ou inexistência do risco? (por exemplo, ela diz que o agressor pode matá-la, ou ela justifica o comportamento do agressor ou naturaliza o comportamento violento?). Anote a percepção e explique.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>2.</strong> Existem outras informações relevantes com relação ao contexto ou situação da vítima e que possam indicar risco de novas agressões? (Por exemplo, a vítima tem novo(a) companheiro(a) ou tomou decisões que anunciam um rompimento definitivo com o agressor (pretende mudar de casa, bairro, cidade). Anote e explique.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>3.</strong> Como a vítima se apresenta física e emocionalmente? (Tem sinais de esgotamento emocional, está tomando medicação controlada, necessita de acompanhamento psicológico e/ou psiquiátrico?) Descreva.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>4.</strong> Existe o risco de a vítima tentar suicídio ou existem informações de que tenha tentado se matar?</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>5.</strong> A vítima ainda reside com o(a) agressor(a) ou ele tem acesso fácil à sua residência? Explique a situação.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>6.</strong> Descreva, de forma sucinta, outras circunstâncias que chamaram sua atenção e que poderão representar risco de novas agressões, a serem observadas no fluxo de atendimento.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>7.</strong> Quais são os encaminhamentos sugeridos para a vítima?</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>8.</strong> A vítima concordou com os encaminhamentos? Sim <span style=\'display:inline-block;width:11px;height:11px;border:1.5px solid #000;vertical-align:middle;margin:0 8px 0 4px\'></span> Não <span style=\'display:inline-block;width:11px;height:11px;border:1.5px solid #000;vertical-align:middle;margin:0 4px\'></span> Por quê?</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
       // Rodapé institucional
       '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:8px">' +
         '<div style="margin-top:12px;border:1px solid #000;padding:7px 10px;' + J + S + 'font-size:10pt">' +
