@@ -993,18 +993,19 @@ PCDoc._gerarAlteracao = function() {
 
   // Each signature: line + NOME EM CAIXA ALTA sem negrito + Carreira em negrito
   const assinaturas = pessoasVistas.map(function(p) {
-    return '<div style="margin-top:6rem">' +
+    return '<div style="margin-top:4rem">' +
       '<div style="border-top:1px solid #000;width:40%;margin-bottom:.5rem"></div>' +
       '<div style="text-transform:uppercase;letter-spacing:.02em">' + p.nome + '</div>' +
       (p.carreira ? '<div><strong>' + p.carreira + '</strong></div>' : '') +
       '</div>';
   }).join('');
 
-  // Delegado block — centered, same format
+  // Delegado block — centered, Nada a opor immediately before on same flow
   const delNome     = delegado || '_______________________________';
   const delCarreira = 'Delegado(a) de Polícia Titular — ' + u.nome;
   const delBlock =
-    '<div style="margin-top:6rem;text-align:center">' +
+    '<div style="margin-top:4rem;text-align:center">' +
+    '<p style="margin-bottom:1.5rem;text-align:center">Nada a opor</p>' +
     '<div style="border-top:1px solid #000;width:40%;margin:0 auto .5rem"></div>' +
     '<div style="text-transform:uppercase;letter-spacing:.02em">' + delNome + '</div>' +
     '<div><strong>' + delCarreira + '</strong></div>' +
@@ -1014,8 +1015,7 @@ PCDoc._gerarAlteracao = function() {
     '<p style="margin-bottom:1.1rem">Solicitamos autorização para alteração na escala de plantão de <strong>' + cidade + '</strong>, ficando da seguinte forma:</p>' +
     linhasTrocas +
     assinaturas +
-    '<div style="margin-top:5rem"><p style="margin-bottom:.4rem">Nada a opor</p>' +
-    delBlock + '</div>';
+    delBlock;
 
   const html = PCDoc._docHtml(u, 'AUTORIZAÇÃO PARA ALTERAÇÃO DE PLANTÃO', corpo);
   PCDoc._lastHtml = html;
