@@ -306,7 +306,7 @@ const PCDoc = (() => {
     _unitList = _unitsFull.filter(u => u.dept_raw === deptRaw);
     PCDoc._unitListRef = _unitList;
     PCDoc._deptListRef = _deptList;
-    PCDoc._unitListRef = _unitList;
+    PCDoc._deptListRef = _deptList;
     _unitList.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
     unitSel.innerHTML = '<option value="">Selecione a unidade...</option>' +
@@ -488,6 +488,12 @@ const PCDoc = (() => {
 
   // ── MODAL CUSTOMIZADO (alteração de plantão) ─────────────
   function _renderModalCustom(doc) {
+    if (doc.id === 'fonar') {
+      PCDoc._fonarStep = 1;
+      PCDoc._fonarModo = null;
+      PCDoc._fonarRenderStep1();
+      return;
+    }
     _loadUnits();
     const el = document.getElementById('pcdocModalBody');
     if (!el) return;
@@ -611,8 +617,7 @@ const PCDoc = (() => {
       if (title) title.textContent = doc.titulo;
       const sub = document.getElementById('pcdocModalSub');
       if (sub) sub.textContent = doc.subtitulo || '';
-      if (doc.id === 'fonar') { PCDoc._fonarStep=1; PCDoc._fonarModo=null; PCDoc._fonarRenderStep1(); }
-      else if (doc.customModal) { _renderModalCustom(doc); } else { _renderModal(doc); }
+      if (doc.customModal) { _renderModalCustom(doc); } else { _renderModal(doc); }
       document.getElementById('pcdocBackdrop')?.classList.remove('hidden');
       document.getElementById('pcdocModal')?.classList.remove('hidden');
       if (typeof toggleSidebar === 'function' && window.innerWidth <= 768) toggleSidebar();
@@ -621,9 +626,6 @@ const PCDoc = (() => {
     close() {
       document.getElementById('pcdocBackdrop')?.classList.add('hidden');
       document.getElementById('pcdocModal')?.classList.add('hidden');
-      // Restore footer button visibility
-      var footer = document.querySelector('#pcdocModal .modal-footer');
-      if (footer) { var btn = footer.querySelector('button.btn-primary'); if (btn) btn.style.display = ''; }
       _currentDoc = null;
     },
 
@@ -648,7 +650,6 @@ const PCDoc = (() => {
     _docHtml,
     _loadUnits,
     getDeptList: function() { _loadUnits(); return _deptList; },
-    _docHtml,
     _lastHtml: null,
     _lastUnit: null,
     _lastCampos: null,
@@ -910,7 +911,6 @@ PCDoc._renderTrocas = function() {
     const dataFmt = t.data ? t.data.split('-').reverse().join('/') : '—';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.4rem;gap:.5rem">' +
       '<span style="font-size:.8rem;flex:1"><strong>' + dataFmt + '</strong> (' + dia + ' – ' + t.turno + ') ' + hor +
-      (t.sobreaviso ? ' – <em>sobreaviso</em>' : '') +
       ' — <em>' + t.nomeEntra + '</em> no lugar de <em>' + t.nomeSai + '</em>' +
       (t.feriado ? ' 🎉' : '') + '</span>' +
       '<button onclick="PCDoc._removeTroca(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;flex-shrink:0" title="Remover">🗑</button>' +
@@ -1009,7 +1009,7 @@ PCDoc._gerarAlteracao = function() {
       '</div>';
   }).join('');
 
-  // Delegado block — centered, Nada a opor inside
+  // Delegado block — centered, Nada a opor immediately before on same flow
   const delNome     = delegado || '_______________________________';
   const delCarreira = 'Delegado(a) de Polícia Titular — ' + u.nome;
   const delBlock =
@@ -1037,76 +1037,82 @@ PCDoc._gerarAlteracao = function() {
   setTimeout(function() { if (out) out.scrollIntoView({ behavior:'smooth' }); }, 100);
 };
 
-// ── FONAR ──────────────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════
+// FONAR — Formulário Nacional de Avaliação de Risco
+// Resolução Conjunta CNJ/CNMP nº 5/2020 / Lei nº 14.149/2021
+// ══════════════════════════════════════════════════════════════
 PCSP_DOCS.fonar = {
   id: 'fonar',
-  icone: '\u{1F6BA}',
+  icone: '🚺',
   titulo: 'FONAR \u2014 Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco',
   subtitulo: 'Viol\u00eancia Dom\u00e9stica e Familiar contra a Mulher',
   campos: [
-    { id: 'boletim',       label: 'N\u00famero do BO',                            placeholder: 'Ex: 000001/2026', required: false },
-    { id: 'nomeVitima',    label: 'Nome da v\u00edtima',                           placeholder: 'Nome completo',   required: false },
-    { id: 'idadeVitima',   label: 'Idade da v\u00edtima',                          placeholder: '',                required: false },
-    { id: 'escVitima',     label: 'Escolaridade da v\u00edtima',                   placeholder: '',                required: false },
-    { id: 'nacVitima',     label: 'Nacionalidade da v\u00edtima',                  placeholder: '',                required: false },
-    { id: 'nomeAgressor',  label: 'Nome do(a) agressor(a)',                         placeholder: 'Nome completo',   required: false },
-    { id: 'idadeAgressor', label: 'Idade do(a) agressor(a)',                        placeholder: '',                required: false },
-    { id: 'escAgressor',   label: 'Escolaridade do(a) agressor(a)',                 placeholder: '',                required: false },
-    { id: 'nacAgressor',   label: 'Nacionalidade do(a) agressor(a)',                placeholder: '',                required: false },
-    { id: 'vinculo',       label: 'V\u00ednculo entre v\u00edtima e agressor(a)',   placeholder: 'Ex: c\u00f4njuge', required: false },
+    { id: 'boletim',       label: 'N\u00famero do BO',                              placeholder: 'Ex: 000001/2026',   required: false },
+    { id: 'nomeVitima',    label: 'Nome da v\u00edtima',                             placeholder: 'Nome completo',      required: false },
+    { id: 'idadeVitima',   label: 'Idade da v\u00edtima',                            placeholder: '',                   required: false },
+    { id: 'escVitima',     label: 'Escolaridade da v\u00edtima',                     placeholder: '',                   required: false },
+    { id: 'nacVitima',     label: 'Nacionalidade da v\u00edtima',                    placeholder: '',                   required: false },
+    { id: 'nomeAgressor',  label: 'Nome do(a) agressor(a)',                           placeholder: 'Nome completo',      required: false },
+    { id: 'idadeAgressor', label: 'Idade do(a) agressor(a)',                          placeholder: '',                   required: false },
+    { id: 'escAgressor',   label: 'Escolaridade do(a) agressor(a)',                   placeholder: '',                   required: false },
+    { id: 'nacAgressor',   label: 'Nacionalidade do(a) agressor(a)',                  placeholder: '',                   required: false },
+    { id: 'vinculo',       label: 'V\u00ednculo entre v\u00edtima e agressor(a)',     placeholder: 'Ex: c\u00f4njuge',   required: false },
   ],
-  // gerar() used only in modo vitima (blank form)
-  gerar: function(campos) {
+  gerar: function(campos, u) {
+    var v = campos;
     var S = 'font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;';
     var J = S + 'text-align:justify;';
-    var v = campos;
 
     function linhaFull(label, key) {
       return '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;margin-bottom:3px;width:100%">' +
         '<span style="white-space:nowrap"><strong>' + label + ':</strong></span>' +
-        (v[key] ? '<span>&nbsp;' + v[key] + '</span>' :
-          '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
+        (v[key]
+          ? '<span>&nbsp;' + v[key] + '</span>'
+          : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
         '</div>';
     }
     function linhaDouble(l1, k1, l2, k2) {
       return '<div style="display:flex;gap:1rem;margin-bottom:3px;width:100%">' +
         '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;flex:3">' +
           '<span style="white-space:nowrap"><strong>' + l1 + ':</strong></span>' +
-          (v[k1] ? '<span>&nbsp;' + v[k1] + '</span>' : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
+          (v[k1]
+            ? '<span>&nbsp;' + v[k1] + '</span>'
+            : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
         '</div>' +
         '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;flex:1">' +
           '<span style="white-space:nowrap"><strong>' + l2 + ':</strong></span>' +
-          (v[k2] ? '<span>&nbsp;' + v[k2] + '</span>' : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
+          (v[k2]
+            ? '<span>&nbsp;' + v[k2] + '</span>'
+            : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
         '</div>' +
       '</div>';
     }
+
+    // Seção com caixa de texto e bordas
     function secao(titulo) {
-      return '<div style="border:1.5px solid #000;padding:3px 8px;margin:10px 0 4px;font-weight:bold;' + S + 'text-align:center">' + titulo + '</div>';
+      return '<div style="border:1.5px solid #000;padding:3px 8px;margin:10px 0 4px;font-weight:bold;' + S + 'text-align:center;font-size:11pt">' +
+        titulo + '</div>';
     }
+
     function cb(label) {
-      return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:0;' + S + '">' +
+      return '<div style="display:flex;align-items:center;gap:4px;margin-bottom:0;' + S + '">' +
         '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;flex-shrink:0"></span>' +
-        '<span>' + label + '</span></div>';
+        '<span>' + label + '</span>' +
+        '</div>';
     }
+
     function pergunta(num, texto, opcoes) {
       return '<div style="margin-bottom:6px;page-break-inside:avoid;break-inside:avoid">' +
         '<div style="' + J + S + 'margin-bottom:2px"><strong>' + num + '.</strong> ' + texto + '</div>' +
-        '<div style="padding-left:10px">' + opcoes + '</div></div>';
-    }
-    function p3linhas() {
-      return '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
-             '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
-             '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>';
-    }
-    function pergTexto(num, texto) {
-      return '<div style="margin-bottom:8px;page-break-inside:avoid;break-inside:avoid">' +
-        '<div style="' + J + S + 'margin-bottom:4px"><strong>' + num + '.</strong> ' + texto + '</div>' +
-        p3linhas() + '</div>';
+        '<div style="padding-left:10px">' + opcoes + '</div>' +
+        '</div>';
     }
 
-    var data = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'});
+    var dataImpressao = new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
 
-    return (
+    var corpo =
+      // Identificação — caixa de borda
       secao('Identifica\u00e7\u00e3o das Partes') +
       linhaFull('N\u00famero do BO', 'boletim') +
       linhaDouble('Nome da v\u00edtima', 'nomeVitima', 'Idade', 'idadeVitima') +
@@ -1116,73 +1122,200 @@ PCSP_DOCS.fonar = {
       linhaFull('Escolaridade', 'escAgressor') +
       linhaFull('Nacionalidade', 'nacAgressor') +
       linhaFull('V\u00ednculo entre a v\u00edtima e o(a) agressor(a)', 'vinculo') +
-      '<div style="' + J + S + 'margin-bottom:8px">Data: ' + data + '</div>' +
+      '<div style="' + J + S + 'margin-bottom:8px">Data: ' + dataImpressao + '</div>' +
 
+      // BLOCO I
       secao('Bloco I \u2014 Sobre o hist\u00f3rico de viol\u00eancia') +
-      pergunta(1,'O(A) agressor(a) j\u00e1 amea\u00e7ou voc\u00ea ou algum familiar com a finalidade de atingi-la?',
-        cb('Sim, utilizando arma de fogo')+cb('Sim, utilizando faca')+cb('Sim, de outra forma')+cb('N\u00e3o')) +
-      pergunta(2,'O(A) agressor(a) j\u00e1 praticou alguma(s) destas agress\u00f5es f\u00edsicas contra voc\u00ea?',
-        cb('Queimadura')+cb('Enforcamento')+cb('Sufocamento')+cb('Tiro')+cb('Afogamento')+cb('Facada')+cb('Paulada')+cb('Nenhuma das agress\u00f5es acima')) +
-      pergunta(3,'O(A) agressor(a) j\u00e1 praticou alguma(s) destas outras agress\u00f5es f\u00edsicas contra voc\u00ea?',
-        cb('Socos')+cb('Chutes')+cb('Tapas')+cb('Empur\u00f5es')+cb('Pux\u00f5es de Cabelo')+cb('Nenhuma das agress\u00f5es acima')) +
-      pergunta(4,'O(A) agressor(a) j\u00e1 obrigou voc\u00ea a fazer sexo ou a praticar atos sexuais contra sua vontade?',
-        cb('Sim')+cb('N\u00e3o')) +
-      pergunta(5,'O(A) agressor(a) j\u00e1 teve algum destes comportamentos?',
-        cb('\u201cSe n\u00e3o for minha, n\u00e3o ser\u00e1 de mais ningu\u00e9m\u201d')+
-        cb('Perturbou, perseguiu ou vigiou voc\u00ea nos locais em que frequenta')+
-        cb('Proibiu voc\u00ea de visitar familiares ou amigos')+
-        cb('Proibiu voc\u00ea de trabalhar ou estudar')+
-        cb('Fez telefonemas, enviou mensagens pelo celular ou e-mails de forma insistente')+
-        cb('Impediu voc\u00ea de ter acesso a dinheiro, conta banc\u00e1ria ou outros bens (como documentos pessoais, carro)')+
-        cb('Teve outros comportamentos de ci\u00fames excessivo e de controle sobre voc\u00ea')+
-        cb('Nenhum dos comportamentos acima listados')) +
-      pergunta(6,'Voc\u00ea j\u00e1 registrou ocorr\u00eancia policial ou formulou pedido de medida protetiva de urg\u00eancia envolvendo essa mesma pessoa?',
-        cb('Sim')+cb('N\u00e3o')) +
-      pergunta(7,'As amea\u00e7as ou agress\u00f5es f\u00edsicas do(a) agressor(a) contra voc\u00ea se tornaram mais frequentes ou mais graves nos \u00faltimos meses?',
-        cb('Sim')+cb('N\u00e3o')) +
 
+      pergunta(1,
+        'O(A) agressor(a) j\u00e1 amea\u00e7ou voc\u00ea ou algum familiar com a finalidade de atingi-la?',
+        cb('Sim, utilizando arma de fogo') +
+        cb('Sim, utilizando faca') +
+        cb('Sim, de outra forma') +
+        cb('N\u00e3o')) +
+
+      pergunta(2,
+        'O(A) agressor(a) j\u00e1 praticou alguma(s) destas agress\u00f5es f\u00edsicas contra voc\u00ea?',
+        cb('Queimadura') +
+        cb('Enforcamento') +
+        cb('Sufocamento') +
+        cb('Tiro') +
+        cb('Afogamento') +
+        cb('Facada') +
+        cb('Paulada') +
+        cb('Nenhuma das agress\u00f5es acima')) +
+
+      pergunta(3,
+        'O(A) agressor(a) j\u00e1 praticou alguma(s) destas outras agress\u00f5es f\u00edsicas contra voc\u00ea?',
+        cb('Socos') +
+        cb('Chutes') +
+        cb('Tapas') +
+        cb('Empur\u00f5es') +
+        cb('Pux\u00f5es de Cabelo') +
+        cb('Nenhuma das agress\u00f5es acima')) +
+
+      pergunta(4,
+        'O(A) agressor(a) j\u00e1 obrigou voc\u00ea a fazer sexo ou a praticar atos sexuais contra sua vontade?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(5,
+        'O(A) agressor(a) j\u00e1 teve algum destes comportamentos?',
+        cb('disse algo parecido com a frase: \u201cse n\u00e3o for minha, n\u00e3o ser\u00e1 de mais ningu\u00e9m\u201d') +
+        cb('perturbou, perseguiu ou vigiou voc\u00ea nos locais em que frequenta') +
+        cb('proibiu voc\u00ea de visitar familiares ou amigos') +
+        cb('proibiu voc\u00ea de trabalhar ou estudar') +
+        cb('fez telefonemas, enviou mensagens pelo celular ou e-mails de forma insistente') +
+        cb('impediu voc\u00ea de ter acesso a dinheiro, conta banc\u00e1ria ou outros bens (como documentos pessoais, carro)') +
+        cb('teve outros comportamentos de ci\u00fames excessivo e de controle sobre voc\u00ea') +
+        cb('nenhum dos comportamentos acima listados')) +
+
+      pergunta(6,
+        'Voc\u00ea j\u00e1 registrou ocorr\u00eancia policial ou formulou pedido de medida protetiva de urg\u00eancia envolvendo essa mesma pessoa?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(7,
+        'As amea\u00e7as ou agress\u00f5es f\u00edsicas do(a) agressor(a) contra voc\u00ea se tornaram mais frequentes ou mais graves nos \u00faltimos meses?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      // BLOCO II
       secao('Bloco II \u2014 Sobre o(a) agressor(a)') +
-      pergunta(8,'O(A) agressor(a) faz uso abusivo de \u00e1lcool ou de drogas?',
-        cb('Sim, de \u00e1lcool')+cb('Sim, de drogas')+cb('N\u00e3o')+cb('N\u00e3o sei')) +
-      pergunta(9,'O(A) agressor(a) tem alguma doen\u00e7a mental comprovada por avalia\u00e7\u00e3o m\u00e9dica?',
-        cb('Sim e faz uso de medica\u00e7\u00e3o')+cb('Sim e n\u00e3o faz uso de medica\u00e7\u00e3o')+cb('N\u00e3o')+cb('N\u00e3o sei')) +
-      pergunta(10,'O(A) agressor(a) j\u00e1 descumpriu medida protetiva anteriormente?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(11,'O(A) agressor(a) j\u00e1 tentou suic\u00eddio ou falou em suicidar-se?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(12,'O(A) agressor(a) est\u00e1 desempregado ou tem dificuldades financeiras?', cb('Sim')+cb('N\u00e3o')+cb('N\u00e3o sei')) +
-      pergunta(13,'O(A) agressor(a) tem acesso a armas de fogo?', cb('Sim')+cb('N\u00e3o')+cb('N\u00e3o sei')) +
-      pergunta(14,'O(A) agressor(a) j\u00e1 amea\u00e7ou ou agrediu seus filhos, outros familiares, amigos, colegas de trabalho, pessoas desconhecidas ou animais de estima\u00e7\u00e3o?',
-        cb('Sim. Especifique:')+
-        '<div style="padding-left:20px">'+cb('filhos')+cb('outros familiares')+cb('outras pessoas')+cb('animais')+'</div>'+
-        cb('N\u00e3o')+cb('N\u00e3o sei')) +
 
+      pergunta(8,
+        'O(A) agressor(a) faz uso abusivo de \u00e1lcool ou de drogas?',
+        cb('Sim, de \u00e1lcool') +
+        cb('Sim, de drogas') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      pergunta(9,
+        'O(A) agressor(a) tem alguma doen\u00e7a mental comprovada por avalia\u00e7\u00e3o m\u00e9dica?',
+        cb('Sim e faz uso de medica\u00e7\u00e3o') +
+        cb('Sim e n\u00e3o faz uso de medica\u00e7\u00e3o') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      pergunta(10,
+        'O(A) agressor(a) j\u00e1 descumpriu medida protetiva anteriormente?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(11,
+        'O(A) agressor(a) j\u00e1 tentou suic\u00eddio ou falou em suicidar-se?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(12,
+        'O(A) agressor(a) est\u00e1 desempregado ou tem dificuldades financeiras?',
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      pergunta(13,
+        'O(A) agressor(a) tem acesso a armas de fogo?',
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      pergunta(14,
+        'O(A) agressor(a) j\u00e1 amea\u00e7ou ou agrediu seus filhos, outros familiares, amigos, colegas de trabalho, pessoas desconhecidas ou animais de estima\u00e7\u00e3o?',
+        cb('Sim. Especifique:') +
+        '<div style="padding-left:20px">' +
+          cb('filhos') + cb('outros familiares') + cb('outras pessoas') + cb('animais') +
+        '</div>' +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      // BLOCO III
       secao('Bloco III \u2014 Sobre voc\u00ea') +
-      pergunta(15,'Voc\u00ea se separou recentemente do(a) agressor(a) ou tentou se separar?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(16,'Voc\u00ea tem filhos?',
-        cb('Sim, com o agressor. Quantos? ______')+cb('Sim, de outro relacionamento. Quantos? ______')+cb('N\u00e3o')) +
-      pergunta(17,'Se sim, assinale a faixa et\u00e1ria de seus filhos. Se tiver mais de um filho, pode assinalar mais de uma op\u00e7\u00e3o:',
-        cb('0 a 11 anos')+cb('12 a 17 anos')+cb('A partir de 18 anos')) +
-      pergunta(18,'Algum de seus filhos \u00e9 pessoa portadora de defici\u00eancia?', cb('Sim, Quantos? ______')+cb('N\u00e3o')) +
-      pergunta(19,'Voc\u00ea est\u00e1 vivendo algum conflito com o(a) agressor(a) em rela\u00e7\u00e3o \u00e0 guarda do(s) filho(s), visitas ou pagamento de pens\u00e3o?',
-        cb('Sim')+cb('N\u00e3o')+cb('N\u00e3o tenho filhos com o(a) agressor(a)')) +
-      pergunta(20,'Seu(s) filho(s) j\u00e1 presenciaram ato(s) de viol\u00eancia do(a) agressor(a) contra voc\u00ea?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(21,'Voc\u00ea sofreu algum tipo de viol\u00eancia durante a gravidez ou nos tr\u00eas meses posteriores ao parto?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(22,'Se voc\u00ea est\u00e1 em um novo relacionamento, percebeu que as amea\u00e7as ou as agress\u00f5es f\u00edsicas aumentaram em raz\u00e3o disso?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(23,'Voc\u00ea possui alguma defici\u00eancia ou \u00e9 portadora de doen\u00e7as degenerativas que acarretam condi\u00e7\u00e3o limitante ou de vulnerabilidade f\u00edsica ou mental?',
-        cb('Sim. Qual(is)? _________________________________________')+cb('N\u00e3o')) +
-      pergunta(24,'Com qual cor/ra\u00e7a voc\u00ea se identifica:',
-        cb('branca')+cb('preta')+cb('parda')+cb('amarela/oriental')+cb('ind\u00edgena')) +
 
+      pergunta(15,
+        'Voc\u00ea se separou recentemente do(a) agressor(a) ou tentou se separar?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(16,
+        'Voc\u00ea tem filhos?',
+        cb('Sim, com o agressor. Quantos? ______') +
+        cb('Sim, de outro relacionamento. Quantos? ______') +
+        cb('N\u00e3o')) +
+
+      pergunta(17,
+        'Se sim, assinale a faixa et\u00e1ria de seus filhos. Se tiver mais de um filho, pode assinalar mais de uma op\u00e7\u00e3o:',
+        cb('0 a 11 anos') +
+        cb('12 a 17 anos') +
+        cb('A partir de 18 anos')) +
+
+      pergunta(18,
+        'Algum de seus filhos \u00e9 pessoa portadora de defici\u00eancia?',
+        cb('Sim, Quantos? ______') +
+        cb('N\u00e3o')) +
+
+      pergunta(19,
+        'Voc\u00ea est\u00e1 vivendo algum conflito com o(a) agressor(a) em rela\u00e7\u00e3o \u00e0 guarda do(s) filho(s), visitas ou pagamento de pens\u00e3o?',
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o tenho filhos com o(a) agressor(a)')) +
+
+      pergunta(20,
+        'Seu(s) filho(s) j\u00e1 presenciaram ato(s) de viol\u00eancia do(a) agressor(a) contra voc\u00ea?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(21,
+        'Voc\u00ea sofreu algum tipo de viol\u00eancia durante a gravidez ou nos tr\u00eas meses posteriores ao parto?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(22,
+        'Se voc\u00ea est\u00e1 em um novo relacionamento, percebeu que as amea\u00e7as ou as agress\u00f5es f\u00edsicas aumentaram em raz\u00e3o disso?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(23,
+        'Voc\u00ea possui alguma defici\u00eancia ou \u00e9 portadora de doen\u00e7as degenerativas que acarretam condi\u00e7\u00e3o limitante ou de vulnerabilidade f\u00edsica ou mental?',
+        cb('Sim. Qual(is)? _________________________________________') +
+        cb('N\u00e3o')) +
+
+      pergunta(24,
+        'Com qual cor/ra\u00e7a voc\u00ea se identifica:',
+        cb('branca') +
+        cb('preta') +
+        cb('parda') +
+        cb('amarela/oriental') +
+        cb('ind\u00edgena')) +
+
+      // BLOCO IV
       secao('Bloco IV \u2014 Outras Informa\u00e7\u00f5es Importantes') +
-      pergunta(25,'Voc\u00ea considera que mora em bairro, comunidade, \u00e1rea rural ou local de risco de viol\u00eancia?', cb('Sim')+cb('N\u00e3o')+cb('N\u00e3o sei')) +
-      pergunta(26,'Voc\u00ea se considera dependente financeiramente do(a) agressor(a)?', cb('Sim')+cb('N\u00e3o')) +
-      pergunta(27,'Voc\u00ea quer e aceita abrigamento tempor\u00e1rio?', cb('Sim')+cb('N\u00e3o')) +
 
-      '<div style="margin-top:10px;' + J + S + '">Declaro, para os fins de direito, que as informa\u00e7\u00f5es supra s\u00e3o ver\u00eddicas e foram prestadas por mim.</div>' +
-      '<div style="' + S + 'display:flex;align-items:baseline;gap:4px;margin:8px 0 10px">' +
+      pergunta(25,
+        'Voc\u00ea considera que mora em bairro, comunidade, \u00e1rea rural ou local de risco de viol\u00eancia?',
+        cb('Sim') +
+        cb('N\u00e3o') +
+        cb('N\u00e3o sei')) +
+
+      pergunta(26,
+        'Voc\u00ea se considera dependente financeiramente do(a) agressor(a)?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      pergunta(27,
+        'Voc\u00ea quer e aceita abrigamento tempor\u00e1rio?',
+        cb('Sim') +
+        cb('N\u00e3o')) +
+
+      // Declaração
+      '<div style="margin-top:10px;' + J + S + '">' +
+        'Declaro, para os fins de direito, que as informa\u00e7\u00f5es supra s\u00e3o ver\u00eddicas e foram prestadas por mim.' +
+      '</div>' +
+      '<div style="' + S + 'display:flex;align-items:baseline;gap:4px;margin:10px 0 16px">' +
         '<span style="white-space:nowrap">Assinatura da v\u00edtima:</span>' +
         '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>' +
       '</div>' +
 
+      // Profissional
       secao('Para Preenchimento pelo Profissional') +
       cb('V\u00edtima respondeu a este formul\u00e1rio sem ajuda profissional') +
       cb('V\u00edtima respondeu a este formul\u00e1rio com aux\u00edlio profissional') +
@@ -1190,33 +1323,71 @@ PCSP_DOCS.fonar = {
       cb('V\u00edtima recusou-se a preencher o formul\u00e1rio') +
       cb('Terceiro comunicante respondeu a este formul\u00e1rio') +
 
-      secao('PARTE II \u2014 PREENCHIMENTO EXCLUSIVO POR PROFISSIONAL CAPACITADO') +
-      pergTexto(1,'Durante o atendimento, a v\u00edtima demonstra percep\u00e7\u00e3o de risco sobre sua situa\u00e7\u00e3o? A percep\u00e7\u00e3o \u00e9 de exist\u00eancia ou inexist\u00eancia do risco? Anote a percep\u00e7\u00e3o e explique.') +
-      pergTexto(2,'Existem outras informa\u00e7\u00f5es relevantes com rela\u00e7\u00e3o ao contexto ou situa\u00e7\u00e3o da v\u00edtima e que possam indicar risco de novas agress\u00f5es? Anote e explique.') +
-      pergTexto(3,'Como a v\u00edtima se apresenta f\u00edsica e emocionalmente? Descreva.') +
-      pergTexto(4,'Existe o risco de a v\u00edtima tentar suic\u00eddio ou existem informa\u00e7\u00f5es de que tenha tentado se matar?') +
-      pergTexto(5,'A v\u00edtima ainda reside com o(a) agressor(a) ou ele tem acesso f\u00e1cil \u00e0 sua resid\u00eancia? Explique a situa\u00e7\u00e3o.') +
-      pergTexto(6,'Descreva, de forma sucinta, outras circunst\u00e2ncias que chamaram sua aten\u00e7\u00e3o e que poder\u00e3o representar risco de novas agress\u00f5es, a serem observadas no fluxo de atendimento.') +
-      pergTexto(7,'Quais s\u00e3o os encaminhamentos sugeridos para a v\u00edtima?') +
-      '<div style="margin-bottom:8px;page-break-inside:avoid;break-inside:avoid">' +
-        '<div style="' + J + S + 'margin-bottom:4px"><strong>8.</strong> A v\u00edtima concordou com os encaminhamentos? ' +
-          '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:10px">Sim <span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;vertical-align:middle;margin-left:3px"></span></span>' +
-          '<span style="display:inline-flex;align-items:center;gap:3px">N\u00e3o <span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;vertical-align:middle;margin-left:3px"></span></span>' +
-          ' Por qu\u00ea?</div>' +
-        p3linhas() +
+      // Parte II
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:16px">' +
+      '<div style="border:1.5px solid #000;padding:3px 8px;margin:0 0 6px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;font-size:11pt;text-align:center">PARTE II &mdash; PREENCHIMENTO EXCLUSIVO POR PROFISSIONAL CAPACITADO</div>' +
       '</div>' +
-
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>1.</strong> Durante o atendimento, a vítima demonstra percepção de risco sobre sua situação? A percepção é de existência ou inexistência do risco? (por exemplo, ela diz que o agressor pode matá-la, ou ela justifica o comportamento do agressor ou naturaliza o comportamento violento?). Anote a percepção e explique.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>2.</strong> Existem outras informações relevantes com relação ao contexto ou situação da vítima e que possam indicar risco de novas agressões? (Por exemplo, a vítima tem novo(a) companheiro(a) ou tomou decisões que anunciam um rompimento definitivo com o agressor (pretende mudar de casa, bairro, cidade). Anote e explique.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>3.</strong> Como a vítima se apresenta física e emocionalmente? (Tem sinais de esgotamento emocional, está tomando medicação controlada, necessita de acompanhamento psicológico e/ou psiquiátrico?) Descreva.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>4.</strong> Existe o risco de a vítima tentar suicídio ou existem informações de que tenha tentado se matar?</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>5.</strong> A vítima ainda reside com o(a) agressor(a) ou ele tem acesso fácil à sua residência? Explique a situação.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>6.</strong> Descreva, de forma sucinta, outras circunstâncias que chamaram sua atenção e que poderão representar risco de novas agressões, a serem observadas no fluxo de atendimento.</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>7.</strong> Quais são os encaminhamentos sugeridos para a vítima?</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      '<div style="page-break-inside:avoid;break-inside:avoid;margin-bottom:10px">' +
+      '<div style="font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;text-align:justify;margin-bottom:5px"><strong>8.</strong> A vítima concordou com os encaminhamentos? Sim <span style=\'display:inline-block;width:11px;height:11px;border:1.5px solid #000;vertical-align:middle;margin:0 8px 0 4px\'></span> Não <span style=\'display:inline-block;width:11px;height:11px;border:1.5px solid #000;vertical-align:middle;margin:0 4px\'></span> Por quê?</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:5px">&nbsp;</div>' +
+      '<div style="border-bottom:1px solid #000;width:100%;margin-bottom:2px">&nbsp;</div>' +
+      '</div>' +
+      // Rodapé institucional
       '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:8px">' +
-      '<div style="margin-top:12px;border:1px solid #000;padding:7px 10px;' + J + S + 'font-size:10pt">' +
-      'O Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco foi institu\u00eddo pela Resolu\u00e7\u00e3o Conjunta CNJ/CNMP n\u00ba 5/2020 e \u00e9 um instrumento destinado a identificar fatores de risco de a mulher vir a sofrer qualquer forma de viol\u00eancia no \u00e2mbito das rela\u00e7\u00f5es dom\u00e9sticas e familiares.' +
-      '</div></div>'
-    );
+        '<div style="margin-top:12px;border:1px solid #000;padding:7px 10px;' + J + S + 'font-size:10pt">' +
+          'O Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco foi institu\u00eddo pela Resolu\u00e7\u00e3o Conjunta CNJ/CNMP n\u00ba 5/2020 e \u00e9 um instrumento destinado a identificar fatores de risco de a mulher vir a sofrer qualquer forma de viol\u00eancia no \u00e2mbito das rela\u00e7\u00f5es dom\u00e9sticas e familiares.' +
+        '</div>' +
+      '</div>';
+
+    return corpo;
   },
 };
-
-// ── FONAR MODAL STATE ─────────────────────────────────────────
-PCDoc._fonarModo  = null;
-PCDoc._fonarStep  = 1;
+// ── FONAR MODAL LOGIC ─────────────────────────────────────────
+PCDoc._fonarModo = null;
+PCDoc._fonarStep = 1;
 
 PCDoc._fonarSetFooter = function(show) {
   var footer = document.querySelector('#pcdocModal .modal-footer');
@@ -1232,31 +1403,30 @@ PCDoc._fonarRenderStep1 = function() {
   var sub = document.getElementById('pcdocModalSub');
   if (sub) sub.textContent = 'Como deseja prosseguir?';
 
-  var opt = function(id, modo, icon, title, desc) {
-    return '<div id="fonar_opt_' + modo + '" style="display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1rem;' +
-      'background:var(--bg-surface);border:2px solid var(--border);border-radius:var(--radius);' +
-      'cursor:pointer;transition:border-color .15s,background .15s" ' +
+  var opt = function(modo, icon, title, desc) {
+    return '<div id="fonar_opt_' + modo + '" style="display:flex;align-items:flex-start;gap:.75rem;' +
+      'padding:.9rem 1rem;background:var(--bg-surface);border:2px solid var(--border);' +
+      'border-radius:var(--radius);cursor:pointer;transition:border-color .15s,background .15s" ' +
       'onclick="PCDoc._fonarSelecionaModo(\'' + modo + '\')">' +
       '<div style="width:38px;height:38px;border-radius:8px;background:var(--accent-dim);display:flex;' +
         'align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem">' + icon + '</div>' +
-      '<div style="flex:1">' +
-        '<div style="font-weight:700;font-family:var(--font-display);font-size:.87rem;margin-bottom:.2rem;color:var(--text-primary)">' + title + '</div>' +
+      '<div style="flex:1"><div style="font-weight:700;font-family:var(--font-display);font-size:.87rem;' +
+        'margin-bottom:.2rem;color:var(--text-primary)">' + title + '</div>' +
         '<div style="font-size:.76rem;color:var(--text-secondary);line-height:1.45">' + desc + '</div>' +
       '</div></div>';
   };
 
   el.innerHTML =
     '<div style="display:flex;flex-direction:column;gap:.75rem;margin-top:.25rem">' +
-    opt('vitima',       'vitima',       '&#128424;', 'Imprimir para a vítima preencher',
+    opt('vitima','&#128424;','Imprimir para a vítima preencher',
       'Gera o formulário em branco com caixas e linhas para preenchimento manuscrito') +
-    opt('profissional', 'profissional', '&#128101;', 'Preenchimento pelo profissional',
+    opt('profissional','&#128101;','Preenchimento pelo profissional',
       'Registra as respostas no sistema e gera o formulário com as alternativas marcadas') +
     '</div>' +
     '<div style="margin-top:1rem;text-align:right">' +
     '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._fonarAvancarStep1()">Avançar →</button>' +
     '</div>';
 };
-
 
 PCDoc._fonarSelecionaModo = function(modo) {
   PCDoc._fonarModo = modo;
@@ -1270,7 +1440,7 @@ PCDoc._fonarSelecionaModo = function(modo) {
 
 PCDoc._fonarAvancarStep1 = function() {
   if (!PCDoc._fonarModo) {
-    if (typeof showToast === 'function') showToast('Selecione uma op\u00e7\u00e3o para continuar.');
+    if (typeof showToast === 'function') showToast('Selecione uma opção para continuar.');
     return;
   }
   PCDoc._fonarStep = 2;
@@ -1289,40 +1459,39 @@ PCDoc._fonarRenderStep2 = function() {
   }).join('');
 
   var camposHtml = (doc.campos || []).map(function(f) {
-    return '<div class="modal-form-group" style="margin-bottom:.5rem">' +
-      '<label>' + f.label + '</label>' +
-      '<input type="text" id="pcdoc_' + f.id + '" placeholder="' + (f.placeholder || '') + '" autocomplete="off" />' +
-      '</div>';
+    return '<div class="modal-form-group" style="margin-bottom:.5rem"><label>' + f.label + '</label>' +
+      '<input type="text" id="pcdoc_' + f.id + '" placeholder="' + (f.placeholder||'') + '" autocomplete="off" /></div>';
   }).join('');
 
+  var unitBlock =
+    '<div class="modal-form-group"><label>Departamento</label>' +
+    '<select id="pcdocDept" onchange="PCDoc._onDeptChange()">' +
+    '<option value="">Selecione o departamento...</option>' + deptOpts + '</select></div>' +
+    '<div class="modal-form-group"><label>Unidade policial</label>' +
+    '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>';
+
+  var outputBlock =
+    '<div id="pcdocOutput" class="hidden">' +
+      '<div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>' +
+      '<div id="pcdocPreview" style="background:var(--bg-input);border:1px solid var(--border);' +
+        'border-radius:var(--radius);padding:.9rem;font-size:.8rem;max-height:220px;overflow-y:auto;line-height:1.7"></div>' +
+      '<div style="display:flex;gap:.5rem;margin-top:.6rem">' +
+        '<button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">&#128424; Imprimir / PDF</button>' +
+      '</div></div>';
+
+  var btnRow =
+    '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
+    '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
+    '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
+    '</div>';
+
   if (PCDoc._fonarModo === 'vitima') {
-    // Simple form — just unit + fields + gerar
     if (sub) sub.textContent = 'Identificação das partes';
-    el.innerHTML =
-      '<div class="modal-form-group"><label>Departamento</label>' +
-      '<select id="pcdocDept" onchange="PCDoc._onDeptChange()">' +
-      '<option value="">Selecione o departamento...</option>' + deptOpts +
-      '</select></div>' +
-      '<div class="modal-form-group"><label>Unidade policial</label>' +
-      '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>' +
-      camposHtml +
-      '<div id="pcdocOutput" class="hidden">' +
-        '<div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>' +
-        '<div id="pcdocPreview" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;font-size:.8rem;max-height:220px;overflow-y:auto;line-height:1.7"></div>' +
-        '<div style="display:flex;gap:.5rem;margin-top:.6rem">' +
-          '<button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">&#128424; Imprimir / PDF</button>' +
-        '</div>' +
-      '</div>' +
-      '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
-      '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
-      '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
-      '</div>';
+    el.innerHTML = unitBlock + camposHtml + outputBlock + btnRow;
     return;
   }
 
-  // ── PROFISSIONAL: unified single-scroll modal ──
   if (sub) sub.textContent = 'Preencha os dados e as respostas';
-
   var S = 'font-family:var(--font-body);font-size:.84rem;';
 
   function pCb(num, qid, texto, opcoes) {
@@ -1342,39 +1511,27 @@ PCDoc._fonarRenderStep2 = function() {
   }
 
   function bl(txt) {
-    return '<div style="font-weight:700;font-family:var(--font-display);font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:.8rem 0 .5rem;padding-top:.5rem;border-top:2px solid var(--accent-dim)">' + txt + '</div>';
+    return '<div style="font-weight:700;font-family:var(--font-display);font-size:.75rem;text-transform:uppercase;' +
+      'letter-spacing:.07em;color:var(--text-muted);margin:.8rem 0 .5rem;padding-top:.5rem;' +
+      'border-top:2px solid var(--accent-dim)">' + txt + '</div>';
   }
 
   el.innerHTML =
     '<div style="max-height:60vh;overflow-y:auto;padding-right:.2rem">' +
-
-    // Unit selection
-    bl('Unidade policial') +
-    '<div class="modal-form-group" style="margin-bottom:.5rem"><label>Departamento</label>' +
-    '<select id="pcdocDept" onchange="PCDoc._onDeptChange()">' +
-    '<option value="">Selecione o departamento...</option>' + deptOpts +
-    '</select></div>' +
-    '<div class="modal-form-group" style="margin-bottom:.5rem"><label>Unidade policial</label>' +
-    '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>' +
-
-    // Identification fields
-    bl('Identificação das Partes') +
-    camposHtml +
-
-    // Bloco I
+    bl('Unidade policial') + unitBlock +
+    bl('Identificação das Partes') + camposHtml +
     bl('Bloco I — Histórico de violência') +
-    pCb(1,'q1','O(A) agressor(a) já ameaçou você ou algum familiar?',
-      ['Sim, utilizando arma de fogo','Sim, utilizando faca','Sim, de outra forma','Não']) +
-    pCb(2,'q2','Agressões físicas graves:',
-      ['Queimadura','Enforcamento','Sufocamento','Tiro','Afogamento','Facada','Paulada','Nenhuma das agressões acima']) +
-    pCb(3,'q3','Outras agressões físicas:',
-      ['Socos','Chutes','Tapas','Empurões','Puxões de Cabelo','Nenhuma das agressões acima']) +
+    pCb(1,'q1','O(A) agressor(a) já ameaçou você ou algum familiar?',['Sim, utilizando arma de fogo','Sim, utilizando faca','Sim, de outra forma','Não']) +
+    pCb(2,'q2','Agressões físicas graves:',['Queimadura','Enforcamento','Sufocamento','Tiro','Afogamento','Facada','Paulada','Nenhuma das agressões acima']) +
+    pCb(3,'q3','Outras agressões físicas:',['Socos','Chutes','Tapas','Empurões','Puxões de Cabelo','Nenhuma das agressões acima']) +
     pCb(4,'q4','Já obrigou a fazer sexo ou atos sexuais contra a vontade?',['Sim','Não']) +
     pCb(5,'q5','Comportamentos do(a) agressor(a):',
-      ['“Se não for minha, não será de mais ninguém”','Perturbou, perseguiu ou vigiou você','Proibiu de visitar familiares ou amigos','Proibiu de trabalhar ou estudar','Telefonemas ou mensagens insistentes','Impediu acesso a dinheiro ou bens','Ciúmes excessivo e controle','Nenhum dos comportamentos acima']) +
-    pCb(6,'q6','Já registrou ocorrência ou pedido de medida protetiva contra essa mesma pessoa?',['Sim','Não']) +
-    pCb(7,'q7','As ameaças ou agressões se tornaram mais frequentes ou graves nos últimos meses?',['Sim','Não']) +
-
+      ['“Se não for minha, não será de mais ninguém”','Perturbou, perseguiu ou vigiou você',
+       'Proibiu de visitar familiares ou amigos','Proibiu de trabalhar ou estudar',
+       'Telefonemas ou mensagens insistentes','Impediu acesso a dinheiro ou bens',
+       'Ciúmes excessivo e controle','Nenhum dos comportamentos acima']) +
+    pCb(6,'q6','Já registrou ocorrência ou pedido de medida protetiva?',['Sim','Não']) +
+    pCb(7,'q7','As ameaças ou agressões se tornaram mais frequentes ou graves?',['Sim','Não']) +
     bl('Bloco II — Sobre o(a) agressor(a)') +
     pCb(8,'q8','Uso abusivo de álcool ou drogas?',['Sim, de álcool','Sim, de drogas','Não','Não sei']) +
     pCb(9,'q9','Doença mental comprovada?',['Sim e faz uso de medicação','Sim e não faz uso de medicação','Não','Não sei']) +
@@ -1384,28 +1541,25 @@ PCDoc._fonarRenderStep2 = function() {
     pCb(13,'q13','Tem acesso a armas de fogo?',['Sim','Não','Não sei']) +
     pCb(14,'q14','Já ameacou ou agrediu filhos, familiares, outras pessoas ou animais?',
       ['Sim — filhos','Sim — outros familiares','Sim — outras pessoas','Sim — animais','Não','Não sei']) +
-
     bl('Bloco III — Sobre você') +
     pCb(15,'q15','Se separou recentemente ou tentou se separar?',['Sim','Não']) +
     pCb(16,'q16','Tem filhos?',['Sim, com o agressor','Sim, de outro relacionamento','Não']) +
     pCb(17,'q17','Faixa etária dos filhos:',['0 a 11 anos','12 a 17 anos','A partir de 18 anos']) +
     pCb(18,'q18','Algum filho é pessoa com deficiência?',['Sim','Não']) +
     pCb(19,'q19','Conflito sobre guarda, visitas ou pensão?',['Sim','Não','Não tenho filhos com o(a) agressor(a)']) +
-    pCb(20,'q20','Filhos presenciaram atos de violência contra você?',['Sim','Não']) +
+    pCb(20,'q20','Filhos presenciaram atos de violência?',['Sim','Não']) +
     pCb(21,'q21','Sofreu violência durante a gravidez ou 3 meses após o parto?',['Sim','Não']) +
     pCb(22,'q22','Novo relacionamento aumentou ameaças ou agressões?',['Sim','Não']) +
     pCb(23,'q23','Possui deficiência ou doença degenerativa limitante?',['Sim','Não']) +
     pCb(24,'q24','Cor/raça:',['Branca','Preta','Parda','Amarela/Oriental','Indígena']) +
-
     bl('Bloco IV — Outras informações') +
     pCb(25,'q25','Mora em área de risco?',['Sim','Não','Não sei']) +
     pCb(26,'q26','Dependente financeiramente do(a) agressor(a)?',['Sim','Não']) +
     pCb(27,'q27','Aceita abrigamento temporário?',['Sim','Não']) +
-
     bl('Preenchimento pelo profissional') +
     pCb('P','qp0','Como o formulário foi respondido?',
-      ['Vítima respondeu sem ajuda profissional','Vítima respondeu com auxílio profissional','Vítima não teve condições de responder','Vítima recusou-se a preencher','Terceiro comunicante respondeu']) +
-
+      ['Vítima respondeu sem ajuda profissional','Vítima respondeu com auxílio profissional',
+       'Vítima não teve condições de responder','Vítima recusou-se a preencher','Terceiro comunicante respondeu']) +
     bl('Parte II — Avaliação do profissional') +
     pTxt(1,'p1','A vítima demonstra percepção de risco? Qual? Anote e explique.') +
     pTxt(2,'p2','Outras informações que indicam risco de novas agressões? Anote e explique.') +
@@ -1414,29 +1568,14 @@ PCDoc._fonarRenderStep2 = function() {
     pTxt(5,'p5','A vítima ainda reside com o(a) agressor(a) ou ele tem acesso fácil à sua residência? Explique.') +
     pTxt(6,'p6','Outras circunstâncias relevantes que chamaram sua atenção:') +
     pTxt(7,'p7','Quais são os encaminhamentos sugeridos?') +
-    '<div style="margin-bottom:.9rem">' +
-      '<div style="font-weight:600;' + S + 'margin-bottom:.35rem">8. A vítima concordou com os encaminhamentos?</div>' +
-      '<div style="display:flex;gap:1.5rem;margin-bottom:.4rem">' +
-        '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Sim" style="accent-color:var(--accent)" /> Sim</label>' +
-        '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Não" style="accent-color:var(--accent)" /> Não</label>' +
-      '</div>' +
-      '<textarea id="ftxt_p8" rows="2" placeholder="Por quê?" style="width:100%;padding:.4rem .5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.82rem;resize:vertical"></textarea>' +
+    '<div style="margin-bottom:.9rem"><div style="font-weight:600;' + S + 'margin-bottom:.35rem">8. A vítima concordou com os encaminhamentos?</div>' +
+    '<div style="display:flex;gap:1.5rem;margin-bottom:.4rem">' +
+      '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Sim" style="accent-color:var(--accent)" /> Sim</label>' +
+      '<label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="radio" name="frad_concordou" value="Não" style="accent-color:var(--accent)" /> Não</label>' +
     '</div>' +
-
-    '</div>' +
-    '<div id="pcdocOutput" class="hidden">' +
-      '<div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>' +
-      '<div id="pcdocPreview" style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;font-size:.8rem;max-height:220px;overflow-y:auto;line-height:1.7"></div>' +
-      '<div style="display:flex;gap:.5rem;margin-top:.6rem">' +
-        '<button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">&#128424; Imprimir / PDF</button>' +
-      '</div>' +
-    '</div>' +
-    '<div style="margin-top:1rem;display:flex;gap:.5rem;justify-content:flex-end">' +
-    '<button class="btn-secondary" style="width:auto;margin:0" onclick="PCDoc._fonarVoltarStep1()">&#8592; Voltar</button>' +
-    '<button class="btn-primary" style="width:auto;margin:0" onclick="PCDoc._gerarFonarFinal()">Gerar documento</button>' +
-    '</div>';
+    '<textarea id="ftxt_p8" rows="2" placeholder="Por quê?" style="width:100%;padding:.4rem .5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:.82rem;resize:vertical"></textarea></div>' +
+    '</div>' + outputBlock + btnRow;
 };
-
 
 PCDoc._fonarVoltarStep1 = function() {
   PCDoc._fonarStep = 1;
@@ -1446,13 +1585,8 @@ PCDoc._fonarVoltarStep1 = function() {
 PCDoc._gerarFonarFinal = function() {
   var unitSel = document.getElementById('pcdocUnit');
   var unitIdx = unitSel ? unitSel.value : '';
-  if (unitIdx === '' || unitIdx === null || unitIdx === undefined) {
-    if (typeof showToast === 'function') showToast('Selecione a unidade policial.');
-    return;
-  }
-  // _unitListRef is set by _onDeptChange; also try _unitList via the exposed ref
-  var unitList = PCDoc._unitListRef || [];
-  var u = unitList[parseInt(unitIdx, 10)];
+  if (!unitIdx) { if (typeof showToast === 'function') showToast('Selecione a unidade policial.'); return; }
+  var u = (PCDoc._unitListRef || [])[parseInt(unitIdx, 10)];
   if (!u) { if (typeof showToast === 'function') showToast('Unidade não encontrada. Selecione novamente.'); return; }
 
   var campos = {};
@@ -1461,17 +1595,12 @@ PCDoc._gerarFonarFinal = function() {
     campos[f.id] = el ? el.value.trim() : '';
   });
 
-  var corpo;
-  if (PCDoc._fonarModo === 'vitima') {
-    corpo = PCSP_DOCS.fonar.gerar(campos);
-  } else {
-    var r = PCDoc._fonarColetarRespostas();
-    corpo = PCDoc._gerarFonarProfissional(campos, r);
-  }
+  var corpo = PCDoc._fonarModo === 'vitima'
+    ? PCSP_DOCS.fonar.gerar(campos)
+    : PCDoc._gerarFonarProfissional(campos, PCDoc._fonarColetarRespostas());
 
   var html = PCDoc._docHtml(u,
-    'FORMUL\u00c1RIO NACIONAL DE AVALIA\u00c7\u00c3O DE RISCO\nVIOL\u00caNCIA DOM\u00c9STICA E FAMILIAR CONTRA A MULHER',
-    corpo);
+    'FORMULÁRIO NACIONAL DE AVALIAÇÃO DE RISCO\nVIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER', corpo);
   PCDoc._lastHtml = html;
   PCDoc._lastDoc  = PCSP_DOCS.fonar;
 
@@ -1479,18 +1608,15 @@ PCDoc._gerarFonarFinal = function() {
   var out  = document.getElementById('pcdocOutput');
   if (prev) prev.innerHTML = html;
   if (out)  out.classList.remove('hidden');
-  setTimeout(function() { if (out) out.scrollIntoView({ behavior: 'smooth' }); }, 100);
+  setTimeout(function() { if (out) out.scrollIntoView({ behavior:'smooth' }); }, 100);
 };
 
 PCDoc._fonarColetarRespostas = function() {
   var r = {};
-  var qids = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14',
-              'q15','q16','q17','q18','q19','q20','q21','q22','q23','q24','q25','q26','q27','qp0'];
-  qids.forEach(function(qid) {
+  ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14',
+   'q15','q16','q17','q18','q19','q20','q21','q22','q23','q24','q25','q26','q27','qp0'].forEach(function(qid) {
     var checked = [];
-    document.querySelectorAll('[id^="fcb_' + qid + '_"]:checked').forEach(function(el) {
-      checked.push(el.value);
-    });
+    document.querySelectorAll('[id^="fcb_' + qid + '_"]:checked').forEach(function(el) { checked.push(el.value); });
     r[qid] = checked;
   });
   ['p1','p2','p3','p4','p5','p6','p7','p8'].forEach(function(pid) {
@@ -1500,134 +1626,4 @@ PCDoc._fonarColetarRespostas = function() {
   var rad = document.querySelector('input[name="frad_concordou"]:checked');
   r['concordou'] = rad ? rad.value : '';
   return r;
-};
-
-PCDoc._gerarFonarProfissional = function(campos, r) {
-  var S  = 'font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#000;';
-  var J  = S + 'text-align:justify;';
-  var v  = campos;
-
-  function linhaFull(label, key) {
-    return '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;margin-bottom:3px;width:100%">' +
-      '<span style="white-space:nowrap"><strong>' + label + ':</strong></span>' +
-      (v[key] ? '<span>&nbsp;' + v[key] + '</span>' :
-        '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') + '</div>';
-  }
-  function linhaDouble(l1, k1, l2, k2) {
-    return '<div style="display:flex;gap:1rem;margin-bottom:3px;width:100%">' +
-      '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;flex:3">' +
-        '<span style="white-space:nowrap"><strong>' + l1 + ':</strong></span>' +
-        (v[k1] ? '<span>&nbsp;' + v[k1] + '</span>' : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
-      '</div>' +
-      '<div style="' + J + 'display:flex;align-items:baseline;gap:4px;flex:1">' +
-        '<span style="white-space:nowrap"><strong>' + l2 + ':</strong></span>' +
-        (v[k2] ? '<span>&nbsp;' + v[k2] + '</span>' : '<div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div>') +
-      '</div>' +
-    '</div>';
-  }
-  function secao(titulo) {
-    return '<div style="border:1.5px solid #000;padding:3px 8px;margin:10px 0 4px;font-weight:bold;' + S + 'text-align:center">' + titulo + '</div>';
-  }
-  function cb(label, marcado) {
-    return '<div style="display:flex;align-items:center;gap:5px;margin-bottom:0;' + S + '">' +
-      '<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;flex-shrink:0;text-align:center;line-height:11px;font-size:9px;font-weight:bold">' + (marcado ? 'X' : '') + '</span>' +
-      '<span>' + label + '</span></div>';
-  }
-  function pergCb(num, qid, texto, opcoes) {
-    var resps = r[qid] || [];
-    return '<div style="margin-bottom:6px;page-break-inside:avoid;break-inside:avoid">' +
-      '<div style="' + J + S + 'margin-bottom:2px"><strong>' + num + '.</strong> ' + texto + '</div>' +
-      '<div style="padding-left:10px">' + opcoes.map(function(op) { return cb(op, resps.indexOf(op) >= 0); }).join('') + '</div></div>';
-  }
-  function pergTexto(num, texto, resp) {
-    return '<div style="margin-bottom:8px;page-break-inside:avoid;break-inside:avoid">' +
-      '<div style="' + J + S + 'margin-bottom:4px"><strong>' + num + '.</strong> ' + texto + '</div>' +
-      (resp
-        ? '<div style="' + S + 'font-style:italic;padding:4px 8px;background:#f5f5f5;border-left:3px solid #555">' + resp + '</div>'
-        : '<div style="' + S + 'color:#999;font-style:italic">N\u00e3o informado.</div>') +
-    '</div>';
-  }
-
-  var data = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric'});
-
-  var qp0opts = ['V\u00edtima respondeu sem ajuda profissional','V\u00edtima respondeu com aux\u00edlio profissional',
-    'V\u00edtima n\u00e3o teve condi\u00e7\u00f5es de responder','V\u00edtima recusou-se a preencher','Terceiro comunicante respondeu'];
-
-  return (
-    secao('Identifica\u00e7\u00e3o das Partes') +
-    linhaFull('N\u00famero do BO','boletim') +
-    linhaDouble('Nome da v\u00edtima','nomeVitima','Idade','idadeVitima') +
-    linhaFull('Escolaridade','escVitima') + linhaFull('Nacionalidade','nacVitima') +
-    linhaDouble('Nome do(a) agressor(a)','nomeAgressor','Idade','idadeAgressor') +
-    linhaFull('Escolaridade','escAgressor') + linhaFull('Nacionalidade','nacAgressor') +
-    linhaFull('V\u00ednculo entre a v\u00edtima e o(a) agressor(a)','vinculo') +
-    '<div style="' + J + S + 'margin-bottom:8px">Data: ' + data + '</div>' +
-
-    secao('Bloco I \u2014 Sobre o hist\u00f3rico de viol\u00eancia') +
-    pergCb(1,'q1','O(A) agressor(a) j\u00e1 amea\u00e7ou voc\u00ea ou algum familiar com a finalidade de atingi-la?',
-      ['Sim, utilizando arma de fogo','Sim, utilizando faca','Sim, de outra forma','N\u00e3o']) +
-    pergCb(2,'q2','O(A) agressor(a) j\u00e1 praticou alguma(s) destas agress\u00f5es f\u00edsicas contra voc\u00ea?',
-      ['Queimadura','Enforcamento','Sufocamento','Tiro','Afogamento','Facada','Paulada','Nenhuma das agress\u00f5es acima']) +
-    pergCb(3,'q3','O(A) agressor(a) j\u00e1 praticou alguma(s) destas outras agress\u00f5es f\u00edsicas contra voc\u00ea?',
-      ['Socos','Chutes','Tapas','Empur\u00f5es','Pux\u00f5es de Cabelo','Nenhuma das agress\u00f5es acima']) +
-    pergCb(4,'q4','O(A) agressor(a) j\u00e1 obrigou voc\u00ea a fazer sexo ou a praticar atos sexuais contra sua vontade?',
-      ['Sim','N\u00e3o']) +
-    pergCb(5,'q5','O(A) agressor(a) j\u00e1 teve algum destes comportamentos?',
-      ['\u201cSe n\u00e3o for minha, n\u00e3o ser\u00e1 de mais ningu\u00e9m\u201d','Perturbou, perseguiu ou vigiou voc\u00ea','Proibiu de visitar familiares ou amigos','Proibiu de trabalhar ou estudar','Telefonemas ou mensagens insistentes','Impediu acesso a dinheiro, conta banc\u00e1ria ou bens','Ci\u00fames excessivo e controle sobre voc\u00ea','Nenhum dos comportamentos acima listados']) +
-    pergCb(6,'q6','Voc\u00ea j\u00e1 registrou ocorr\u00eancia policial ou formulou pedido de medida protetiva de urg\u00eancia envolvendo essa mesma pessoa?',['Sim','N\u00e3o']) +
-    pergCb(7,'q7','As amea\u00e7as ou agress\u00f5es f\u00edsicas se tornaram mais frequentes ou mais graves nos \u00faltimos meses?',['Sim','N\u00e3o']) +
-
-    secao('Bloco II \u2014 Sobre o(a) agressor(a)') +
-    pergCb(8,'q8','O(A) agressor(a) faz uso abusivo de \u00e1lcool ou de drogas?',['Sim, de \u00e1lcool','Sim, de drogas','N\u00e3o','N\u00e3o sei']) +
-    pergCb(9,'q9','O(A) agressor(a) tem alguma doen\u00e7a mental comprovada por avalia\u00e7\u00e3o m\u00e9dica?',['Sim e faz uso de medica\u00e7\u00e3o','Sim e n\u00e3o faz uso de medica\u00e7\u00e3o','N\u00e3o','N\u00e3o sei']) +
-    pergCb(10,'q10','O(A) agressor(a) j\u00e1 descumpriu medida protetiva anteriormente?',['Sim','N\u00e3o']) +
-    pergCb(11,'q11','O(A) agressor(a) j\u00e1 tentou suic\u00eddio ou falou em suicidar-se?',['Sim','N\u00e3o']) +
-    pergCb(12,'q12','O(A) agressor(a) est\u00e1 desempregado ou tem dificuldades financeiras?',['Sim','N\u00e3o','N\u00e3o sei']) +
-    pergCb(13,'q13','O(A) agressor(a) tem acesso a armas de fogo?',['Sim','N\u00e3o','N\u00e3o sei']) +
-    pergCb(14,'q14','O(A) agressor(a) j\u00e1 amea\u00e7ou ou agrediu filhos, familiares, amigos, colegas, desconhecidos ou animais?',
-      ['Sim \u2014 filhos','Sim \u2014 outros familiares','Sim \u2014 outras pessoas','Sim \u2014 animais','N\u00e3o','N\u00e3o sei']) +
-
-    secao('Bloco III \u2014 Sobre voc\u00ea') +
-    pergCb(15,'q15','Voc\u00ea se separou recentemente do(a) agressor(a) ou tentou se separar?',['Sim','N\u00e3o']) +
-    pergCb(16,'q16','Voc\u00ea tem filhos?',['Sim, com o agressor','Sim, de outro relacionamento','N\u00e3o']) +
-    pergCb(17,'q17','Faixa et\u00e1ria dos filhos:',['0 a 11 anos','12 a 17 anos','A partir de 18 anos']) +
-    pergCb(18,'q18','Algum filho \u00e9 pessoa portadora de defici\u00eancia?',['Sim','N\u00e3o']) +
-    pergCb(19,'q19','Conflito sobre guarda, visitas ou pens\u00e3o?',['Sim','N\u00e3o','N\u00e3o tenho filhos com o(a) agressor(a)']) +
-    pergCb(20,'q20','Filhos j\u00e1 presenciaram atos de viol\u00eancia contra voc\u00ea?',['Sim','N\u00e3o']) +
-    pergCb(21,'q21','Sofreu viol\u00eancia durante a gravidez ou 3 meses ap\u00f3s o parto?',['Sim','N\u00e3o']) +
-    pergCb(22,'q22','Novo relacionamento aumentou amea\u00e7as ou agress\u00f5es?',['Sim','N\u00e3o']) +
-    pergCb(23,'q23','Possui defici\u00eancia ou doen\u00e7a degenerativa limitante?',['Sim','N\u00e3o']) +
-    pergCb(24,'q24','Cor/ra\u00e7a:',['Branca','Preta','Parda','Amarela/Oriental','Ind\u00edgena']) +
-
-    secao('Bloco IV \u2014 Outras Informa\u00e7\u00f5es') +
-    pergCb(25,'q25','Voc\u00ea considera que mora em bairro, comunidade, \u00e1rea rural ou local de risco de viol\u00eancia?',['Sim','N\u00e3o','N\u00e3o sei']) +
-    pergCb(26,'q26','Voc\u00ea se considera dependente financeiramente do(a) agressor(a)?',['Sim','N\u00e3o']) +
-    pergCb(27,'q27','Voc\u00ea quer e aceita abrigamento tempor\u00e1rio?',['Sim','N\u00e3o']) +
-
-    '<div style="margin-top:10px;' + J + S + '">Declaro, para os fins de direito, que as informa\u00e7\u00f5es supra s\u00e3o ver\u00eddicas e foram prestadas por mim.</div>' +
-    '<div style="' + S + 'display:flex;align-items:baseline;gap:4px;margin:8px 0 10px"><span style="white-space:nowrap">Assinatura da v\u00edtima:</span><div style="border-bottom:1px solid #000;flex:1;margin-left:4px">&nbsp;</div></div>' +
-
-    secao('Para Preenchimento pelo Profissional') +
-    qp0opts.map(function(op) { return cb(op, (r['qp0']||[]).indexOf(op) >= 0); }).join('') +
-
-    secao('PARTE II \u2014 PREENCHIMENTO EXCLUSIVO POR PROFISSIONAL CAPACITADO') +
-    pergTexto(1,'Durante o atendimento, a v\u00edtima demonstra percep\u00e7\u00e3o de risco sobre sua situa\u00e7\u00e3o? A percep\u00e7\u00e3o \u00e9 de exist\u00eancia ou inexist\u00eancia do risco? Anote a percep\u00e7\u00e3o e explique.', r['p1']) +
-    pergTexto(2,'Existem outras informa\u00e7\u00f5es relevantes com rela\u00e7\u00e3o ao contexto ou situa\u00e7\u00e3o da v\u00edtima e que possam indicar risco de novas agress\u00f5es? Anote e explique.', r['p2']) +
-    pergTexto(3,'Como a v\u00edtima se apresenta f\u00edsica e emocionalmente? Descreva.', r['p3']) +
-    pergTexto(4,'Existe o risco de a v\u00edtima tentar suic\u00eddio ou existem informa\u00e7\u00f5es de que tenha tentado se matar?', r['p4']) +
-    pergTexto(5,'A v\u00edtima ainda reside com o(a) agressor(a) ou ele tem acesso f\u00e1cil \u00e0 sua resid\u00eancia? Explique a situa\u00e7\u00e3o.', r['p5']) +
-    pergTexto(6,'Descreva, de forma sucinta, outras circunst\u00e2ncias que chamaram sua aten\u00e7\u00e3o e que poder\u00e3o representar risco de novas agress\u00f5es, a serem observadas no fluxo de atendimento.', r['p6']) +
-    pergTexto(7,'Quais s\u00e3o os encaminhamentos sugeridos para a v\u00edtima?', r['p7']) +
-    '<div style="margin-bottom:8px;page-break-inside:avoid;break-inside:avoid">' +
-      '<div style="' + J + S + 'margin-bottom:4px"><strong>8.</strong> A v\u00edtima concordou com os encaminhamentos? ' +
-        '<span style="display:inline-flex;align-items:center;gap:3px;margin-right:12px">Sim ' + cb('', r['concordou']==='Sim') + '</span>' +
-        '<span style="display:inline-flex;align-items:center;gap:3px">N\u00e3o ' + cb('', r['concordou']==='N\u00e3o') + '</span>' +
-        ' Por qu\u00ea?' +
-      '</div>' +
-      (r['p8'] ? '<div style="' + S + 'font-style:italic;padding:4px 8px;background:#f5f5f5;border-left:3px solid #555">' + r['p8'] + '</div>' : '') +
-    '</div>' +
-
-    '<div style="page-break-inside:avoid;break-inside:avoid;margin-top:8px">' +
-    '<div style="margin-top:12px;border:1px solid #000;padding:7px 10px;' + J + S + 'font-size:10pt">O Formul\u00e1rio Nacional de Avalia\u00e7\u00e3o de Risco foi institu\u00eddo pela Resolu\u00e7\u00e3o Conjunta CNJ/CNMP n\u00ba 5/2020 e \u00e9 um instrumento destinado a identificar fatores de risco de a mulher vir a sofrer qualquer forma de viol\u00eancia no \u00e2mbito das rela\u00e7\u00f5es dom\u00e9sticas e familiares.</div></div>'
-  );
 };
