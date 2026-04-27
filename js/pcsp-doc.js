@@ -129,6 +129,9 @@ const PCDoc = (() => {
 
   // ── MODAL: renderiza seleção + campos ─────────────────────
   function _renderModal(doc) {
+    // Ensure footer button is visible for standard docs
+    var footer = document.querySelector('#pcdocModal .modal-footer');
+    if (footer) { var btn = footer.querySelector('button.btn-primary'); if (btn) btn.style.display = ''; }
     _loadUnits();
     const el = document.getElementById('pcdocModalBody');
     if (!el) return;
@@ -626,6 +629,9 @@ const PCDoc = (() => {
     close() {
       document.getElementById('pcdocBackdrop')?.classList.add('hidden');
       document.getElementById('pcdocModal')?.classList.add('hidden');
+      // Always restore footer button visibility when closing
+      var footer = document.querySelector('#pcdocModal .modal-footer');
+      if (footer) { var btn = footer.querySelector('button.btn-primary'); if (btn) btn.style.display = ''; }
       _currentDoc = null;
     },
 
@@ -1471,9 +1477,9 @@ PCDoc._fonarRenderStep2 = function() {
     '<select id="pcdocUnit" disabled><option value="">Selecione o departamento primeiro</option></select></div>';
 
   var outputBlock =
-    '<div id="pcdocOutput" class="hidden">' +
+    '<div id="fonarOutput" class="hidden">' +
       '<div class="email-output-label" style="margin-top:.75rem">Documento gerado:</div>' +
-      '<div id="pcdocPreview" style="background:var(--bg-input);border:1px solid var(--border);' +
+      '<div id="fonarPreview" style="background:var(--bg-input);border:1px solid var(--border);' +
         'border-radius:var(--radius);padding:.9rem;font-size:.8rem;max-height:220px;overflow-y:auto;line-height:1.7"></div>' +
       '<div style="display:flex;gap:.5rem;margin-top:.6rem">' +
         '<button class="btn-primary" onclick="PCDoc._print()" style="flex:1;margin:0">&#128424; Imprimir / PDF</button>' +
@@ -1604,8 +1610,8 @@ PCDoc._gerarFonarFinal = function() {
   PCDoc._lastHtml = html;
   PCDoc._lastDoc  = PCSP_DOCS.fonar;
 
-  var prev = document.getElementById('pcdocPreview');
-  var out  = document.getElementById('pcdocOutput');
+  var prev = document.getElementById('fonarPreview');
+  var out  = document.getElementById('fonarOutput');
   if (prev) prev.innerHTML = html;
   if (out)  out.classList.remove('hidden');
   setTimeout(function() { if (out) out.scrollIntoView({ behavior:'smooth' }); }, 100);
