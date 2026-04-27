@@ -538,10 +538,14 @@ const PCDoc = (() => {
           </div>
         </div>
 
-        <div class="modal-form-group" style="margin-bottom:.75rem">
+        <div class="modal-form-group" style="margin-bottom:.75rem;display:flex;gap:1.5rem">
           <label class="pcdoc-toggle-label" style="font-size:.78rem;font-weight:600;color:var(--text-secondary)">
             <input type="checkbox" id="alteracaoFeriado" />
             <span>Feriado</span>
+          </label>
+          <label class="pcdoc-toggle-label" style="font-size:.78rem;font-weight:600;color:var(--text-secondary)">
+            <input type="checkbox" id="alteracaoSobreaviso" />
+            <span><em>Sobreaviso</em></span>
           </label>
         </div>
 
@@ -924,7 +928,8 @@ PCDoc._addTroca = function() {
   const nomeERaw   = document.getElementById('alteracaoNomeEntra')?.value?.trim();
   const carreiraS  = document.getElementById('alteracaoCarreiraSai')?.value?.trim();
   const nomeSRaw   = document.getElementById('alteracaoNomeSai')?.value?.trim();
-  const ferial     = document.getElementById('alteracaoFeriado')?.checked || false;
+  const ferial      = document.getElementById('alteracaoFeriado')?.checked || false;
+  const sobreaviso  = document.getElementById('alteracaoSobreaviso')?.checked || false;
 
   const nomeE = carreiraE ? carreiraE + ' ' + nomeERaw : nomeERaw;
   const nomeS = carreiraS ? carreiraS + ' ' + nomeSRaw : nomeSRaw;
@@ -937,13 +942,14 @@ PCDoc._addTroca = function() {
     nomeEntra: nomeE, nomeSai: nomeS,
     carreiraEntra: carreiraE, carreiraEntraNome: nomeERaw,
     carreiraSai: carreiraS, carreiraSaiNome: nomeSRaw,
-    feriado: ferial });
+    feriado: ferial, sobreaviso: sobreaviso });
   document.getElementById('alteracaoData').value = '';
   document.getElementById('alteracaoNomeEntra').value = '';
   document.getElementById('alteracaoNomeSai').value = '';
   if (document.getElementById('alteracaoCarreiraEntra')) document.getElementById('alteracaoCarreiraEntra').value = '';
   if (document.getElementById('alteracaoCarreiraSai'))  document.getElementById('alteracaoCarreiraSai').value = '';
   document.getElementById('alteracaoFeriado').checked = false;
+  if (document.getElementById('alteracaoSobreaviso')) document.getElementById('alteracaoSobreaviso').checked = false;
   PCDoc._renderTrocas();
   document.getElementById('alteracaoData').focus();
 };
@@ -971,8 +977,9 @@ PCDoc._gerarAlteracao = function() {
     const iniFim   = t.turno === 'noturno'
       ? (fdsOuFer ? 'das 20:00 às 08:00 hs' : 'das 18:00 às 08:00 hs')
       : (fdsOuFer ? 'das 08:00 às 20:00 hs' : 'das 08:00 às 18:00 hs');
+    const sobreavisoTxt = t.sobreaviso ? ' – <em>sobreaviso</em>' : '';
     return '<p style="margin-bottom:.9rem">' +
-      'Dia ' + fmt + ' (' + dia + ' – ' + t.turno + ') – ' + iniFim + '<br>' +
+      'Dia ' + fmt + ' (' + dia + ' – ' + t.turno + ') – ' + iniFim + sobreavisoTxt + '<br>' +
       '<strong>' + t.nomeEntra + '</strong> no lugar ' + (t.nomeSai.match(/^Delegad/i) ? 'da ' : 'do ') + '<strong>' + t.nomeSai + '</strong>.' +
       '</p>';
   }).join('');
