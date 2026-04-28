@@ -49,19 +49,23 @@ function renderUser() {
 
 // ── THEME ────────────────────────────────────────────────────
 function applyStoredTheme() {
-  const theme = localStorage.getItem('pc_theme') || 'light';
+  const theme = localStorage.getItem('pc_theme') || 'dark';
   document.body.setAttribute('data-theme', theme);
   updateThemeBtn(theme);
 }
 function toggleTheme() {
-  const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  const cur = document.body.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'pcsp' : cur === 'pcsp' ? 'light' : 'dark';
   document.body.setAttribute('data-theme', next);
   localStorage.setItem('pc_theme', next);
   updateThemeBtn(next);
 }
 function updateThemeBtn(theme) {
   const btn = document.getElementById('themeBtn');
-  if (btn) btn.textContent = theme === 'dark' ? '☀ Modo Claro' : '🌙 Modo Escuro';
+  if (!btn) return;
+  if (theme === 'dark')       btn.textContent = '☀ Modo Claro';
+  else if (theme === 'pcsp')  btn.textContent = '◎ Tema PCSP';
+  else                        btn.textContent = '☽ Modo Escuro';
 }
 
 // ── SIDEBAR ──────────────────────────────────────────────────
