@@ -92,9 +92,6 @@ PCSP_DOCS.certidao = {
     var escrivao = campos.nomeEscrivao || '___________________________________';
 
     return (
-      // Título centralizado
-      '<div style="text-align:center;font-weight:bold;font-size:13pt;' + S + 'margin-bottom:2rem;text-transform:uppercase;letter-spacing:.05em">CERTID\u00c3O</div>' +
-
       // Corpo
       '<div style="' + J + 'margin-bottom:3rem;text-indent:2.5rem">' +
         'Certifico, para os devidos fins, que ' + corpo_texto +
