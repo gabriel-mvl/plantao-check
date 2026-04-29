@@ -41,7 +41,7 @@ PCSP_DOCS.certidao = {
         corpo_texto =
           'o(a) indiciado(a) <strong>' + nome + '</strong>, devidamente qualificado(a) nos autos do boletim de ocorr\u00eancia ' + numBO + ', ' +
           'foi cientificado(a) do teor de seu interrogat\u00f3rio e da respectiva nota de culpa, ' +
-          'recusando-se a assinar ambos os documentos, o que fa\u00e7o constar para os devidos fins legais.';
+          'recusando-se a assinar ambos os documentos.';
         break;
 
       case 'recusa_dactilo':
@@ -57,14 +57,14 @@ PCSP_DOCS.certidao = {
         corpo_texto =
           'o(a) autor(a) do fato <strong>' + nome + '</strong>, devidamente qualificado(a) nos autos do boletim de ocorr\u00eancia ' + numBO + ', ' +
           'foi cientificado(a) do teor do Termo Circunstanciado de Ocorr\u00eancia lavrado, ' +
-          'recusando-se a assin\u00e1-lo, o que fa\u00e7o constar para os devidos fins legais.';
+          'recusando-se a assin\u00e1-lo.';
         break;
 
       case 'sem_advogado':
         corpo_texto =
           'at\u00e9 a presente data, n\u00e3o consta nos autos desta unidade policial a constitui\u00e7\u00e3o ' +
           'de advogado pelo(a) indiciado(a) <strong>' + nome + '</strong>, nem a nomea\u00e7\u00e3o de ' +
-          'defensor dativo, o que fa\u00e7o constar para os devidos fins legais.';
+          'defensor dativo.';
         break;
 
       case 'medida_protetiva':
@@ -72,13 +72,13 @@ PCSP_DOCS.certidao = {
           'a medida protetiva de urg\u00eancia deferida nos autos do processo n.\u00ba ' +
           '<strong>' + num + '</strong> foi devidamente comunicada ao(à) requerido(a) ' +
           '<strong>' + nome + '</strong>, o qual(a) foi cientificado(a) de seu teor e das ' +
-          'consequ\u00eancias de seu descumprimento, o que fa\u00e7o constar para os devidos fins legais.';
+          'consequ\u00eancias de seu descumprimento.';
         break;
 
       case 'livre':
         corpo_texto =
           (campos.textoLivre || '___________________________________') +
-          ', o que fa\u00e7o constar para os devidos fins legais.';
+          '.';
         break;
 
       default:
