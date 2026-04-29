@@ -107,7 +107,16 @@ PCSP_DOCS.certidao = {
         cidade + ', ' + dataExtenso + '.' +
       '</div>' +
 
-      // Assinatura
+      // Assinatura do requerido (apenas medida protetiva)
+      (tipo === 'medida_protetiva'
+        ? '<div style="text-align:center;' + S + 'margin-bottom:3rem">' +
+            '<div style="border-top:1px solid #000;width:50%;margin:0 auto .4rem"></div>' +
+            '<div>' + nome + '</div>' +
+            '<div style="font-weight:bold">Requerido(a)</div>' +
+          '</div>'
+        : '') +
+
+      // Assinatura do escrivão
       '<div style="text-align:center;' + S + '">' +
         '<div style="border-top:1px solid #000;width:50%;margin:0 auto .4rem"></div>' +
         '<div>' + escrivao + '</div>' +
