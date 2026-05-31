@@ -1,0 +1,75 @@
+/* ── BOPM ── */
+.bopm-search-wrap {
+  margin-bottom: 1rem;
+}
+.bopm-search-wrap input {
+  width: 100%;
+  padding: .6rem .9rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: .9rem;
+}
+.bopm-search-wrap input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+.bopm-grupo {
+  margin-bottom: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.bopm-grupo-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .55rem .9rem;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border);
+}
+.bopm-letra {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--accent);
+  min-width: 1.5rem;
+}
+.bopm-grupo-nome {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .78rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.bopm-codigos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.bopm-item {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  padding: .4rem .9rem;
+  border-bottom: 1px solid var(--border-light);
+  font-size: .82rem;
+  transition: background .15s;
+}
+.bopm-item:hover { background: var(--bg-hover); }
+.bopm-item:last-child { border-bottom: none; }
+.bopm-codigo {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: .78rem;
+  color: var(--accent);
+  min-width: 2.8rem;
+  flex-shrink: 0;
+}
+.bopm-descricao {
+  color: var(--text-primary);
+  line-height: 1.4;
+}
